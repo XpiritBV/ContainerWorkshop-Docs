@@ -117,7 +117,7 @@ docker pull mcr.microsoft.com/mssql/server:2017-latest-ubuntu
 
 Use the command:
 ```
-docker run -e ACCEPT_EULA=Y -e MSSQL_PID=Developer -e SA_PASSWORD="Pass@word" --name sqldocker -p 5433:1433 -d mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
+docker run -e ACCEPT_EULA=Y -e MSSQL_PID=Developer -e SA_PASSWORD="Pass@word" --name sqldocker -p 5433:1433 -d mcr.microsoft.com/mssql/server:2017-latest-ubuntu
 ```
 The SQL Server container is started detached, so it will not show any output other than the container ID:
 ```
