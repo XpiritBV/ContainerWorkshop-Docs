@@ -33,7 +33,7 @@ Kubernetes does not have a built-in [ingress](https://kubernetes.io/docs/concept
 Type the following command to deploy the [Contour](https://github.com/heptio/contour) ingress controller:
 
 ```
-kubectl apply -f '00 contour.yaml'
+kubectl apply -f '00-contour.yaml'
 ```
 
 This command will install custom resource definitions and pods to serve as ingress controller within the local cluster.
@@ -44,13 +44,13 @@ We will now deploy a small demo application, it is a .Net Core Web Api. There ar
 Deploy the two versions of the workload by running these commands:
 
 ```
-kubectl apply -f '01 green.yaml'
+kubectl apply -f '01-green.yaml'
 ```
 
 and
 
 ```
-kubectl apply -f '02 blue.yaml'
+kubectl apply -f '02-blue.yaml'
 ```
 
 Each of these commands will first ensure that the namespace 'BlueGreen' exists, and then create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment) and expose it by using a [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
@@ -114,7 +114,7 @@ The value in 'virtualhost' will be matched against the `Host` header of incoming
 Create the ingress by running this command:
 
 ```
-kubectl apply -f '03 ingress.yaml'
+kubectl apply -f '03-ingress.yaml'
 ```
 
 To ensure everything works, run this command:
