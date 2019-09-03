@@ -18,6 +18,7 @@ First, you will need to have a development IDE installed. The most preferable ID
 You may want to consider installing [Visual Studio Code](https://code.visualstudio.com/) in the following cases:
 - Your development machine is running OSX or a Linux distribution as your operating system.
 - You want to have an light-weight IDE or use an alternative to Visual Studio 2019.
+- You want to run any of the labs including and above lab 10.
 
 > Download and install either [Visual Studio 2019](https://www.visualstudio.com/downloads/) or [Code](https://www.visualstudio.com/downloads/).
 >
