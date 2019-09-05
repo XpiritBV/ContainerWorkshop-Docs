@@ -1,0 +1,26 @@
+#Unlike the K8s built-in Ingress, Contours' IngressRoute allows multiple services under one route.
+#allowing traffic shifting with minimal efforts. 
+apiVersion: contour.heptio.com/v1beta1
+kind: IngressRoute
+metadata: 
+  name: ingress
+  namespace: bluegreen
+spec: 
+  virtualhost:
+    fqdn: demo.local
+  healthCheck:
+    path: /api/color
+    intervalSeconds: 5
+    timeoutSeconds: 2
+    unhealthyThresholdCount: 3
+    healthyThresholdCount: 5
+  routes: 
+    - match: /
+      permitInsecure: true
+      services: 
+        - name: blue
+          port: 80
+          weight: 10
+        - name: green
+          port: 80
+          weight: 90

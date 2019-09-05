@@ -21,11 +21,15 @@ On the Kubernetes tab, check 'Enable Kubernetes' and click 'Apply'.
 
 Wait a few minutes until the indicator in the bottom-left of the screen indicates that both Docker and Kubernetes are running.
 
+If you already installed the mini-cluster, please open the tab named 'Reset' and select 'Reset Kubernetes Cluster..' to reset the local mini-cluster to its defaults.
+
+![dd](images/vscode-k8s.png)
+
 Now, in VS Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' is the current cluster, or right click on it to select it as the current cluster.
 
 ![dd](images/vscode-k8s.png)
 
-Also, in the terminal, move to the repository directory named 'resources'.
+Also, in the terminal, move to the repository directory named 'resources/lab10'.
 
 ## <a name='deploy-contour'></a>Deploying the Contour ingress controller
 Kubernetes does not have a built-in [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) controller. We first need to deploy one. For this lab, we chose [Contour](https://github.com/heptio/contour). Other popular [options](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) are Nginx and Traefik.
@@ -52,6 +56,7 @@ and
 ```
 kubectl apply -f '02-blue.yaml'
 ```
+> In this lab, we will move from the 'green' version to 'blue'.
 
 Each of these commands will first ensure that the namespace 'BlueGreen' exists, and then create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment) and expose it by using a [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
 The first command creates the 'green' version of the workload, and the second will create the 'blue' version.
@@ -161,7 +166,7 @@ Running the command, should display output similar to this:
 Type `exit` to stop the container.
 
 ### Blue/Green testing
-You can now perform Blue/Green testing, and (gradually) shift traffic towards the 'blue' version of the software.
+You can now perform Blue/Green testing, and (gradually) shift traffic towards the (newer) 'blue' version of the software.
 
 Type the following command to edit the existing Ingress:
 
@@ -191,4 +196,4 @@ This time, it should display a result like this:
 22 green
 ```
 
-In real life, you can use this technique to gradually increase traffic to a new version of your software, with the means of moving back to the previous version in a few seconds in case of issues.
+In real life, you can use this technique to gradually increase traffic to a new version of your software, with the means of moving back to the previous version in a few seconds in case of issues. Every software release would flip
