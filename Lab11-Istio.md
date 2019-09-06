@@ -152,11 +152,11 @@ One of the Pods has a name that starts with 'istio-ingressgateway'. This [ingres
 Examine the description of the service:
 
 ```
-kubectl get svc istio-ingressgateway -n istio-system -o wide
+kubectl get svc istio-ingressgateway -n istio-system
 
 NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)
-                                              AGE   SELECTOR
-istio-ingressgateway   LoadBalancer   10.96.240.207   localhost     15020:32700/TCP,80:31380/TCP,443:31390/TCP,31400:31400/TCP,15029:30802/TCP,15030:30801/TCP,15031:31368/TCP,15032:32407/TCP,15443:30823/TCP   2d    app=istio-ingressgateway,istio=ingressgateway,release=istio
+                                              AGE
+istio-ingressgateway   LoadBalancer   10.96.240.207   localhost     15020:32700/TCP,80:31380/TCP,443:31390/TCP,31400:31400/TCP,15029:30802/TCP,15030:30801/TCP,15031:31368/TCP,15032:32407/TCP,15443:30823/TCP   2d17h
 ```
 
 > Note that the value of 'EXTERNAL-IP' shows 'localhost'. This means that you can access this service from the host that runs the mini-cluster (i.e. your laptop), by using 'localhost'. This is convenient for testing!
