@@ -181,7 +181,7 @@ curl: (52) Empty reply from server
 
 ### Creating a Gateway and VirtualService
 
-We will add a `[Gateway](https://istio.io/docs/reference/config/networking/v1alpha3/gateway/)` resource, which is a Layer 4-6 load balancer that connects the Istio gateway to a virtual host, specifying hostname (e.g. 'blue.example.com'), port (e.g. 80) and protocol (e.g HTTP).
+We will add a [Gateway](https://istio.io/docs/reference/config/networking/v1alpha3/gateway/) resource, which is a Layer 4-6 load balancer that connects the Istio gateway to a virtual host, specifying hostname (e.g. 'blue.example.com'), port (e.g. 80) and protocol (e.g HTTP).
 
 The next step is to create a [VirtualService](https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/) which adds Layer 7 based traffic routing. It routes traffic to Service instances or even to specific Pods running behind a Service.
 
