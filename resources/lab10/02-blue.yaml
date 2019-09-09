@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bluegreen
+  labels:
+    istio-injection: enabled
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: blue
+  namespace: bluegreen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bluegreen-app
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: bluegreen-app
+        version: v2
+    spec:
+      containers:
+      - name: blue
+        image: xpiritbv/bluegreen:blue
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blue
+  namespace: bluegreen
+  labels:
+    app: bluegreen-app
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: bluegreen-app
+    version: v2

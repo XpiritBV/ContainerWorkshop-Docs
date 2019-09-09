@@ -1,0 +1,86 @@
+#Gateway to access cluster
+#Using 1 Service instance exposing 2 Pods.
+#Service 'bluegreen', that groups deployments 'blue' and 'green' by using a selector on label 'app=bluegreen-app'.
+#DestinationRoute that routes traffic to service bluegreen. Pods (green) labeled 'version=v1' are grouped as 'v1' and Pods (blue) labeled 'version=v2' are 'v2'.
+#VirtualService to forward traffic with a special header ('Foo:bar') to v2 Pods, and the rest to v1 Pods.
+#curl -HHost:versions.example.com http://localhost/api/color -> green
+#curl -HHost:versions.example.com -HFoo:bar http://localhost/api/color -> blue
+apiVersion: v1
+kind: Service
+metadata:
+  name: bluegreen
+  namespace: bluegreen
+  labels:
+    app: bluegreen
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: bluegreen-app
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: versions-gateway
+  namespace: bluegreen
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "versions.example.com"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: bluegreen-destinationrule
+  namespace: bluegreen
+spec:
+  host: bluegreen
+  trafficPolicy:
+    loadBalancer:
+        simple: ROUND_ROBIN
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: versions
+  namespace: bluegreen
+spec:
+  hosts:
+  - "versions.example.com"
+  gateways:
+  - versions-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api/color
+      headers:
+          Foo:
+            exact: bar
+    route:
+    - destination:
+        port:
+          number: 80
+        host: bluegreen
+        subset: v2
+  - route:
+    - destination:
+        port:
+          number: 80
+        host: bluegreen
+        subset: v1

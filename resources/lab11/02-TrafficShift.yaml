@@ -1,0 +1,47 @@
+#Gateway to access cluster
+#Using 2 Service instances.
+#VirtualService to forward 50% of traffic with path '/api/color' to Service named 'blue'
+#and the other 50% to Service 'green'
+#curl -HHost:bluegreen.example.com http://localhost/api/color -> green 50% / blue 50%
+
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: bluegreen-gateway
+  namespace: bluegreen
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "bluegreen.example.com"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bluegreen
+  namespace: bluegreen
+spec:
+  hosts:
+  - "bluegreen.example.com"
+  gateways:
+  - bluegreen-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api/color
+    route:
+    - destination:
+        port:
+          number: 80
+        host: blue
+      weight: 50
+    - destination:
+        port:
+          number: 80
+        host: green
+      weight: 50
