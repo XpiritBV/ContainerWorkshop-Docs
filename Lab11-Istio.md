@@ -107,7 +107,7 @@ kubectl config set-context --current --namespace=bluegreen
 ```
 ### Sidecar proxy
 
-After a few seconds, the Pods will appear. However, they are not only running the green and blue containers! Examine the Pods by running this command:
+After a few seconds, the Pods will appear. However, they are not only running the green and blue containers. Examine the Pods by running this command:
 
 ```
 kubectl get pod -n bluegreen
@@ -159,7 +159,7 @@ NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)
 istio-ingressgateway   LoadBalancer   10.96.240.207   localhost     15020:32700/TCP,80:31380/TCP,443:31390/TCP,31400:31400/TCP,15029:30802/TCP,15030:30801/TCP,15031:31368/TCP,15032:32407/TCP,15443:30823/TCP   2d17h
 ```
 
-> Note that the value of 'EXTERNAL-IP' shows 'localhost'. This means that you can access this service from the host that runs the mini-cluster (i.e. your laptop), by using 'localhost'. This is convenient for testing!
+> Note that the value of 'EXTERNAL-IP' shows 'localhost'. This means that you can access this service from the host that runs the mini-cluster (i.e. your laptop), by using 'localhost'. This is convenient for testing.
 
 At this time, no services are exposed yet. So if you run the following command, you will receive an empty response:
 
