@@ -8,7 +8,7 @@ Goals for this lab:
 ## <a name='start'></a>Inspect your Kubernetes environment
 We will deploy and call an application using Visual Studio Code. Make sure you installed it, return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) if you do not have it installed. Also, make sure you have [this](https://github.com/XpiritBV/ContainerWorkshop2019Docs) repository cloned, so you have a copy of the Kubernetes template files on your machine.
 
-Tip: Having multiple ingress controllers on a Kubernetes cluster may cause issues. To avoid this, start this lab by installing the Kubernetes feature of Docker Desktop. This miniature version of Kubernetes can be reset to defaults by the click of a button!
+Tip: Having multiple ingress controllers on a Kubernetes cluster may cause issues. To avoid this, start this lab by installing the Kubernetes feature of Docker Desktop. This miniature version of Kubernetes can be reset to defaults by the click of a button.
 You can deploy the mini-cluster by right clicking on the icon in the tool bar. 
 
 ![tray](images/dockertray.png)
@@ -31,7 +31,11 @@ You can deploy the mini-cluster by right clicking on the icon in the tool bar.
 6. Also, in the terminal, move to the repository directory named 'resources/lab11'.
 7. Unzip the file 'istio-1.2.5.zip' in the same folder.
 
-## <a name='deploy-contour'></a>Deploying Istio
+## <a name='deploy-istio'></a>Deploying Istio
+
+You can choose to install Istio to the local mini-cluster that is installed with Docker Desktop, or to AKS.
+
+### <a name='mini'></a>Option 1: Deploying Istio to the mini-cluster
 
 Let's start by deploying Istio to the mini-cluster.
 From the folder 'resources/lab11', run the following command to deploy the Custom Resource Definitions:
@@ -46,6 +50,47 @@ Next, install the demo version of Istio, by running:
 kubectl apply -f istio-1.2.5/install/kubernetes/istio-demo.yaml
 ```
 
+### <a name='mini'></a>Option 2: Deploying Istio to AKS
+
+Add the Istio Helm repository:
+
+```
+helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.2.5/charts/
+```
+
+> Note that using Helm is simple, but the default settings, as used here, are not secure. In real life, you should use Helm without Tiller. For demo purposes, it works fine.
+
+Create a Helm service account:
+
+```
+kubectl apply -f istio-1.2.5/install/kubernetes/helm/helm-service-account.yaml
+```
+
+Install Helm with Tiller:
+
+```
+helm init --service-account tiller
+```
+> Note that this operation could take a few seconds to complete in the background.
+
+Install the istio-init chart to bootstrap all the Istio Custom Resource Definitions:
+
+```
+helm install istio-1.2.5/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system
+```
+
+Install Istio itself:
+
+```
+helm install istio-1.2.5/install/kubernetes/helm/istio --name istio --namespace istio-system --values istio-1.2.5/install/kubernetes/helm/istio/values-istio-demo.yaml
+```
+
+Uninstall Tiller, without removing Istio:
+
+```
+helm reset --force
+```
+
 ### Verify install
 
 Run this command, and check that all Pods are deployed correctly:
@@ -54,7 +99,7 @@ Run this command, and check that all Pods are deployed correctly:
 kubectl get pods -n istio-system
 ```
 
-The output should be similar to this:
+The output should be similar to the output below. Depending on the type of install, there could be more Pods, e.g. the 'istio-init-crd' Pods:
 
 ```
 NAME                                      READY   STATUS      RESTARTS   AGE
@@ -79,7 +124,7 @@ prometheus-776fdf7479-mbnvk               1/1     Running     0          4m1s
 
 ## <a name='deploy-workload'></a> Deploying a workload
 Now it is time to see ingress in action. 
-1. First, make sure that we start with a clean slate:
+1. First, make sure that we start with a clean slate by deleting the existing namespace 'bluegreen':
 
 ```
 kubectl delete namespace bluegreen
@@ -159,7 +204,10 @@ NAME                   TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)
 istio-ingressgateway   LoadBalancer   10.96.240.207   localhost     15020:32700/TCP,80:31380/TCP,443:31390/TCP,31400:31400/TCP,15029:30802/TCP,15030:30801/TCP,15031:31368/TCP,15032:32407/TCP,15443:30823/TCP   2d17h
 ```
 
-> Note that the value of 'EXTERNAL-IP' shows 'localhost'. This means that you can access this service from the host that runs the mini-cluster (i.e. your laptop), by using 'localhost'. This is convenient for testing.
+> Note that the value of 'EXTERNAL-IP' shows 'localhost' when running on the mini-cluster. This means that you can access this service from the host that runs the mini-cluster (i.e. your laptop), by using 'localhost'. This is convenient for local testing.
+
+
+**If the value of 'EXTERNAL-IP' is not 'localhost', make a note of the value, replace 'localhost' with that value in the CURL commands below.**
 
 At this time, no services are exposed yet. So if you run the following command, you will receive an empty response:
 
@@ -221,7 +269,7 @@ kubectl apply -f 02-TrafficShift.yaml
 
 > Note that this service runs under a different virtual host 'bluegreen.example.com'.
 
-If you now test the exposed service again, you should see that around fifty percent of all calls return 'blue' and the others return 'green':
+If you now test the exposed service again repeatedly, you should see that around fifty percent of all calls return 'blue' and the others return 'green':
 
 ```
 curl -HHost:bluegreen.example.com http://localhost/api/color
@@ -354,6 +402,12 @@ This means that you can instruct testers of the 'blue' version to include an HTT
 
 > Note that many more options for matching exist. For example, based on cookie content (user groups) or request path (/v1/).
 
+Deploy the complete solution:
+
+```
+kubectl apply -f 04-Canary.yaml
+```
+
 It is now possible to send targeted requests to both software versions. To target the green version, you can use the same call as before:
 
 ```
@@ -370,13 +424,31 @@ curl -HHost:versions.example.com -HFoo:bar http://localhost/api/color
 blue
 ```
 
-### Cleaning up
+## <a name='clean'></a>Cleaning up
 
-Please open the tab named 'Reset' and select 'Reset Kubernetes Cluster..' to reset the local mini-cluster to its defaults.
+If you are not continuing to Lab 12, you should clean your cluster.
 
+- When using the mini-cluster; please open the tab named 'Reset' and select 'Reset Kubernetes Cluster..' to reset the local mini-cluster to its defaults.
 ![dd](images/dockerdesktop.png)
 
-
 Wait a few minutes until the indicator in the bottom-left of the screen indicates that both Docker and Kubernetes are running and continue with the next lab.
+
+
+- When using AKS; remove the Lab resources by running the following commands:
+
+```
+kubectl delete namespace bluegreen
+```
+
+To delete Helm and Istio, type the following commands:
+
+```
+helm init --service-account tiller
+helm delete --purge istio
+helm delete --purge istio-init
+helm reset --force
+kubectl delete namespace istio-system
+```
+
 
 
