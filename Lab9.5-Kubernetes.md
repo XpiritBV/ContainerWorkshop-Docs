@@ -52,8 +52,28 @@ When you actually want to run a containerized application inside the cluster you
 
 This describes how your application runs and its configuration as well as validating and managing the health of your pod. 
 
-Start a new deployment using `kubectl`:
+Start a new deployment using `kubectl` by creating a pod running the busybox container:
 
 ```
 kubectl create deployment hello-busybox --image=busybox
 ```
+
+Verify that the deployment is working, by using the describe functionality again, this time by querying the deployments:
+
+```
+kubectl describe deployments
+```
+
+You will get a listing of all deployments with details. For a quick overview, use the _get_ method.
+
+```
+kubectl get deployments
+```
+
+Which will output something like below:
+
+```
+NAME            READY   UP-TO-DATE   AVAILABLE   AGE
+hello-busybox   1/1     1            0           1m
+```
+
