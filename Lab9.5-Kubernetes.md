@@ -38,8 +38,8 @@ This command will show you the where the master node is running. To see the clus
 kubectl version
 ```
 
-## <a name='nodes'></a>Nodes
-A cluster has one or more nodes, they are responsible for running the actual pods. To see which nodes are available, we can use the 'describe' command of `kubectl`.
+## <a name='nodes'></a>Information about the nodes
+A cluster has one or more nodes which are responsible for running the actual pods. To see which nodes are available, we can use the 'describe' command of `kubectl`.
 
 ```
 kubectl describe nodes
@@ -48,6 +48,12 @@ kubectl describe nodes
 Each node is listed with not only the technical details, but also the actual pods running on the specific node.
 
 ## <a name='deployment'></a>Deploy an application
-When you actually want to run a containerized application inside the cluster you will use a deployment configuration.
+When you actually want to run a containerized application inside the cluster you will use a deployment configuration to schedule a Pod.
 
-This describes how to 
+This describes how your application runs and its configuration as well as validating and managing the health of your pod. 
+
+Start a new deployment using `kubectl`:
+
+```
+kubectl create deployment hello-busybox --image=busybox
+```
