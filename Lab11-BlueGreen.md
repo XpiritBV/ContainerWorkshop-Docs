@@ -1,4 +1,4 @@
-# Lab 10 Blue/Green deployments on Kubernetes
+# Lab 11 Blue/Green deployments on Kubernetes with Contour
 
 During this lab, you will become familiar with Kubernetes networking concepts, like Service and Ingress.
 
@@ -29,7 +29,7 @@ Now, in VS Code, open the Kubernetes extension, make sure the cluster named 'doc
 
 ![dd](images/vscode-k8s.png)
 
-Also, in the terminal, move to the repository directory named 'resources/lab10'.
+Also, in the terminal, move to the repository directory named 'resources/lab11'.
 
 ## <a name='deploy-contour'></a>Deploying the Contour ingress controller
 Kubernetes does not have a built-in [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) controller. We first need to deploy one. For this lab, we chose [Contour](https://github.com/heptio/contour). Other popular [options](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) are Nginx and Traefik.
@@ -197,3 +197,18 @@ This time, it should display a result like this:
 ```
 
 In real life, you can use this technique to gradually increase traffic to a new version of your software, with the means of moving back to the previous version in a few seconds in case of issues. For every software release, you would flip from blue, to green, to blue, etc. 
+
+
+## <a name='clean'></a>Cleaning up
+
+Uninstall Contour:
+
+```
+kubectl delete -f '00-contour.yaml'
+```
+
+Delete workloads:
+
+```
+kubectl delete namespace bluegreen
+```

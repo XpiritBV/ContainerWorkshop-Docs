@@ -1,4 +1,4 @@
-# Lab 11 Working with Istio on Kubernetes
+# Lab 12 Working with Istio on Kubernetes
 
 During this lab, you will become familiar with [Istio](https://istio.io/docs/concepts/what-is-istio/) concepts, like the sidecar proxy-pattern, canary release, and connection resiliency.
 
@@ -28,7 +28,7 @@ You can deploy the mini-cluster by right clicking on the icon in the tool bar.
 
 ![dd](images/dockerdesktop-reset.png)
 
-6. Also, in the terminal, move to the repository directory named 'resources/lab11'.
+6. Also, in the terminal, move to the repository directory named 'resources/lab12'.
 7. Unzip the file 'istio-1.2.5.zip' in the same folder.
 
 ## <a name='deploy-istio'></a>Deploying Istio
@@ -38,7 +38,7 @@ You can choose to install Istio to the local mini-cluster that is installed with
 ### <a name='mini'></a>Option 1: Deploying Istio to the mini-cluster
 
 Let's start by deploying Istio to the mini-cluster.
-From the folder 'resources/lab11', run the following command to deploy the Custom Resource Definitions:
+From the folder 'resources/lab12', run the following command to deploy the Custom Resource Definitions:
 
 ```
 kubectl apply -f istio-1.2.5/install/kubernetes/helm/istio-init/files --recursive
@@ -426,7 +426,7 @@ blue
 
 ## <a name='clean'></a>Cleaning up
 
-If you are not continuing to Lab 12, you should clean your cluster.
+If you are not continuing to Lab 13, you should clean your cluster.
 
 - When using the mini-cluster; please open the tab named 'Reset' and select 'Reset Kubernetes Cluster..' to reset the local mini-cluster to its defaults.
 ![dd](images/dockerdesktop.png)

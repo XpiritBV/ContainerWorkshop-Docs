@@ -1,24 +1,19 @@
-#assign built-in privileged policy to all sa's in istio-system
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+apiVersion: v1
+kind: Namespace
 metadata:
-  name: istio-permissive
-  namespace: istio-system
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: psp:privileged
-subjects:
-- kind: Group
-  name: system:serviceaccounts
-  namespace: istio-system
+  name: blue
 ---
-#assign built-in privileged policy to all sa's in bluegreen
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: buggy
+---
+#assign built-in privileged policy to all sa's in blue
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: bluegreen-permissive
-  namespace: bluegreen
+  name: blue-permissive
+  namespace: blue
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -26,4 +21,19 @@ roleRef:
 subjects:
 - kind: Group
   name: system:serviceaccounts
-  namespace: bluegreen
+  namespace: blue
+---
+#assign built-in privileged policy to all sa's in buggygreen
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: blue-permissive
+  namespace: buggygreen
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: psp:privileged
+subjects:
+- kind: Group
+  name: system:serviceaccounts
+  namespace: buggygreen
