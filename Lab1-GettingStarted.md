@@ -1,4 +1,4 @@
-# Lab 1 - Getting started
+#  <a name="start"></a>Lab 1 - Getting started
 
 This lab is going to let you prepare your development environment for the rest of the labs in the workshop. Not all steps are required. The more you can prepare, the better the experience during the workshop.
 
