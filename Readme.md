@@ -30,5 +30,5 @@ Additionally, for hosting a container cluster in Microsoft Azure you will need a
 - [Lab 11 - Blue/Green deployments on Kubernetes with Contour](Lab11-BlueGreen.md)
 - [Lab 12 - Working with Istio on Kubernetes](Lab12-Istio.md)
 - [Lab 13 - Retry and Circuit breaker with Istio](Lab12-Istio.md)
-- [Lab 13 Azure Dev Spaces](Lab14-AzureDevSpaces.md)
+- [Lab 14 - Azure Dev Spaces](Lab14-AzureDevSpaces.md)
 - [Lab 20 - Explore](Lab10-Explore.md)
