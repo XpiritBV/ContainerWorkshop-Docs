@@ -90,3 +90,5 @@ rcf/
 
 istio-1.2.5/
 .vscode/settings.json
+
+**/*-mod.yaml

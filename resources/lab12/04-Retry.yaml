@@ -1,0 +1,28 @@
+#VirtualService configured to detect 'gateway-error' (which includes HTTP statuscode 503) and retry 40 times, within max. 60 seconds.
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: buggygreen-vsvc
+  namespace: buggygreen
+spec:
+  hosts:
+  - buggygreen
+  http:
+  - route:
+    - destination:
+        port:
+          number: 80
+        host: buggygreen
+        subset: v1
+      weight: 50
+    - destination:
+        port:
+          number: 80
+        host: buggygreen
+        subset: v2
+      weight: 50
+    retries:
+      attempts: 40
+      perTryTimeout: 1s
+      retryOn: gateway-error
+    timeout: 60s
