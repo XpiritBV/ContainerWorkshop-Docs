@@ -131,4 +131,4 @@ Fix the bug (by removing the code you added previously) by following a proper De
 
 In this lab you have added the first monitoring support to the application and Web API. You used Application Insights to capture telemetry of multiple Azure resources and introduced semantic logging to create rich log information.
 
-Continue with [Lab 10 - Explore](Lab10-Explore.md).
+

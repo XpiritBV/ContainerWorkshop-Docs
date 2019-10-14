@@ -1,4 +1,4 @@
-# Lab 12 Retry and Circuit breaker with Istio
+# Lab 13 Retry and Circuit breaker with Istio
 
 During this lab, you will become familiar with the [Istio](https://istio.io/docs/concepts/what-is-istio/) concepts 'retry' and 'circuit breaker'.
 
@@ -10,9 +10,9 @@ Goals for this lab:
 We will deploy and call an application using Visual Studio Code. Make sure you installed it, return to [Lab 1 - Getting Started](Lab1-GettingStarted#start.md) if you do not have it installed. Also, make sure you have [this](https://github.com/XpiritBV/ContainerWorkshop2019Docs) repository cloned, so you have a copy of the Kubernetes template files on your machine.
 
 
-1. If you did not do so already, unzip the file 'istio-1.2.5.zip' in the folder 'resources/lab11'.
-2. Install Istio by following the steps from Lab 11 [here](Lab11-Istio.md#deploy-istio)
-3. In VS Code, in the terminal, move to the repository directory named 'resources/lab12'
+1. If you did not do so already, unzip the file 'istio-1.2.5.zip' in the folder 'resources/lab12'.
+2. Install Istio by following the steps from Lab 12 [here](Lab12-Istio.md#deploy-istio)
+3. After that, in the VS Code terminal, move to the repository directory named 'resources/lab13'
 
 ## <a name='deploy-workload'></a> Deploying a workload
 
@@ -282,4 +282,4 @@ Delete the namespace 'buggygreen' to clean your workspace.
 kubectl delete ns buggygreen
 ```
 
-Please visit [Cleaning up](Lab11-Istio#clean) from Lab 11 to remove Istio, if you are not continuing to Lab 13.
+Please visit [Cleaning up](Lab12-Istio#clean) from Lab 12 to remove Istio, but **only** if you are not continuing to Lab 14.

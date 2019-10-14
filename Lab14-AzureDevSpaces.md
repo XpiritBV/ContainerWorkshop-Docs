@@ -1,4 +1,4 @@
-# Lab 13 Azure Dev Spaces
+# Lab 14 Azure Dev Spaces
 
 During this lab, you will become familiar with [Azure Dev Spaces]().
 
@@ -24,7 +24,7 @@ Also, make sure you have [this](https://github.com/XpiritBV/ContainerWorkshop201
 
 We will enable Dev Spaces for the [demo project](https://github.com/XpiritBV/ContainerWorkshop2018), so make sure you also have cloned that repository, checked out to the 'devspaces' branch.
 
-1. In VS Code, in the terminal, move to the repository directory named 'resources/lab13'.
+1. In VS Code, in the terminal, move to the repository directory named 'resources/lab14'.
 
 
 ## <a name='tiller'></a>Deploy Helm with Tiller
@@ -66,7 +66,7 @@ kompose up -f docker-compose.remote.yml
 ```
 > Note that it can take quite some time (several minutes) for SQL Server to start and for the database to be created.
 
-In VS Code, right click on the gamingwebapp pod and open up a port-forward, from local port 8080 to remote port 8080.
+In VS Code, right click on the `gamingwebapp` pod and open up a port-forward, from local port 8080 to remote port 8080.
 In your browser, navigate to the url: `http://localhost:8080/`.
 Make sure the 'Pacman' high score is displayed; this indicates that all system components (web app, web api and database) are running.
 

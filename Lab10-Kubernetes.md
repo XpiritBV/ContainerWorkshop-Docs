@@ -1,4 +1,4 @@
-# Lab 9.5 How to use Kubernetes
+# Lab 10 How to use Kubernetes
 
 During this lab, you will become familiar with Kubernetes concepts, showing you how to deploy a container, scale the number of instances, and see the output of a running application.
 
@@ -27,6 +27,7 @@ If you already installed the mini-cluster, please open the tab named 'Reset' and
 ![dd](images/vscode-k8s.png)
 
 Now, in VS Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' is the current cluster, or right click on it to select it as the current cluster.
+Also, in the terminal, move to the repository directory named 'resources/lab10'
 
 ## <a name='inspect-cluster'></a>Inspecting the cluster
 To interact with the Kubernetes cluster, you will need to use the **kubectl** tool. This allows you to issue commands and queries to the selected Kubernetes cluster. 
@@ -43,6 +44,14 @@ This command will show you where the master node is running. To see the cluster 
 kubectl version
 ```
 
+## <a name='select-ns'></a>Selecting a namespace to work with
+Kubernetes resources are deployed in containers called 'namespaces'. 
+Select the built-in Namespace 'default' as the default for this session:
+
+```
+kubectl config set-context --current --namespace=default
+```
+
 ## <a name='nodes'></a>Information about the nodes
 A cluster has one or more nodes that are responsible for running the actual pods. A node is the worker machine in Kubernetes and can be a virtual machine or a physical machine. To see which nodes are available, we can use the 'describe' command of `kubectl`.
 
@@ -53,8 +62,9 @@ kubectl describe nodes
 Each node is listed with not only the technical details but also the actual pods running on the specific node. To get the details about a particular node, you can use the same describe command:
 
 ```
-kubectl describe node docker-desktop
+kubectl describe node {node-name}
 ```
+>Note replace {node-name} with the name of one cluster node. E.g. `aks-nodepool1-32430043-3` or `docker-desktop`.
 
 The _conditions_ in the output indicate if the node can accept pods. You might see an output like below:
 
@@ -70,8 +80,8 @@ Conditions:
 
 In this case, the node is in a _Ready_ state and can run Pods.
 
-## <a name='deployment'></a>Create a deployment
-When you want to run a containerized application inside the cluster, you will use a deployment configuration to schedule a Pod. A Pod is a group of one or more containers. It can have its own storage and networking setup and contains specifications on how to run the actual containers.
+## <a name='deployment'></a>Create a Deployment
+When you want to run a containerized application inside the cluster, you will use a Deployment configuration to schedule a Pod. A Pod is a group of one or more containers. It can have its own storage and networking setup and contains specifications on how to run the actual containers.
 
 Start a new deployment using `kubectl` by creating a Pod running the busybox container:
 
@@ -79,7 +89,7 @@ Start a new deployment using `kubectl` by creating a Pod running the busybox con
 kubectl create deployment hello-busybox --image=busybox
 ```
 
-Verify that the deployment is working, by using the describe functionality again, this time by querying the deployment by its name:
+Verify that the Deployment is working, by using the describe functionality again, this time by querying the deployment by its name:
 
 ```
 kubectl describe deployment hello-busybox 
@@ -108,7 +118,7 @@ kubectl delete deployment hello-busybox
 
 We just started the container by directly creating a deployment; we can also use a Pod template. 
 
-```yaml
+``` yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -122,12 +132,12 @@ spec:
     command: ['sh', '-c', 'echo Hello Kubernetes! && sleep 3600']
 ```
 
-In your terminal, move to the repository directory named 'resources/lab9.5'.
+In your terminal, move to the repository directory named 'resources/lab10'.
 
 Type the following command to deploy the template:
 
 ```
-kubectl apply -f '00-busybox.yaml'
+kubectl apply -f 00-busybox.yaml
 ```
 
 This will return a line indicating the Pod creation:
@@ -140,7 +150,7 @@ pod/myapp-pod created
 The just deployed Pod will run a container with a command to output a certain string. To see this output, we can query the logs of the Pod.
 
 ```
-kubectl logs myapp-pod
+kubectl logs myapp-pod -c myapp-container
 ```
 
 You should see a text like `Hello Kubernetes!` being returned. Remove the Pod by executing the delete command:
@@ -209,6 +219,18 @@ NAME               READY   UP-TO-DATE   AVAILABLE   AGE
 nginx-deployment   3/3     3            3           4m
 ```
 
+At this time, there will be 3 Pods running inside the 'default' namespace. Inspect them by using the following command:
+
+```
+kubectl get pods
+
+NAME                                 READY   STATUS    RESTARTS   AGE
+nginx-deployment-6dd86d77d-6tbcx     2/2     Running   0          37s
+nginx-deployment-6dd86d77d-bdntl     2/2     Running   0          2m2s
+nginx-deployment-6dd86d77d-gwps6     2/2     Running   0          37s
+```
+
+
 ## <a name='services'></a>Use services
 In Kubernetes, a Pod will get its own IP address. In theory, you can use this to communicate with other Pods. However, when a Pod dies and gets resurrected, the IP address will be different. For example, when a front-end pod needs to talk to a back-end pod, it needs another way to find the location of this Pod. Services are the solution to this.
 
@@ -231,7 +253,7 @@ spec:
 ```
 
 ```
-kubectl apply -f .\02-nginx-service.yaml
+kubectl apply -f 02-nginx-service.yaml
 ```
 
 And inspect the outcome:
@@ -250,7 +272,7 @@ nginx-service   ClusterIP   10.108.174.121   <none>        8080/TCP   21s
 To validate that we can resolve the name using the internal DNS to a service, we will run a lookup from within the cluster.
 
 ```
-kubectl run curl --image=radial/busyboxplus:curl -i --tty
+kubectl run curl --image=radial/busyboxplus:curl -i --tty --restart=Never
 ```
 
 In the terminal that opens, execute a `nslookup nginx-service` and it will return an address to the actual pod:
@@ -265,13 +287,23 @@ Address 1: 10.108.174.121 nginx-service.default.svc.cluster.local
 
 Where the 10.108.174.121 address is the same as the cluster service IP. 
 
+> Note that in your environment, IP addresses will be different.
+
 In the same terminal window, we can also execute a `curl` command to fetch the nginx page:
 
 ```
 curl -XGET -v 10.108.174.121:8080
 ```
+> Note, replace the IP address with the value for your Service.
 
 As you can see, we created a service that we can interact with using the DNS system of Kubernetes regardless of Pod restarts or scaling of the number of containers.
 
 
+## <a name='clean'></a>Cleaning up
+Delete the Pods, Service and Deployment
 
+```
+kubectl delete deployment nginx-deployment
+kubectl delete service nginx-service
+kubectl delete pod curl
+```
