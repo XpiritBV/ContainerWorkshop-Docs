@@ -148,6 +148,7 @@ Pull down the hosting environments dropdown and select Azure Dev Spaces from the
 This should show a pop-up that allows you to select the cluster and Namespace you have provisioned for Dev Spaces earlier. 
 **Make sure to allow public access.**
 
+Press F5 to deploy the project and attach a remote debugger.
 Place a breakpoint inside the file `IndexModel.cs` on line 32. Refresh the page. If all works well, you should now see your breakpoint being hit.
 You are now debugging code that runs inside AKS, without the need to mock the calls to the Web API.
 
