@@ -2,19 +2,17 @@
 
 During this lab, you will become familiar with [Azure Dev Spaces]().
 
-Azure Dev Spaces is a developer assisting technology that allows them to deploy, test and debug software directly on an AKS cluster. 
-Similar to Istio, it works by injecting 3 sidecar-containers together with your application inside a Pod. Dev Spaces works inside Namespaces labeled `azds.io/space=true`. 
-
-It works in the following way. Imagine you are working on an application containing a Web Frontend and an API, running on AKS, in a Namespace called 'dev'.
-You would first create a personal Dev Space called 'custom'. Then, by using the client-side tooling, you would enable Dev Spaces for your solution. Next, you would deploy the part of the application you are working on. Let's say, the Frontend. Azure Dev Spaces will generate a unique URL for you, and ensures all HTTP calls made to the Frontend will be routed to your personal version of it. However, all HTTP calls made internally, from the Frontend to the API, would still be routed to the version running in the 'dev' Namespace.
-So Dev Spaces allow you to replace a Pod with a copy of your own, and use that for testing purposes.
-
+Azure Dev Spaces is a developer assisting technology that allows them to deploy, test and debug software directly on an AKS cluster without requiring committed code or adding images to the container registry. 
+Similar to Istio, it works by injecting 3 sidecar-containers together with your application inside a Pod. Dev Spaces works inside Namespaces labeled `azds.io/space=true`:
 
 1. devspaces-proxy : Manages all TCP network traffic in and out of the Pod, and route HTTP calls to child spaces if needed. 
 2. devspaces-proxy-init: Bootstraps networking rules inside the application container, ensuring all TCP traffic is routed through the devspaces-proxy.
 3. devspaces-build container: Compiles software, builds container images, to be run locally.  
 
+Dev Spaces works by configuring Ingress with a custom DNS entry and routing rules for every space. Spaces can be nested, and the most specific match will be selected, when routing traffic to Pods.
+
 Goals for this lab:
+- Deploy a Dev Spaces -enabled solution
 - Gain a **basic** understanding Dev Spaces
 
 ## <a name='start'></a>Inspect your environment
@@ -26,8 +24,8 @@ We will enable Dev Spaces for the [demo project](https://github.com/XpiritBV/Con
 
 1. In VS Code, in the terminal, move to the repository directory named 'resources/lab14'.
 
-
 ## <a name='tiller'></a>Deploy Helm with Tiller
+Ensure that Tiller is installed, with rights to manage the cluster.
 
 > Note that using Helm is simple, but the default settings, as used here, are not secure. In real life, you should use Helm without Tiller. For demo purposes, it works fine.
 
@@ -55,33 +53,54 @@ By continuing, you agree to the Microsoft Software License Terms (https://aka.ms
 
 > Note that this operation takes a while.
 > Replace the values for resource group `g` and cluster name `n` with your own cluster details if needed.
+> To enable Dev Spaces with tools already installed, type `azds controller create --name AksDevSpacesCtl --target-name ContainerWorkshopCluster --resource-group ContainerWorkshop`.
 
-## <a name='deploy-workload'></a> Deploying a workload
+## <a name='deploy-workload'></a> Deploying a baseline workload
 
-It is now time to deploy a workload to the cluster. For this demo, we'll use the tool `kompose` to deploy a docker-compose file to Kubernetes without modifications. First, [download](https://kubernetes.io/docs/tasks/configure-pod-container/translate-compose-kubernetes/#install-kompose) the tool.
-Next, use the following command to deploy the demo solution:
+It is now time to deploy the baseline workload to the cluster. For this demo, we'll use the tool `kompose` to deploy a docker-compose file to Kubernetes without modifications. First, [download](https://kubernetes.io/docs/tasks/configure-pod-container/translate-compose-kubernetes/#install-kompose) the tool.
+
+Second, create and select the 'baseline' Dev Space, without a parent:
+
+```
+azds space select -n baseline
+Dev space 'baseline' does not exist and will be created.
+
+Select a parent dev space or Kubernetes namespace to use as a parent dev space.
+ [0] <none>
+ [1] default
+ [2] dev
+ [3] kube-node-lease
+Type a number: 0
+
+Creating and selecting dev space 'baseline'...2s
+```
+
+Followed by:
+
+```
+kubectl config set-context --current --namespace=baseline
+```
+
+Finally, use the following command to deploy the demo solution:
 
 ```
 kompose up -f docker-compose.remote.yml
 ```
-> Note that it can take quite some time (several minutes) for SQL Server to start and for the database to be created.
+> Note that it can take quite some time (up to minutes) for SQL Server to start and for the database to be created.
 
-In VS Code, right click on the `gamingwebapp` pod and open up a port-forward, from local port 8080 to remote port 8080.
-In your browser, navigate to the url: `http://localhost:8080/`.
+In VS Code, right click on the `gamingwebapp` pod and open up a port-forward, from local port 80 to remote port 80 to test the application.
+In your browser, navigate to the url: `http://localhost/`.
 Make sure the 'Pacman' high score is displayed; this indicates that all system components (web app, web api and database) are running.
+Terminate the port forward.
 
-## <a name='enable'></a>Enable Azure Dev Spaces for the GamingWebApp
+> Note: sometimes it helps to kill the LeaderBoard WebAPI Pod to get things going.
 
-In Visual Studio 2017 or 2019, open the [ContainerWorkshop](https://github.com/XpiritBV/ContainerWorkshop2018) solution.
-Make sure that the GamingWebApp project is configured as the startup project.
-Pull down the hosting environments dropdown and select Azure Dev Spaces from the list.
+### Configure Dev Spaces for project
 
-![](images/devspaces-01.png)
+Delete the Deployment named 'gamingwebapp', this will be replaced with a 'Dev Spaces'-enabled version.
 
-This should show a pop-up that allows you to select the cluster you have provisioned for Dev Spaces earlier. 
-**Make sure to allow public access.**
-
-If not, you can enable it by using the CLI in VS Code:
+Modify the Web App for use of Dev Spaces.
+In the terminal of VS Code, type:
 
 ```
 $ <your repo folder>\ContainerWorkshop2018\src\Applications\GamingWebApp>azds prep --public
@@ -91,28 +110,86 @@ One of the results, is a new Docker file, named `\ContainerWorkshop2018\src\Appl
 Open this file and on line 5, add an environment variable, that specifies where the Web API can be found:
 
 ```
-ENV LeaderboardApiOptions__BaseUrl=http://leaderboardwebapi
+ENV LeaderboardApiOptions__BaseUrl=http://leaderboardwebapi.baseline
 ```
 
-And change the default port to 8080, by replacing the value for `ASPNETCORE_URLS`:
+And change the default port to 14069, by replacing the value for `ASPNETCORE_URLS`:
 
 ```
-ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_URLS=http://+:14069
 ```
 
-The following command will start Azure Dev Spaces from the CLI:
+### Run the Web App
+
+Run the following commands to start Azure Dev Spaces from the CLI:
 
 ```
-azds space select -n default
+kubectl config set-context --current --namespace=baseline
 azds up
 ```
+This command will generate a lot of logging. Within the output, you'll find a note that your `gamingwebapp` Service was configured in an `Ingress` also named `gamingwebapp`.
+
+After some time, you'll be able to navigate to that url in your browser, e.g.:
+http://baseline.gamingwebapp.p4v88vkr7c.weu.azds.io/
+
+You should see the Pacman high score again.
+
+At this point in time we have replaced our Gaming Web App front-end, with a Dev Spaces enabled version. We can now start running additional copies of the front-end, by adding additional Dev Spaces.
+
+
 
 ## <a name='debug'></a>Debugging the GamingWebApp
+In Visual Studio 2017 or 2019, open the [ContainerWorkshop](https://github.com/XpiritBV/ContainerWorkshop2018) solution.
+Make sure that the GamingWebApp project is configured as the startup project.
+Pull down the hosting environments dropdown and select Azure Dev Spaces from the list.
+
+![](images/devspaces-01.png)
+
+This should show a pop-up that allows you to select the cluster and Namespace you have provisioned for Dev Spaces earlier. 
+**Make sure to allow public access.**
+
+Press F5 to deploy the project and attach a remote debugger.
 Place a breakpoint inside the file `IndexModel.cs` on line 32. Refresh the page. If all works well, you should now see your breakpoint being hit.
 You are now debugging code that runs inside AKS, without the need to mock the calls to the Web API.
+
+
+## Additional challenge
+
+Create a new Dev Space, called 'dev', choose 'baseline' as its parent:
+
+```
+azds space select -n dev
+
+Dev space 'dev' does not exist and will be created.
+
+Select a parent dev space or Kubernetes namespace to use as a parent dev space.
+ [0] <none>
+ [1] default
+ [2] baseline
+ [3] kube-node-lease
+Type a number: 3
+
+Creating and selecting dev space baseline/dev'...2s
+```
+
+Modify the Web API to enable it for Dev Spaces in the same way as the Web App.
+Deploy the Web API.
+
 
 ## <a name='clean'></a>Cleaning up
 
 Remove Azure Dev Spaces support by using the Azure Portal.
 Undo pending changes to the 'devspaces' branch.
 
+Remove the Dev Spaces:
+
+```
+azds space remove dev
+azds space remove baseline
+```
+
+Remove the Kubernetes Namespaces:
+```
+kubectl delete ns dev
+kubectl delete ns baseline
+```
