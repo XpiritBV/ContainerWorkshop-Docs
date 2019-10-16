@@ -70,7 +70,7 @@ Experiment some more with manually created networks. For example use a specific 
 
 ```cmd
 docker network create -d bridge --subnet 10.0.0.0/24 workshop_specific
-docker run -itd --name c3 --ip 10.0.0.123 --net workshop_specific --network-alias c3.containerworkshop.local alpine sh
+docker run -it --name c3 --ip 10.0.0.123 --net workshop_specific --network-alias c3.containerworkshop.local alpine sh
 ```
 
 You should be able to ping container `c3` from inside itself with `ping c3.containerworkshop.local`. Also, inspect the network again to see the running containers in it. 
