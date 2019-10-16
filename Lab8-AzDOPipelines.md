@@ -137,20 +137,20 @@ Here is the list of variables you need to create:
 
 Name | Value (example)
 --- | ---
-containerregistry | containerworkshopregistry.azurecr.io
-dns | imworld.5a79006cd4b54431acb1.westeurope.aksapp.io
+containerregistry | <your-registry> (e.g. 'containerworkshopregistry.azurecr.io' or else 'xpiritbv')
+namespace | workshop
+aikey | (empty)
 keyvaultclientid | ca5a0aeb-0eec-49a3-a527-a29e2524fa5b
 keyvaultclientsecret | 45gSC1AZ3lkaSUHpsqFfL/+vddtbshVs1umC0IZWsVY=
 keyvaulturl | https://Containerworkshop.vault.azure.net
-namespace | workshop
-aikey | (empty)
 
+**If you did Lab 7 before:**
 Each of these variable names should be familiar and known to you (except the `aikey`, which remains empty for now). For the key vault related values (e.g. keyvaultclientid), use the values from the [Security Lab](Lab7-Security.md#adding-support-for-azure-key-vault).
 Some of these will be used later.
-
 You can remove the `volumeMounts` and `spec` from the `dep-leaderboardwebapi` deployment, now that the values in it are coming from the pipeline variables and the environment variables. 
 
-Try your release pipeline by creating a new release. Check whether the release is successful and fix any errors. You might want to check the Kubernetes dashboard to see if the cluster deployment succeeded as well. If all is well, you should be able to access the DNS host endpoint of your HTTP application route to view the web application.
+### Try it out
+Try your release pipeline by creating a new release. Check whether the release is successful and fix any errors. You might want to check the Kubernetes dashboard to see if the cluster deployment succeeded as well. 
 
 ## Wrapup
 
