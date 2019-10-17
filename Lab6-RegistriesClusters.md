@@ -75,6 +75,7 @@ Tag the current images again to include the registry name. This will not create 
 ```
 docker tag gamingwebapp:latest <full-registry-name>/gamingwebapp:latest
 ```
+> Note: use lower case strings only
 
 Make sure you replace the name `<full-registry-name>` with your registry name. For Azure Container Registry, use the value of `LOGIN SERVER` as the registry name, e.g. `containerworkshopregistry.azurecr.io`. For Docker Hub it is the simple name, like `containerworkshop`.
 
@@ -197,6 +198,8 @@ For Azure Container Registry, you can create another service principal that will
 az ad sp create-for-rbac --scopes /subscriptions/<your-subscription-id>/resourcegroups/ContainerWorkshop/providers/Microsoft.ContainerRegistry/registries/<your-registry-name> --role Contributor --name ContainerWorkshopRegistryPrincipal
 ```
 This command creates a principal that has the Contributor role in the ACR. Take a note of the password that is generated in the output.
+
+> Note: if you cannot create this Service Principal, you can use the admin credentials you used for `docker login` earlier.
 
 Next, you are going to create a secret in the cluster to hold the credentials for this principal. The secret is specific to container registries and allows the manifest deployment to use the credentials to pull images for the Kubernetes services.
 
