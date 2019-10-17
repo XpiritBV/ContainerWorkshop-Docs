@@ -142,6 +142,8 @@ docker pull <full-registry-name>/gamingwebapp:latest
 ```
 This process can be automated by a build and release pipeline. You will learn how to do that in a later lab.
 
+**Repeat the procedure for the Leaderboard Web API.
+
 ## Connecting to your cluster
 
 At this point you will need to have access to a Docker cluster. If you haven't done so already, create an Azure Kubernetes Service cluster in Azure. [Module 1](Lab1-GettingStarted.md) describes how you can create one.
