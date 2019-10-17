@@ -145,12 +145,6 @@ This process can be automated by a build and release pipeline. You will learn ho
 
 At this point you will need to have access to a Docker cluster. If you haven't done so already, create an Azure Kubernetes Service cluster in Azure. [Module 1](Lab1-GettingStarted.md) describes how you can create one.
 
-Make sure the addon 'http application routing' is installed. If it's not run this command:
-
-```cmd
-az aks enable-addons -a http_application_routing --resource-group ContainerWorkshop --name ContainerWorkshopCluster
-```
-
 Open the dashboard of your cluster. There are several ways to connect to it. The easiest way is to use VSCode and the Kubernetes extension. Navigate to the Kubernetes pane on the left and find your cluster listed. Right-click it and use `Set as current cluster` if you have more than one cluster and yours is not selected yet. Right-click again and select `Open Dashboard` from the context menu. This should create a port mapping from your localhost machine to the master node of your cluster. A browser window will open at `http://localhost:10000` and show the Kubernetes dashboard.
 
 Alternatively, you can run the command:
@@ -193,8 +187,6 @@ Kubernetes does not use Docker Compose files for its deployments. The Visual Stu
 You need to make a few changes to the manifest for it to be useable. In particular, make sure you change the following markers:
 - `__containerregistry__`
 	- execute the command `az acr show -n <registry> --query loginServer` to get the value
-- `__httpapplicationroutingdomain__`
-	- execute the command `az aks show --name ContainerWorkshopCluster -g ContainerWorkshop --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName ` to retrieve the value or look in the Azure Portal
 - change `gamingwebapp:demo` into `gamingwebapp:latest`
 
 In order to be able to pull images from your registry into the cluster, you will need to authenticate against a private registry. If you are using Docker Hub, then this is not required. 
