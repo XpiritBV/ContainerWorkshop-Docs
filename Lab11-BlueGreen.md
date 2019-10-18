@@ -65,6 +65,7 @@ After this step, you will have two active Pods who can be called individually.
 Check if the service is deployed correctly by running this command:
 
 ```
+kubectl config set-context --current --namespace=bluegreen
 kubectl get -n heptio-contour service contour -o wide
 ```
 
