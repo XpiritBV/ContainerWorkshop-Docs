@@ -103,7 +103,8 @@ Modify the Web App for use of Dev Spaces.
 In the terminal of VS Code, type:
 
 ```
-$ <your repo folder>\ContainerWorkshop2018\src\Applications\GamingWebApp>azds prep --public
+cd <your-repo-folder>\ContainerWorkshop2018\src\Applications\GamingWebApp
+azds prep --public
 ```
 
 One of the results, is a new Docker file, named `\ContainerWorkshop2018\src\Applications\GamingWebApp\Dockerfile.develop`
@@ -129,6 +130,12 @@ azds up
 ```
 This command will generate a lot of logging. Within the output, you'll find a note that your `gamingwebapp` Service was configured in an `Ingress` also named `gamingwebapp`.
 
+Check the status of all URLs associated with your Dev Spaces services:
+
+```
+azds list-uris
+```
+
 After some time, you'll be able to navigate to that url in your browser, e.g.:
 http://baseline.gamingwebapp.p4v88vkr7c.weu.azds.io/
 
@@ -153,7 +160,7 @@ Place a breakpoint inside the file `IndexModel.cs` on line 32. Refresh the page.
 You are now debugging code that runs inside AKS, without the need to mock the calls to the Web API.
 
 
-## Additional challenge
+## Debugging the Web API
 
 Create a new Dev Space, called 'dev', choose 'baseline' as its parent:
 
@@ -172,9 +179,31 @@ Type a number: 3
 Creating and selecting dev space baseline/dev'...2s
 ```
 
-Modify the Web API to enable it for Dev Spaces in the same way as the Web App.
-Deploy the Web API.
+Run this command again, to display the new endpoint URL:
+```
+azds list-uris
+```
 
+Modify the Web API to enable it for Dev Spaces in the same way as the Web App, except that the Web API must not have a public endpoint:
+
+```
+cd <your-repo-folder>\ContainerWorkshop2018\src\Services\Leaderboard.WebAPI
+azds prep
+```
+Make sure the Web API has a SQL Server to work with, by changing the connection string to SQL Server in the `appsettings.json` file:
+
+``` json
+  "ConnectionStrings": {
+    "LeaderboardContext": "Server=sql.baseline;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False;"
+  }
+```
+
+Deploy the Web API:
+
+```
+kubectl config set-context --current --namespace=dev
+azds up
+```
 
 ## <a name='clean'></a>Cleaning up
 
