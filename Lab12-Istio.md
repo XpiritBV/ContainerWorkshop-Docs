@@ -132,17 +132,17 @@ kubectl delete namespace bluegreen
 
 2. Second, deploy both versions of the sample workload; by creating a namespace with two deployments and services. 
 
-> For more information about this application, read the introduction in [Lab 10](Lab10-BlueGreen.md#deploy-workloads).
+> For more information about this application, read the introduction in [Lab 11](Lab11-BlueGreen.md#deploy-workloads).
 
 Version 1:
 ```
-kubectl apply -f ..\lab10\01-green.yaml
+kubectl apply -f ..\lab11\01-green.yaml
 ```
 
 And version 2:
 
 ```
-kubectl apply -f ..\lab10\02-blue.yaml
+kubectl apply -f ..\lab11\02-blue.yaml
 ```
 
 And select the new 'bluegreen' namespace as the default for this session:
