@@ -35,7 +35,7 @@ You will also need the [Azure Command Line 2.0 tooling](https://docs.microsoft.c
 
 Download and install [.NET Core 2.2](https://dotnet.microsoft.com/download/dotnet-core/2.2) if needed.
 
-Download and install [git](https://git-scm.com/downloads) if needed.
+Download [git](https://git-scm.com/downloads) if needed. Store the file in a location that is part of the PATH variable, e.g. "C:\Program Files".
 
 The following optional tools are recommended, but not required.
 
