@@ -49,12 +49,19 @@ The application is themed around high-scores of retro video games. It consists o
 Clone the repository to your development machine:
 - Create a folder for the source code, e.g. `C:\Sources\ContainerWorkshop`.
 - Open a command prompt from that folder
-- Clone the Git repository for the workshop files:
+- Clone the Git repositories for the workshop files
 
+Demo project with source code:
 ```
 git clone https://github.com/XpiritBV/ContainerWorkshop2018.git
 ```
+
+The repository with the labs:
+```
+git clone https://github.com/XpiritBV/ContainerWorkshop2019docs.git
+```
 - Set an environment variable to the root of the cloned repository from PowerShell:
+
 ```
 $env:workshop = 'C:\Sources\ContainerWorkshop'
 ```
