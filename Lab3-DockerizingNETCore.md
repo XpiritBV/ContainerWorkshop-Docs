@@ -109,7 +109,7 @@ Choose the right place to make that change, considering that you are now running
 gamingwebapp:
   environment:
     - ASPNETCORE_ENVIRONMENT=Development
-    - LeaderboardApiOptions:BaseUrl=http://leaderboard.webapi
+    - LeaderboardApiOptions__BaseUrl=http://leaderboard.webapi
 ```
 
 Change the IP address of the connection string in the application settings for the Web API to be your local IP address (of your LAN) instead of `127.0.0.1`. This is a temporary fix.
