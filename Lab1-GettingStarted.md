@@ -112,7 +112,7 @@ az aks create --resource-group ContainerWorkshop --name ContainerWorkshopCluster
   --client-secret <your-principal-password> 
   --service-principal <your-principal-appid> 
   --generate-ssh-keys --location westeurope --node-count 3 
-  --kubernetes-version 1.13.5 --max-pods 100 
+  --kubernetes-version 1.14.8 --max-pods 100 
   --enable-addons http_application_routing
 ```
 
