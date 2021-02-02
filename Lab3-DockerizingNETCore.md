@@ -9,26 +9,24 @@ Goals for this lab:
 - [Build container images](#build)
 - [Running SQL Server in a Docker container](#sql)
 
-## <a name="run"></a>Run existing application
-We will start with running the existing ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to clone it now if you do not have the sources. Switch to the `Start` branch by using this command:
+## Prerequisites
+Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
+
+## <a name="run"></a>Run the application
+We will start with running the existing ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to clone it now if you do not have the sources. 
+
+Switch to the `Start` branch by using this command:
 
 ```cmd
 git checkout start
 ```
-
-> ##### Important
-
-> Make sure you have switched to the `start` branch to use the right .NET solution. If you are still on the `master` branch, you will use the completed solution. 
-
-> Make sure you have configured 'Docker Desktop' to run Linux containers.
-> If your VS2017 debugger won't start and attach, reset 'Docker Desktop' to its factory defaults and recreate network shares by using the settings screen.
 
 Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to navigate the code and familiarize yourself with the various projects in the solution. You should be able to identify these:
 
 - `GamingWebApp`, an ASP.NET MVC Core frontend 
 - `Leaderboard.WebAPI`, an ASP.NET Core Web API
 
-For now, the SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as described in [Lab 2](https://github.com/XpiritBV/ContainerWorkshop2018Docs/blob/master/Lab2-Docker101.md#lab-2---docker-101).
+For now, the SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as described in [Lab 2 - Running Microsoft SQL Server on Linux](Lab2-Docker101.md###sql).
 
 > ##### Important
 > Update the connectionstring in the appsettings.json file to use the computername instead of localhost or 127.0.0.1. We will need this later. 
@@ -36,13 +34,8 @@ For now, the SQL Server for Linux container instance is providing the developer 
 ```json
 {
   "ConnectionStrings": {
-    "LeaderboardContext": "Server=tcp:machinename,5433;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False;"
+    "LeaderboardContext": "Server=tcp:<<computername>>,5433;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False;"
   }
-```
-
-Then start the container, if you did not already do this.
-```
-docker run -e ACCEPT_EULA=Y -e MSSQL_PID=Developer -e SA_PASSWORD="Pass@word" --name sqldocker -p 5433:1433 -d mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
 ```
 
 Right-click both the GamingWebApp and Leaderboard.WebAPI and start to debug a new instance.
@@ -116,7 +109,7 @@ Change the IP address of the connection string in the application settings for t
 
 Start the solution by pressing `F5`. See if it works correctly. Timebox your efforts to try to fix any errors.
 
-## <a name="sql"></a>Running SQL Server in a Docker container
+## <a name="sql"></a>Running SQL Server in a Docker container composition
 
 Now that your application is running two projects in Docker containers, you can also run SQL Server in the same composition. This is convenient for isolated development and testing purposes. It eliminates the need to install SQL Server locally and to start the container for SQL Server manually.
 
@@ -124,7 +117,7 @@ Go ahead and add the definition for a container service in the `docker-compose.y
 
 ```
   sql.data:
-    image: mcr.microsoft.com/mssql/server
+    image: mcr.microsoft.com/mssql/server:2019-latest
 ```
 
 Remember that from the Docker CLI you used many environment variables to bootstrap the container instance. Go back to the previous lab to check what these are.
@@ -153,7 +146,7 @@ You will need to change the connection string for the Web API to reflect the new
 > ##### Strange connection string or not? 
 > There are at least two remarkable things in this connection string. Can you spot them and explain why? Don't worry if not, as we will look at this in the [Networking](Lab4-Networking.md) lab.
  
-With this change, you should be able to run your application completely from containers. Make sure you have stopped any containers related to the application. Give it a try and fix any issues that occur. 
+With this change, you should be able to run your applications in containers. Make sure you have stopped any containers related to the application. Give it a try and fix any issues that occur. 
 
 ## <a name="debug"></a>Debugging with Docker container instances
 One of the nicest features of the Docker support in Visual Studio is the debugging support while running container instances. Check out how easy debugging is by stepping through the application like before.
