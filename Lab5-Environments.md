@@ -7,22 +7,13 @@ Goals for this lab:
 - [Create compositions for different environments](#create)
 - [Change implementation to work with environment variables](#change)
 
-## <a name="run"></a>Run existing application
-We will start with or continue running the existing ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to clone it now if you do not have the sources. Switch to the `master` branch by using this command.
+> Make sure to configure Docker Desktop to run Linux containers.
+>
+> This lab uses files from the 'Code' repository.
 
-```
-git checkout master
-```
 
-> ##### Important
-> Make sure you have switched to the `master` branch to use the right .NET solution.
-> Make sure you have configured 'Docker Desktop' to run Linux containers.
-
-Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to navigate the code and familiarize yourself with the various projects in the solution. You should be able to identify these:
-- `GamingWebApp`, an ASP.NET MVC Core frontend 
-- `Leaderboard.WebAPI`, an ASP.NET Core Web API.
-
-For now, a SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as described in [Lab 2](https://github.com/XpiritBV/ContainerWorkshop2018Docs/blob/master/Lab2-Docker101.md#lab-2---docker-101).
+## Prerequisites
+Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
 
 ## <a name="work"></a>Working with compositions and Docker Compose
 
