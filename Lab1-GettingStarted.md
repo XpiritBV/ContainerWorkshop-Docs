@@ -205,6 +205,15 @@ If the output checks out, you are good to go. If not, ask your proctor for some 
 >
 > Restart the Docker Desktop service
 
+## Save some bandwidth later
+During this workshop we will use a couple of Docker images. You can download these images at home ahead of time, so you don't have to wait for them to download during the workshop:
+
+```
+docker pull portainer/portainer-ce
+docker pull nginx
+docker pull mcr.microsoft.com/mssql/server:2019-latest
+```
+
 ## Wrapup
 You have prepared your laptop and container environment to be ready for the next labs. Any issues you may have, can probably be resolved during the labs. Ask your fellow attendees or the proctor to help you, if you cannot solve the issues.
 
