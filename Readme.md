@@ -1,13 +1,15 @@
-# Workshop Containers 
-## Architecting and implementing .NET Core solutions in a Docker ecosystem
+# Workshop 'Doing Docker DevOps Style'
 
-Welcome to the workshop "Architecting and implementing .NET Core solutions in a Docker ecosystem". 
+Welcome to the workshop "Doing Docker DevOps Style". 
 
-In this workshop you will create a .NET application that demonstrates what is required to design a solution running in a Docker ecosystem.
+In this workshop you will create a .NET application that demonstrates what is required to design a solution running in a Docker ecosystem. It caters to people with or without prior experience using containers.
 
-To get the best experience with the hands-on-labs it is recommended that you prepare the following:
-- Laptop for development and running containers
-- Azure subscription to create and use a Docker container cluster
+To get the best experience with the hands-on-labs it is recommended that you prepare the following ahead of time:
+
+- A laptop for development, capable of running containers.
+- A recent version of Visual Studio Code ([download here](https://code.visualstudio.com/download))
+- Docker Desktop, on Windows or Mac ([download here](https://www.docker.com/products/docker-desktop))
+- An Azure subscription, to create and use a container cluster and registry ([trial account here](https://azure.microsoft.com/en-us/free/)).
 
 ### Preparing for workshop
 
