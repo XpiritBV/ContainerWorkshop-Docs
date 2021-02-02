@@ -121,7 +121,7 @@ a9eb60b21543   nginx                    "/docker-entrypoint.…"   21 seconds ag
 c60021dd30ca   portainer/portainer-ce   "/portainer"             22 minutes ago   Up 22 minutes   0.0.0.0:8000->8000/tcp, 0.0.0.0:9000->9000/tcp   portainer
 ```
 
-### Running Microsoft SQL Server on Linux
+### <a name="sql"></a> Running Microsoft SQL Server on Linux
 Next, start a container to run an instance of SQL Server on Linux. 
 The image for SQL Server for Linux is located in the Docker Store, since it is an official image. Navigate to https://hub.docker.com and search for [SQL Server](https://hub.docker.com/_/microsoft-mssql-server) there. Pull the image when you found its name:
 
