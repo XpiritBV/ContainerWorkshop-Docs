@@ -209,6 +209,7 @@ If the output checks out, you are good to go. If not, ask your proctor for some 
 During this workshop we will use a couple of Docker images. You can download these images at home ahead of time, so you don't have to wait for them to download during the workshop:
 
 ```
+docker pull alpine
 docker pull portainer/portainer-ce
 docker pull nginx
 docker pull mcr.microsoft.com/mssql/server:2019-latest
