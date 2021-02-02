@@ -10,6 +10,7 @@ To get the best experience with the hands-on-labs it is recommended that you pre
 - A recent version of Visual Studio Code ([download here](https://code.visualstudio.com/download))
 - Docker Desktop, on Windows or Mac ([download here](https://www.docker.com/products/docker-desktop))
 - An Azure subscription, to create and use a container cluster and registry ([trial account here](https://azure.microsoft.com/en-us/free/)).
+- For [Lab 8 - Azure DevOps pipelines](Lab8-AzDOPipelines.md), you'll need an Azure DevOps subscription. Get one for free here: [dev.azure.com](https://dev.azure.com).
 
 ### Preparing for workshop
 

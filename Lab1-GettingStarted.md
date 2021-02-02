@@ -3,13 +3,23 @@
 This lab is going to let you prepare your development environment for the rest of the labs in the workshop. Not all steps are required. The more you can prepare, the better the experience during the workshop.
 
 Goals for this lab: 
-- [Prepare development laptop](#1)
-- [Download required and optional tooling](#2)
-- [Clone Git repository for lab code](#3)
-- [Run and inspect lab application](#4)
-- [Create Docker cluster on Microsoft Azure](#5)
+- [Get the optional subscriptions](#1)
+- [Prepare development laptop](#2)
+- [Download required and optional tooling](#3)
+- [Clone Git repository for lab code](#4)
+- [Run and inspect lab application](#5)
+- [Create a Kubernetes cluster](#6)
+- [Save time later](#7)
  
-## <a name="1"></a>1. Prepare your development laptop
+## <a name="1"></a>1. Get optional subscriptions
+If you want to learn how to work with Azure and Azure DevOps, make sure to get access to (trial) subscriptions.
+
+For [Lab 8 - Azure DevOps pipelines](Lab8-AzDOPipelines.md), you'll need an Azure DevOps subscription. Get one for free here: [dev.azure.com](https://dev.azure.com).
+
+To create a Kubernetes cluster and/or a Container Registry inside Azure, you will need an Azure subscription.
+Create a free [trial account here](https://azure.microsoft.com/en-us/free/).
+
+## <a name="2"></a>2. Prepare your development laptop
 Make sure that your laptop is up-to-date with the latest security patches. This workshop is specific towards Windows as the operating system for your machine. The labs can also be done on Linux and Mac, although this can be a bit more challenging.
 
 ### Windows Subsystem for Linux
@@ -18,7 +28,7 @@ For better performance, we recommend that you enable WSL, by following the steps
 
 > If you cannot do this, you will use a Linux Virtual Machine to run Linux containers on Windows later.
 
-## <a name="2"></a>2. Install tools
+## <a name="3"></a>3. Install tools
 
 ### Visual Studio 2019 / VS Code
 First, you will need to have a development IDE installed. The most preferable IDE is [Visual Studio 2019](https://www.visualstudio.com/vs/) if you are running the Windows operating system.
@@ -56,7 +66,7 @@ The following optional tools are recommended, but not required.
 - [GitHub Desktop](https://desktop.github.com/) for Git Shell and Git repository utilities
 - [PuTTY](http://www.putty.org/) for `PuTTY.exe` and `PuTTYgen.exe`
 
-## <a name="3"></a>3. Clone Git repositories with labs and code
+## <a name="4"></a>4. Clone Git repositories with labs and code
 The workshop uses an example to get you started with Dockerizing a typical ASP.NET Core application. 
 
 Clone the repository to your development machine:
@@ -83,12 +93,12 @@ pwsh
 $env:workshop = 'C:\Sources\ContainerWorkshop'
 ```
 
-## <a name="4"></a>4. Compile and inspect demo application
+## <a name="5"></a>5. Compile and inspect demo application
 Start Visual Studio and open the solution you cloned in the previous step. 
 Build the application and fix any issues that might occur. 
 Take a look at the solution and inspect the source code.
 
-## <a name="5"></a>5. Create a Kubernetes cluster
+## <a name="6"></a>6. Create a Kubernetes cluster
 
 During the labs, you will need admin access to a working Kubernetes cluster. You can choose to create one in Azure, or use Docker Desktop.
 
@@ -205,14 +215,15 @@ If the output checks out, you are good to go. If not, ask your proctor for some 
 >
 > Restart the Docker Desktop service
 
-## Save some bandwidth later
+## <a name="7"></a> 7. Save some time later
 During this workshop we will use a couple of Docker images. You can download these images at home ahead of time, so you don't have to wait for them to download during the workshop:
 
 ```
-docker pull alpine
+docker pull mcr.microsoft.com/mssql/server:2019-latest
 docker pull portainer/portainer-ce
 docker pull nginx
-docker pull mcr.microsoft.com/mssql/server:2019-latest
+docker pull alpine
+docker pull busybox
 ```
 
 ## Wrapup
