@@ -7,6 +7,9 @@ Goals for this lab:
 - [Manage container images and instances](#manage)
 - [Working with container images](#working)
 
+## Prerequisites
+Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
+
 ## <a name="inspect"></a>Inspect your Docker environment
 Let's check whether your Docker Desktop tooling is correctly set up. Also, you might need to get familiar with the Docker tooling.
 

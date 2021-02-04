@@ -245,12 +245,12 @@ Create a visual diagram for the three containers and assign them to the **proper
 > ##### A choice of network type
 > What type of network drive should the two networks use? Remember that your are currently in a local, single-host situation. How would that change when running in a cluster? Also consider the impact of running multiple instances of your container.
 
-### Open the 'Code' repository 
-Open a new terminal and navigate to the folder that contains [the code](https://github.com/XpiritBV/ContainerWorkshop-Code) bits. (e.g. C:\Sources\ContainerWorkshop\ContainerWorkshop-Code)
+### Find the compose files 
+In your terminal, navigate to the `resources\lab04` folder. (e.g. C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab04)
 
 **Navigate to folder 'compose-samples'**
 
-Run docker-compose to build the desired containers and network using a definition file named 'docker-compose-netwrk.yml':
+Run docker-compose to build the desired containers and network using a definition file named '00-docker-compose-netwrk.yml':
   ```
   docker-compose -f docker-compose-netwrk.yml up -d
 
@@ -372,7 +372,7 @@ You can also give a container instance an alias, so you can refer to it by a net
 ```
 >Please note that the network 'backend' no longer has a `-` in front of it.
 
-If you want to cheat, just apply the file named 'docker-compose-netwrk-alias.yml'
+If you want to cheat, just apply the file named '01-docker-compose-netwrk-alias.yml'
 ```
 docker-compose -f docker-compose-netwrk.yml up -d
 ```
