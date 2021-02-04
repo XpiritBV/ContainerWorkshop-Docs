@@ -7,65 +7,83 @@ Goals for this lab:
 - Learn how to use Ingress to expose Services based on routing keys.
 - Run multiple versions of a workload on Kubernetes concurrently, combined with traffic routing to perform [Blue/Green testing](https://martinfowler.com/bliki/BlueGreenDeployment.html).
 
-## <a name='start'></a>Inspect your Kubernetes environment
-We will deploy and call an application using Visual Studio Code. Make sure you installed it, return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) if you do not have it installed. Also, make sure you have [this](https://github.com/XpiritBV/ContainerWorkshop2019Docs) repository cloned, so you have a copy of the Kubernetes template files on your machine.
+## Prerequisites
+Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'
 
-Tip: Having multiple ingress controllers on a Kubernetes cluster may cause issues. To avoid this, start this lab by installing the Kubernetes feature of Docker Desktop. This miniature version of Kubernetes can be reset to defaults by the click of a button!
-You can deploy the mini-cluster by right clicking on the icon in the tool bar. 
-
-![tray](images/dockertray.png)
-
-On the Kubernetes tab, check 'Enable Kubernetes' and click 'Apply'.
-
-![dd](images/dockerdesktop.png)
-
-Wait a few minutes until the indicator in the bottom-left of the screen indicates that both Docker and Kubernetes are running.
-
-If you already installed the mini-cluster, please open the tab named 'Reset' and select 'Reset Kubernetes Cluster..' to reset the local mini-cluster to its defaults.
-
-![dd](images/vscode-k8s.png)
-
-Now, in VS Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' is the current cluster, or right click on it to select it as the current cluster.
-
-![dd](images/vscode-k8s.png)
-
-Also, in the terminal, move to the repository directory named 'resources/lab11'.
+## Getting started
+![](images/kubernetes01.png)
+Launch VS Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster.
+Click on the 'Install dependencies' button if needed.
+Also, in the terminal, change directories to the Code repository directory named 'resources/lab11'
+(e.g. C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab11)
 
 ## <a name='deploy-contour'></a>Deploying the Contour ingress controller
+An ingress controller manages traffic into and out of the cluster. You can use it to get network connectivity between Pods and software outside of the cluster.
+
 Kubernetes does not have a built-in [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) controller. We first need to deploy one. For this lab, we chose [Contour](https://github.com/heptio/contour). Other popular [options](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) are Nginx and Traefik.
+
+Open a terminal, move to the repository directory named 'resources/lab11'.
 
 Type the following command to deploy the [Contour](https://github.com/heptio/contour) ingress controller:
 
 ```
-kubectl apply -f '00-contour.yaml'
+kubectl apply -f 00-contour.yaml
 ```
 
 This command will install custom resource definitions and pods to serve as ingress controller within the local cluster.
 
 ## <a name='deploy-workloads'></a>Deploying two versions of a container
-We will now deploy a small demo application, it is a .Net Core Web Api. There are two versions, 'blue' and 'green'. (In real life, this would probably be something similar to v1 and v2.) The demo application with version *'blue'* is configured to return string value *'blue'* when it is called. The *'green'* version, likewise returns string value *'green'*. This way, we can easily see which application version answers our call when we consume the workload later.
+We will now deploy a small demo application, it is a .NET Core Web Api. There are two versions, 'blue' and 'green'. (In real life, this would probably be something similar to v1 and v2.) The demo application with version *'blue'* is configured to return string value *'blue'* when it is called. The *'green'* version, likewise returns string value *'green'*. This way, we can easily see which application version answers our call when we call the API's later.
 
 Deploy the two versions of the workload by running these commands:
 
 ```
-kubectl apply -f '01-green.yaml'
+kubectl apply -f 01-green.yaml
 ```
 
 and
 
 ```
-kubectl apply -f '02-blue.yaml'
+kubectl apply -f 02-blue.yaml
 ```
 > In this lab, we will move from the 'green' version to 'blue'.
 
 Each of these commands will first ensure that the namespace 'BlueGreen' exists, and then create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment) and expose it by using a [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
+
+> If you have no idea what this is about, consider doing [Lab 10 - How to use Kubernetes](Lab10-Kubernetes.md) first.
+
 The first command creates the 'green' version of the workload, and the second will create the 'blue' version.
 After this step, you will have two active Pods who can be called individually. 
+
+### Check the resources
+
+Kubernetes groups resources in Namespaces. Namespaces can also act as a security boundary. The YAML files we applied earlier, created a new Namespace 'bluegreen'.
+
+List all Namespaces by running `kubectl get namespace`:
+
+```
+kubectl get namespace
+
+NAME              STATUS   AGE
+bluegreen         Active   1m22s
+default           Active   2d5h
+heptio-contour    Active   8m39s
+kube-node-lease   Active   2d5h
+kube-public       Active   2d5h
+kube-system       Active   2d5h
+```
+
+Switch to the 'bluegreen' namespace by using the `kubectl config set-context` command:
+
+```
+kubectl config set-context --current --namespace=bluegreen
+```
+
+When omitting the namespace from `kubectl` commands, it will use the Namespace named `default` as a default value. We have just instructed `kubectl` to use the Namespace `bluegreen` instead.
 
 Check if the service is deployed correctly by running this command:
 
 ```
-kubectl config set-context --current --namespace=bluegreen
 kubectl get -n heptio-contour service contour -o wide
 ```
 
@@ -73,31 +91,47 @@ This should return something similar to this:
 
 ```
 NAME      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE   SELECTOR
-contour   ClusterIP   10.99.235.14   <none>        8001/TCP   43m   app=contour
+contour   ClusterIP   10.0.168.105   <none>        8001/TCP   11m   app=contour
 ```
-
-Note down the Node IP address by running this command:
-
+### Docker Desktop
+If you're running Docker Desktop, note down the Node IP address by running this command:
 ```
-kubectl get node/docker-desktop  -o wide
+kubectl get node/docker-desktop -o wide
 ```
 
 It will output something similar to this:
 ```
-NAME             STATUS   ROLES    AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE         KERNEL-VERSION     CONTAINER-RUNTIME
-docker-desktop   Ready    master   78m   v1.14.3   192.168.65.3   <none>        Docker Desktop   4.9.184-linuxkit   docker://19.3.1
+NAME             STATUS   ROLES    AGE    VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE         KERNEL-VERSION                CONTAINER-RUNTIME
+docker-desktop   Ready    master   2d6h   v1.19.3   192.168.65.3   <none>        Docker Desktop   4.19.128-microsoft-standard   docker://20.10.2
 ```
+
+### Azure Kubernetes Service
+If you're running on Azure, use this command to get the first Node name:
+```
+kubectl get nodes
+```
+Use the Node name to get information (your Node name will be different):
+```
+kubectl get node aks-nodepool1-36156572-vmss000000 -o wide
+```
+
+It will output something similar to this:
+```
+NAME                                STATUS   ROLES   AGE    VERSION    INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
+aks-nodepool1-36156572-vmss000000   Ready    agent   2d5h   v1.18.14   10.240.0.4    <none>        Ubuntu 18.04.5 LTS   5.4.0-1035-azure   docker://19.3.14
+```
+
 > Later in this lab, we will need the value of 'INTERNAL-IP'. So make a note of it.
 
-## <a name='ingress'></a>Adding an IngressRoute
+## <a name='ingress'></a>Adding an HTTPProxy
 We now want to consume both services at a single endpoint, so we can perform Blue/Green testing. In this lab, ninety percent of traffic will be sent to the 'green' version, the remaining 10 percent will be sent to the 'blue' version.
 
-To do this, we'll create a Contour-specific '[IngressRoute](https://github.com/heptio/contour/blob/master/design/ingressroute-design.md)' resource.
+To do this, we'll create a Contour-specific 'HTTPProxy' resource.
 This resource acts as a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) that routes incoming HTTP requests to one or more deployed Services. Being able to target multiple services (e.g. blue & green) allows us to perform Blue/Green testing!
 
 ```
-apiVersion: contour.heptio.com/v1beta1
-kind: IngressRoute
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
 metadata: 
   name: ingress
   namespace: bluegreen
@@ -105,7 +139,8 @@ spec:
   virtualhost:
     fqdn: demo.local
   routes: 
-    - match: /
+    - conditions:
+      - prefix: / # matches everything
       permitInsecure: true
       services: 
         - name: blue
@@ -120,32 +155,32 @@ The value in 'virtualhost' will be matched against the `Host` header of incoming
 Create the ingress by running this command:
 
 ```
-kubectl apply -f '03-ingress.yaml'
+kubectl apply -f 03-ingress.yaml
 ```
 
 To ensure everything works, run this command:
 
 ```
-kubectl get ingressroutes.contour.heptio.com/ingress  -o wide
+kubectl get proxy/ingress -o wide
 ```
 
 The output should look like this:
 
 ```
-NAME      FQDN         TLS SECRET   FIRST ROUTE   STATUS   STATUS DESCRIPTION
-ingress   demo.local                /             valid    valid IngressRoute
+NAME      FQDN         TLS SECRET   STATUS   STATUS DESCRIPTION
+ingress   demo.local                valid    Valid HTTPProxy
 ```
 
-> The 'valid' status means that the health checks of the IngressRoute are currently successful.
+> The 'valid' status means that the all checks of the HTTPProxy are currently successful.
 
 ## <a name='results'></a>Checking the results.
 
-To test the new ingress route, we'll run a terminal in a temporary Pod:
+To test the new ingress route, we'll run a terminal in a temporary Pod.
+Open up a **new terminal** and run:
 
 ```
-kubectl run -i --rm --tty curl --image=mcr.microsoft.com/dotnet/core/aspnet:2.2-stretch-slim --restart=Never bash
+kubectl run -i --rm --tty curl --image=mcr.microsoft.com/dotnet/aspnet:3.1 --restart=Never bash
 ```
-
 
 Inside the terminal, run this command to test the ingress, by making 100 web requests, targeting the host 'demo.local', and displaying the returned unique word frequencies (which are blue & green):
 
@@ -153,7 +188,9 @@ Inside the terminal, run this command to test the ingress, by making 100 web req
 (for i in {1..100}; do echo -e ""; curl -s http://192.168.65.3/api/color -H 'Host: demo.local';  done;) | sort | uniq -c
 ```
 
-> Replace the IP address with the value you noted down for 'INTERNAL-IP' (the Host's IP address) earlier in this lab. You can display it again, by running this command:
+Repeat the call, to see both words being returned.
+
+> Remember to replace the IP address with the value you noted down for 'INTERNAL-IP' (the Host's IP address) earlier in this lab. You can display it again, by running this command:
 `kubectl get node/docker-desktop  -o wide`
 
 Running the command, should display output similar to this:
@@ -164,7 +201,7 @@ Running the command, should display output similar to this:
 ```
 > You should see that around 90 percent of the calls returned were answered by the *green* version, returning the word 'green' and that around 10 percent of the calls returned 'blue'.
 
-Type `exit` to stop the container.
+Switch back to your terminal and leave the test Pod running.
 
 ### Blue/Green testing
 You can now perform Blue/Green testing, and (gradually) shift traffic towards the (newer) 'blue' version of the software.
@@ -172,7 +209,7 @@ You can now perform Blue/Green testing, and (gradually) shift traffic towards th
 Type the following command to edit the existing Ingress:
 
 ```
-kubectl edit IngressRoute ingress
+kubectl edit HTTPProxy ingress
 ```
 Change the weights into:
 ```
@@ -213,3 +250,10 @@ Delete workloads:
 ```
 kubectl delete namespace bluegreen
 ```
+
+
+## Wrapup
+
+In this lab you experimented with Kubernetes network connectivity from the command line. You have learned how to shape traffic flowing into Pods using Countour HTTPProxy.
+
+Continue with [Lab 12 - Working with Istio on Kubernetes](Lab11-Istio.md).

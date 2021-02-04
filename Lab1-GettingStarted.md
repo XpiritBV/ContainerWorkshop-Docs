@@ -224,6 +224,7 @@ docker pull portainer/portainer-ce
 docker pull nginx
 docker pull alpine
 docker pull busybox
+docker pull curlimages/curl
 ```
 
 ## Wrapup
