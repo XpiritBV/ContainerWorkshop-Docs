@@ -1,3 +1,5 @@
+//TODO: use new code
+
 # Lab 6 - Container registries and clusters
 
 In this lab you are going to learn about registries and clusters. This includes pushing images to the registry and deploying compositions to a running cluster.
