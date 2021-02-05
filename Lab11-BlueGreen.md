@@ -14,8 +14,11 @@ Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6)
 ![](images/kubernetes01.png)
 Launch VS Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster.
 Click on the 'Install dependencies' button if needed.
-Also, in the terminal, change directories to the Code repository directory named 'resources/lab11'
-(e.g. C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab11)
+
+Also, in the terminal, change directories to the Docs repository directory named 'resources/lab11'
+```
+C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab11>
+```
 
 ## <a name='deploy-contour'></a>Deploying the Contour ingress controller
 An ingress controller manages traffic into and out of the cluster. You can use it to get network connectivity between Pods and software outside of the cluster.
@@ -249,6 +252,7 @@ Delete workloads:
 
 ```
 kubectl delete namespace bluegreen
+kubectl delete ns heptio-contour 
 ```
 
 
@@ -256,4 +260,4 @@ kubectl delete namespace bluegreen
 
 In this lab you experimented with Kubernetes network connectivity from the command line. You have learned how to shape traffic flowing into Pods using Countour HTTPProxy.
 
-Continue with [Lab 12 - Working with Istio on Kubernetes](Lab11-Istio.md).
+Continue with [Lab 12 - Working with Istio on Kubernetes](Lab12-Istio.md).

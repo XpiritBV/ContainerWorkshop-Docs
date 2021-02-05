@@ -12,6 +12,14 @@ Goals for this lab:
 ## Prerequisites
 Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
 
+
+## Getting started
+
+In the terminal, change directories to the Docs repository directory named 'resources/lab10'
+```
+C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab10>
+```
+
 ## <a name="experiment"></a>Experimenting with networking
 
 To start out, you are going to experiment a little with the networking stack of Docker.

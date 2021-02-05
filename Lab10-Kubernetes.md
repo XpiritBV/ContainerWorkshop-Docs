@@ -16,8 +16,11 @@ Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6)
 ![](images/kubernetes01.png)
 Launch VS Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster.
 Click on the 'Install dependencies' button if needed.
-Also, in the terminal, change directories to the Code repository directory named 'resources/lab10'
-(e.g. C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab10)
+
+Also, in the terminal, change directories to the Docs repository directory named 'resources/lab10'
+```
+C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab10>
+```
 
 ## <a name='inspect-cluster'></a>Inspecting the cluster
 To interact with the Kubernetes cluster, you will need to use the **kubectl** tool. This allows you to issue commands and queries to the selected Kubernetes cluster. 

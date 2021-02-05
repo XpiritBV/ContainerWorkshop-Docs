@@ -20,15 +20,20 @@ To create a Kubernetes cluster and/or a Container Registry inside Azure, you wil
 Create a free [trial account here](https://azure.microsoft.com/en-us/free/).
 
 ## <a name="2"></a>2. Prepare your development laptop
-Make sure that your laptop is up-to-date with the latest security patches. This workshop is specific towards Windows as the operating system for your machine. The labs can also be done on Linux and Mac, although this can be a bit more challenging.
+Make sure that your laptop is up-to-date with the latest security patches. This workshop is specific towards Windows as the operating system for your machine. The labs can also be done on Linux and Mac.
+
+## <a name="3"></a>3. Install tools
 
 ### Windows Subsystem for Linux
-For better performance, we recommend that you enable WSL, by following the steps described here:
+- On Windows 10, enable WSL, by following the steps described here:
 [Enable WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10#manual-installation-steps)
+- Add the Ubuntu distro from the [Microsoft Store](https://www.microsoft.com/en-us/p/ubuntu/9nblggh4msv6)
 
 > If you cannot do this, you will use a Linux Virtual Machine to run Linux containers on Windows later.
 
-## <a name="3"></a>3. Install tools
+> Also, you'll need to run [Lab 12 - Working with Istio on Kubernetes](Lab12-Istio.md) in an [Azure Cloud Shell](https://devblogs.microsoft.com/commandline/the-azure-cloud-shell-connector-in-windows-terminal/).
+
+For the best experience, run the entire workshop using Linux based terminals, even on Windows.
 
 ### Visual Studio 2019 / VS Code
 First, you will need to have a development IDE installed. The most preferable IDE is [Visual Studio 2019](https://www.visualstudio.com/vs/) if you are running the Windows operating system.
