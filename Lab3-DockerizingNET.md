@@ -24,25 +24,25 @@ git checkout start
 Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to navigate the code and familiarize yourself with the various projects in the solution. You should be able to identify these:
 
 - `GamingWebApp`, an ASP.NET MVC Core frontend 
-- `Leaderboard.WebAPI`, an ASP.NET Core Web API
+- `LeaderboardWebAPI`, an ASP.NET Core Web API
 
 For now, the SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as described in [Lab 2 - Running Microsoft SQL Server on Linux](Lab2-Docker101.md###sql).
 
 > ##### Important
-> Update the connectionstring in the appsettings.json file to use the computername instead of localhost or 127.0.0.1. We will need this later. 
+> Update the connectionstring in the appsettings.json file to use the local ip address instead of localhost or 127.0.0.1. We will need this later. 
 
 ```json
 {
   "ConnectionStrings": {
-    "LeaderboardContext": "Server=tcp:<<computername>>,5433;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False;"
+    "LeaderboardContext": "Server=tcp:<<your-ip-address>>,5433;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False;"
   }
 ```
 
-Right-click both the GamingWebApp and Leaderboard.WebAPI and start to debug a new instance.
+Right-click both the GamingWebApp and LeaderboardWebAPI and start to debug a new instance.
 
-First, navigate to the web site located at http://localhost:44325/. There should be a single highscore listed. Notice what the operating system is that you are currently running on.
+First, navigate to the web site located at https://localhost:44325/. There should be a single highscore listed. Notice what the operating system is that you are currently running on.
 
-Next, navigate to the Web API endpoint at http://localhost:44369/swagger. Experiment with the GET and POST operations that are offered from the Swagger user interface. Try to retrieve the list of high scores, and add a new high score for one of the registered player names.
+Next, navigate to the Web API endpoint at https://localhost:44369/swagger. Experiment with the GET and POST operations that are offered from the Swagger user interface. Try to retrieve the list of high scores, and add a new high score for one of the registered player names.
 
 Make sure you know how this application is implemented. Set breakpoints if necessary and navigate the flow of the application for the home page.
 
@@ -50,7 +50,7 @@ Make sure you know how this application is implemented. Set breakpoints if neces
 
 Visual Studio offers tooling for adding support to run your application in a Docker container. You will first add container support to the Web API project.
 
-To get started you can right-click the Leaderboard.WebAPI project and select Add, Container Orchestrator Support from the context menu. Choose `Docker Compose` as the local orchestrator from the dropdown.
+To get started you can right-click the LeaderboardWebAPI project and select Add, Container Orchestrator Support from the context menu. Choose `Docker Compose` as the local orchestrator from the dropdown.
 
 <img src="images/AddContainerOrchestratorSupport.PNG" width="400" />
 
@@ -76,20 +76,26 @@ Now that the projects are running from a Docker container, the application is no
 
 > Some things to try if you feel like finding the cause:
 > - Inspect the running and stopped containers
-> - Try to reach the Web API from http://localhost:44369/swagger.
+> - Try to reach the Web API from https://localhost:44369/swagger.
 > - Debug the call from the web page to the API by stepping through the code.
 > - Verify application settings for each of the projects. 
 
-Notice how the `docker-compose.override.yml` file contains some port mappings, defining the ports inside the container and the composition and outside of it:
+The `docker-compose.override.yml` file contains port mappings, defining the ports inside the container. However, there is no mapping to the outside yet. Change the composition file to add the port numbers for the `gamingwebapp` and `leaderboardwebapi` to reflect these mappings:
 ```
-ports:
-  - "14069:80"
-  - "44325:443"
+leaderboardwebapi:
+  ports:
+    - "4972:80"
+    - "44369:443"
+...
+leaderboardwebapi:
+  ports:
+    - "5618:80"
+    - "44325:443"
 ```
 
-> You will learn more on networking later on. For now, notice that the URL is not referring to `localhost` but `leaderboardwebapi` (the name of the Docker container service as defined in the `docker-compose.yml` file).
+Change the `LeaderboardWebApi:BaseUrl` setting in `appsettings.json` to point to the new endpoint of the Web API with the internal address `http://leaderboardwebapi`.
 
-Change the `LeaderboardWebApiBaseUrl` setting to point to the new endpoint of the Web API with the internal address `http://leaderboard.webapi`.
+> You will learn more on networking later on. For now, notice that the URL is not referring to `localhost` but `leaderboardwebapi`, which is the name of the Docker container service as defined in the `docker-compose.yml` file.
 
 > Make sure you use the HTTP endpoint, because hosting an HTTPS endpoint with self-signed certificates in a cluster does not work by default.
 
@@ -102,12 +108,15 @@ Choose the right place to make that change, considering that you are now running
 gamingwebapp:
   environment:
     - ASPNETCORE_ENVIRONMENT=Development
-    - LeaderboardApiOptions__BaseUrl=http://leaderboard.webapi
+    - LeaderboardApiOptions__BaseUrl=http://leaderboardwebapi
 ```
 
 Change the IP address of the connection string in the application settings for the Web API to be your local IP address (of your LAN) instead of `127.0.0.1`. This is a temporary fix.
 
 Start the solution by pressing `F5`. See if it works correctly. Timebox your efforts to try to fix any errors.
+
+> ##### Tip
+> If you get error messages indicating that ports are in use, shut down IIS Express from the tray icon. The switch to a Docker environment with the same port numbers created the conflict. From now on we will not be running the application without Docker anymore.
 
 ## <a name="sql"></a>Running SQL Server in a Docker container composition
 
@@ -131,7 +140,7 @@ The new container service also requires these same environment variables. Add th
       - MSSQL_PID=Developer
       - ACCEPT_EULA=Y
     ports:
-      - "1433:1433"
+      - "1433"
 ```
 
 > ##### Which additional changes are needed?
@@ -140,7 +149,7 @@ The new container service also requires these same environment variables. Add th
 You will need to change the connection string for the Web API to reflect the new way of hosting of the database. Add a new environment variable for the connection string of the leaderboard.webapi service in the `docker-compose.override.yml` file:
 
 ```
-- ConnectionStrings:LeaderboardContext=Server=sql.data;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False
+- ConnectionStrings__LeaderboardContext=Server=sql.data;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False
 ```
 
 > ##### Strange connection string or not? 
@@ -157,9 +166,9 @@ Run the application by pressing F5. You should be hitting the breakpoints and ju
 ## <a name="build"></a>Building container images
 Start a command prompt and use the Docker CLI to check which container instances are running at the moment. There should be three containers related to the application:
 - SQL Server in `sqldocker`.
-- SQL Server in `dockercompose<id>_gamingwebapp_1`.
-- Web application in `dockercompose<id>_gamingwebapp_1`.
-- Web API in `dockercompose<id>_leaderboard.webapi_1`.
+- SQL Server in `dockercompose<id>_sql.data_1`.
+- Web application in `GamingWebApp`.
+- Web API in `LeaderboardWebAPI`.
 
 where `<id>` is a random unique integer value.
 
@@ -174,7 +183,7 @@ docker kill <container-id>
 
 > Remember that you can use the first unique part of the container ID or its name
 
-*Note that you can get the same result by performing running `Clean solution` from the `Build` menu in Visual Studio.*
+> Note that you can get the same result by performing running `Clean solution` from the `Build` menu in Visual Studio.
 
 Now, try and run the Web application image yourself. Start a container instance.
 
