@@ -125,14 +125,14 @@ In this sample application the web application only has a single setting for an 
 - LeaderboardApiOptions__BaseUrl=http://leaderboardwebapi
 ```
 
-Even so, you can formalize a group of related settings, regardless of their origin. This can be from one of the `appsettings.json` files, `docker-compose.override.yml` files or even environment variables.
+This way you can formalize a group of related settings, regardless of their origin. It can be from one of the `appsettings.json` files, `docker-compose.override.yml` files or even environment variables.
 
 In the web application project you will find a class called `LeaderboardApiOptions` with a single `string` property called `BaseUrl`. In more complex scenarios this class would likely contain more settings. For example, configuration settings for authorization and authentication.
 
 Next, go to the `Startup` class and locate the statement in the `ConfigureServices` method to load the web app settings from the configuration.
 
 ```c#
-services.Configure<LeaderboardApiOptions>(Configuration);
+services.Configure<LeaderboardApiOptions>(Configuration.GetSection(nameof(LeaderboardApiOptions)));
 ```
 
 This instructs the ASP.NET Core dependency injection system to add an instance of the `LeaderboardApiOptions` class to the list of registered mappings. It allows you to inject the settings into any other object created by the DI system.
