@@ -22,7 +22,8 @@ Additionally, for hosting a container cluster in Microsoft Azure you will need a
 
 - [Lab 1 - Getting started](Lab1-GettingStarted.md)
 - [Lab 2 - Docker101](Lab2-Docker101.md)
-- [Lab 3 - Dockerizing .NET Core](Lab3-DockerizingNETCore.md)
+- [Lab 3 - Dockerizing .NET Core](Lab3-DockerizingNET
+.md)
 - [Lab 4 - Networking](Lab4-Networking.md)
 - [Lab 5 - Environments](/Lab5-Environments.md)
 - [Lab 6 - Registries and clusters](Lab6-RegistriesClusters.md)
