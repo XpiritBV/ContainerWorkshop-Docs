@@ -30,14 +30,14 @@ version: '3.4'
 
 services:
   ci-build:
-    image: mcr.microsoft.com/dotnet/core/sdk:2.2-stretch
+    image: mcr.microsoft.com/dotnet/sdk:5.0
     volumes:
       - .:/src
     working_dir: /src
     command: /bin/bash -c "dotnet restore ./ContainerWorkshop.sln && dotnet publish ./ContainerWorkshop.sln -c Release -o ./obj/Docker/publish"
 ```
 
-The definitions in the compose file describe a service called `ci-build` that uses the image `mcr.microsoft.com/dotnet/core/sdk:2.2` and has a volume mapping to the root of the source code. The command starts a build in the working directory `src`.
+The definitions in the compose file describe a service called `ci-build` that uses the image `mcr.microsoft.com/dotnet/sdk:5.0` and has a volume mapping to the root of the source code. The command starts a build in the working directory `src`.
 
 Start this composition by executing the command from the root of the Visual Studio solution where the Docker Compose YAML files are located:
 
@@ -52,32 +52,31 @@ You could use this composition in your build pipeline to perform the build and p
 There is also a new way to accomplish the same thing. This way is by using multi-stage builds in the Dockerfile. Instead of running a new composition that spins up a container to build a container, you can create a Dockerfile that uses stages to build your application. As an example look at the following file
 
 ```docker
-FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-stretch-slim AS base
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
 WORKDIR /app
-EXPOSE 13995
-EXPOSE 44369
+EXPOSE 80
+EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/core/sdk:2.2-stretch AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 WORKDIR /src
-COPY src/Services/Leaderboard.WebAPI/Leaderboard.WebAPI.csproj src/Services/Leaderboard.WebAPI/
-COPY src/Extensions/Microsoft.AspNetCore.HealthChecks/Microsoft.AspNetCore.HealthChecks.csproj src/Extensions/Microsoft.AspNetCore.HealthChecks/
-COPY src/Extensions/Microsoft.Extensions.HealthChecks/Microsoft.Extensions.HealthChecks.csproj src/Extensions/Microsoft.Extensions.HealthChecks/
-RUN dotnet restore src/Services/Leaderboard.WebAPI/Leaderboard.WebAPI.csproj
+COPY ["src/GamingWebApp/GamingWebApp.csproj", "src/GamingWebApp/"]
+RUN dotnet restore "src/GamingWebApp/GamingWebApp.csproj"
 COPY . .
-WORKDIR /src/src/Services/Leaderboard.WebAPI
-RUN dotnet build Leaderboard.WebAPI.csproj -c Release -o /app
+WORKDIR "/src/src/GamingWebApp"
+RUN dotnet build "GamingWebApp.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish Leaderboard.WebAPI.csproj -c Release -o /app
+RUN dotnet publish "GamingWebApp.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app .
-ENTRYPOINT ["dotnet", "Leaderboard.WebAPI.dll"]
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "GamingWebApp.dll"]
 ```
 
-This file creates a clean base image, that is based on the runtime only. Next, it uses a image with the SDK to build the application. Then it publishes the build and in the final stage it uses the `COPY --from` syntax to only use the putput of the previous stage in your clean base image. [Read more about multi-stage builds here](https://docs.docker.com/develop/develop-images/multistage-build/)
+This file creates a clean base image, that is based on the runtime only. Next, it uses a image with the SDK to build the application. Then it publishes the build and in the final stage it uses the `COPY --from` syntax to only use the putput of the previous stage in your clean base image. [Read more about multi-stage builds here.](https://docs.docker.com/develop/develop-images/multistage-build/)
 
+Multi-stage builds are used by the Docker tooling in Visual Studio 2019 by default, so you should be able to find similar content inside the `Dockerfile` files of both ASP.NET Core projects.
 
 ## <a name="create"></a>Create compositions for different environments
 
@@ -93,7 +92,7 @@ It is convenient when your `docker-compose.yml` file is able to build the contai
 
 Make sure you understand the `docker-compose.yml` contents.
 
-The Docker support in Visual Studio 2017 makes a similar assumption. It assumes that runtime details for compositions started from Visual Studio are defined in `docker-compose.override.yml`. Open that file which is located underneath the `docker-compose.yml` file in the Solution Explorer tree of Visual Studio.
+The Docker support in Visual Studio 2019 makes a similar assumption. It assumes that runtime details for compositions started from Visual Studio are defined in `docker-compose.override.yml`. Open that file which is located underneath the `docker-compose.yml` file in the Solution Explorer tree of Visual Studio.
 
 The combination of the two aforementioned compose files is enough to start a composition. You will need to specify both files in the command in the correct order.
 
@@ -107,7 +106,7 @@ Take a moment to contemplate whether the `sql.data` service should be defined in
 
 Change the location of the definition to the override compose file. Merge it with the existing service. 
 
-Enhance the override file by adding the dependencies of the web application on the web api, and the web api on the sql.data service. For each of the two dependent services `gamingwebapp` and `leaderboard.webapi` add a `depends_on` naming the dependency by service name. For example:
+Enhance the override file by adding the dependencies of the web application on the web api, and the web api on the sql.data service. For each of the two dependent services `gamingwebapp` and `leaderboardwebapi` add a `depends_on` naming the dependency by service name. For example:
 
 ```yaml
     depends_on:
@@ -116,14 +115,14 @@ Enhance the override file by adding the dependencies of the web application on t
 
 Next, you are going to create a similar compose override for a production situation. In essence the `docker-compose.override.yml` is the development environment override file by convention.
 
-## <a name="change"></a>Working with environments in .NET Core
+## <a name="change"></a>Working with environments in .NET
 
 > Switch back to the master branch to make sure all files so far are up to date. Make sure to commit or undo any changes you made first.
 
 In this sample application the web application only has a single setting for an external Web API endpoint.
 
 ```yaml
-- LeaderboardApiOptions:BaseUrl=http://leaderboard.webapi
+- LeaderboardApiOptions__BaseUrl=http://leaderboardwebapi
 ```
 
 Even so, you can formalize a group of related settings, regardless of their origin. This can be from one of the `appsettings.json` files, `docker-compose.override.yml` files or even environment variables.
@@ -136,12 +135,12 @@ Next, go to the `Startup` class and locate the statement in the `ConfigureServic
 services.Configure<LeaderboardApiOptions>(Configuration);
 ```
 
-This instructs the ASP.NET MVC Core dependency injection system to add an instance of the `LeaderboardApiOptions` class to the list of registered mappings. It allows you to inject the settings into any other object created by the DI system.
+This instructs the ASP.NET Core dependency injection system to add an instance of the `LeaderboardApiOptions` class to the list of registered mappings. It allows you to inject the settings into any other object created by the DI system.
 
 Open the `Index.cshtml.cs` file and locate the constructor of the controller class. It has two parameters, which will be injected:
 
 ```c#
-public IndexModel(IOptionsSnapshot<LeaderboardApiOptions> options, ILeaderboardClient proxy, ILoggerFactory loggerFactory)
+public IndexModel(IOptionsSnapshot<LeaderboardApiOptions> options, ILoggerFactory loggerFactory)
 ```
 Additionally, a read-only field holds the value of the injected `options` parameter values. 
 
