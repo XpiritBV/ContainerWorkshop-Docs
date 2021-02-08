@@ -65,7 +65,7 @@ When on Windows, make sure to enable WSL integration, if possible.
 If you want to interact with Azure from your local machine, you will also need the [Azure Command Line 2.0 tooling](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) for interaction with Azure resources. 
 > Install [Azure CLI 2.0](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest)
 
-### .NET Framework 5
+### .NET Platform
 Download and install [.NET 5](https://download.visualstudio.microsoft.com/download/pr/75483251-b77a-41a9-9ea2-05fb1668e148/2c27ea12ec2c93434c447f4009f2c2d2/dotnet-sdk-5.0.102-win-x64.exe) if needed.
 
 ### Git CLI

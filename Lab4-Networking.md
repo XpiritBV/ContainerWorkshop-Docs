@@ -17,7 +17,7 @@ Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
 
 In the terminal, change directories to the Docs repository directory named 'resources/lab10'
 ```
-C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab10>
+C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab04>
 ```
 
 ## <a name="experiment"></a>Experimenting with networking
@@ -106,7 +106,7 @@ Read each of the JSON fragments. Pay special attention to the `Config` object in
 
 Shut down any running compositions, by stopping your Visual Studio debugging session and any manually started containers of the demo application.
 
-### <a name="create">clean</a> Cleanup running containers
+### <a name="clean"></a> Cleanup running containers
 Run `docker ps -a` to see if you need to stop any running containers:
 ```
 docker ps -a
@@ -161,7 +161,7 @@ Repeat this for a container named "c2", without explicitly specifying the networ
 docker run -it --name c2 alpine sh
 ```
 
-Detach the terminal and leave the container running, by pressing `Ctrl+p` and `Ctlr+q` at the same time.
+Detach the terminal and leave the container running, by pressing `Ctrl+P` followed by `Ctlr+Q`.
 
 Try to figure out in which network this container ended up. 
 > Hint: Remember `docker network inspect`?
@@ -230,7 +230,7 @@ This command should show both containers "c3" and "c4" running:
 ```
 
 ### Cleanup
-[Cleanup](###clean) all running containers.
+[Cleanup](#clean) all running containers.
 
 Remove the manually created networks:
 ```
@@ -256,17 +256,15 @@ Create a visual diagram for the three containers and assign them to the **proper
 ### Find the compose files 
 In your terminal, navigate to the `resources\lab04` folder. (e.g. C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab04)
 
-**Navigate to folder 'compose-samples'**
-
 Run docker-compose to build the desired containers and network using a definition file named '00-docker-compose-netwrk.yml':
   ```
-  docker-compose -f docker-compose-netwrk.yml up -d
+  docker-compose -f 00-docker-compose-netwrk.yml up -d
 
-  Creating network "compose-samples_frontend" with driver "bridge"
-  Creating network "compose-samples_backend" with driver "bridge"
-  Creating compose-samples_frontend_1 ... done
-  Creating compose-samples_db_1       ... done
-  Creating compose-samples_backend_1  ... done
+  Creating network "lab04_frontend" with driver "bridge"
+  Creating network "lab04_backend" with driver "bridge"
+  Creating lab04_backend_1  ... done
+  Creating lab04_db_1       ... done
+  Creating lab04_frontend_1 ... done
   ```
   
   After completion, you should have three running containers and two custom Docker networks.
@@ -275,19 +273,19 @@ Run docker-compose to build the desired containers and network using a definitio
   docker ps
 
   CONTAINER ID   IMAGE                                        COMMAND                  CREATED              STATUS              PORTS                                            NAMES
-  bb0fb3d99df6   nginx                                        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                                           compose-samples_backend_1
-  77cf533cd37a   mcr.microsoft.com/mssql/server:2019-latest   "/opt/mssql/bin/perm…"   About a minute ago   Up About a minute   0.0.0.0:5433->1433/tcp                           compose-samples_db_1
-  2628e46f4874   nginx                                        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                                           compose-samples_frontend_1
+  bb0fb3d99df6   nginx                                        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                                           lab04_backend_1
+  77cf533cd37a   mcr.microsoft.com/mssql/server:2019-latest   "/opt/mssql/bin/perm…"   About a minute ago   Up About a minute   0.0.0.0:5433->1433/tcp                           lab04_db_1
+  2628e46f4874   nginx                                        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                                           lab04_frontend_1
   ```
-  You can also see that all resources have a prefix `compose-samples` that equals the name of the folder that holds the compose file.
+  You can also see that all resources have a prefix `lab04` that equals the name of the folder that holds the compose file.
 
-#### Check that everything works
+### Check that everything works
 
-Hints, use tools like `docker exec -it <<container>> bash` and `docker network inspect compose-samples_backend` to verify connectivtiy works as expected.
+Hints, use tools like `docker exec -it <<container>> bash` and `docker network inspect lab04_backend` to verify connectivtiy works as expected.
 
 Inside the backend container terminal, run the command `curl -v ` and check how many ethernet adapters are listed. Verify that it corresponds with your design.
 ```
-curl -v compose-samples_frontend_1
+curl -v lab04_frontend_1
 ```
 ```html
 <!DOCTYPE html>
@@ -321,20 +319,20 @@ You'll likely find that there's very little tooling available within the contain
 If you need to investigate a container composition, you can temporarily run a new container (like busybox) inside the backend network:
 
 ```
-docker run -it --name bb --network compose-samples_backend busybox sh
+docker run -it --name bb --network lab04_backend busybox sh
 ```
 
 From the terminal check for connectivity to the frontend:
 ```
-ping compose-samples_frontend_1
-ping: bad address 'compose-samples_frontend_1'
+ping lab04_frontend_1
+ping: bad address 'lab04_frontend_1'
 ```
 
 Check connectivity to localhost:
 ```
-ping compose-samples_backend_1
+ping lab04_backend_1
 
-PING compose-samples_backend_1 (172.22.0.3): 56 data bytes
+PING lab04_backend_1 (172.22.0.3): 56 data bytes
 64 bytes from 172.22.0.3: seq=0 ttl=64 time=0.065 ms
 64 bytes from 172.22.0.3: seq=1 ttl=64 time=0.238 ms
 ^C
@@ -342,8 +340,8 @@ PING compose-samples_backend_1 (172.22.0.3): 56 data bytes
 
 And finally, check network connectivity to the database server:
 ```
-ping compose-samples_db_1
-PING compose-samples_db_1 (172.22.0.2): 56 data bytes
+ping lab04_db_1
+PING lab04_db_1 (172.22.0.2): 56 data bytes
 64 bytes from 172.22.0.2: seq=0 ttl=64 time=0.041 ms
 64 bytes from 172.22.0.2: seq=1 ttl=64 time=0.074 ms
 ^C
@@ -351,9 +349,9 @@ PING compose-samples_db_1 (172.22.0.2): 56 data bytes
 
 You can even see if SQL Server is running, by using `telnet`:
 ```
-telnet compose-samples_db_1 1433
+telnet lab04_db_1 1433
 
-Connected to compose-samples_db_1
+Connected to lab04_db_1
 ^C
 Console escape. Commands are:
 
@@ -362,13 +360,13 @@ Console escape. Commands are:
  z      suspend telnet
  e      exit telnet
  ```
-Hit `Ctrl+c` and `e` to quit telnet.
+Hit `Ctrl+C` and `e` to quit telnet.
 Type `exit` to exit the `busybox` container.
 Cleanup the `busybox` container. (`docker rm -f bb`)
 
 ### Container alias (DNS)
 
-You can also give a container instance an alias, so you can refer to it by a network alias instead of its container service name. Use the fragment below to give the SQL Server instance created in the [previous module](Lab3-DockerizingNETCore.md#running-sql-server-in-a-docker-container) a network alias `sql.containerworkshop.local` on your `db` service.
+You can also give a container instance an alias, so you can refer to it by a network alias instead of its container service name. Use the fragment below to give the SQL Server instance created in the [previous module](Lab3-DockerizingNET.md#running-sql-server-in-a-docker-container) a network alias `sql.containerworkshop.local` on your `db` service.
 
 ```yaml
   db:
@@ -380,12 +378,12 @@ You can also give a container instance an alias, so you can refer to it by a net
 ```
 >Please note that the network 'backend' no longer has a `-` in front of it.
 
-If you want to cheat, just apply the file named '01-docker-compose-netwrk-alias.yml'
+If you want to complete this part, just apply the file named '01-docker-compose-netwrk-alias.yml'
 ```
 docker-compose -f docker-compose-netwrk.yml up -d
 ```
 
-Now run busybox again, and verify that the Database server can be resolved by its alias.
+Run busybox again and verify that the database server can be resolved by its alias:
 ```
 telnet sql.containerworkshop.local 1433
 
@@ -399,6 +397,17 @@ Console escape. Commands are:
  e      exit telnet
  ```
 
+### Add networks to workshop solution
+Finally, you can try to add the same networking structure to the `docker-compose.override.yml` file. 
+Use this checklist to see if it is complete:
+- Add a `frontend` bridge network
+- Add a `backend` bridge network
+- Assign `leaderboardwebapi` and `sql.data` to the `backend` network
+- Assign `leaderboardwebapi` and `gamingwebapp` to the `frontend` network
+- Give the `sql.data` service an alias named `sql.retrogaming.internal`
+- Change the connection string setting for the `leaderboardwebapi` service to reflect the alias
+
+Verify that everything still works by running your Visual Studio solution. Fix any errors should they occur.
 
 ## Wrapup
 
