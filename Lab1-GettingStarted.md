@@ -63,7 +63,7 @@ When on Windows, make sure to enable WSL integration, if possible.
 
 ### Azure CLI
 If you want to interact with Azure from your local machine, you will also need the [Azure Command Line 2.0 tooling](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) for interaction with Azure resources. 
-> Install [Azure CLI 2.0](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest)
+> Install [Azure CLI 2.18 or higher](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest)
 
 ### .NET Platform
 Download and install [.NET 5](https://download.visualstudio.microsoft.com/download/pr/75483251-b77a-41a9-9ea2-05fb1668e148/2c27ea12ec2c93434c447f4009f2c2d2/dotnet-sdk-5.0.102-win-x64.exe) if needed.
@@ -146,17 +146,33 @@ az provider register --namespace Microsoft.OperationsManagement
 az provider register --namespace Microsoft.OperationalInsights
 ```
 
+#### Deploy Kubernetes
+
 You can now create the cluster with the `az aks create` command:
 ```
-az aks create --resource-group ContainerWorkshop --name ContainerWorkshopCluster --node-count 1 --enable-addons monitoring --generate-ssh-keys
+az aks create --resource-group ContainerWorkshop --name ContainerWorkshopCluster --node-count 1 --enable-addons monitoring --generate-ssh-keys --enable-managed-identity --network-plugin azure
+```
+If you get an error such as this message, simply retry the deployment:
+```
+Deployment failed. Correlation ID: 019756e2-cadd-429d-86dc-1c2bd0d71339. Unable to get log analytics workspace info. 
 ```
 
 It can take quite a long time for this command to complete. Take a coffee break! The command will show JSON based information about the cluster.
-After the cluster has been created we can start interacting with it:
+After the cluster has been created we can start interacting with it.
 
-Get admin credentials for the Kubernetes management API:
+Check the status of the cluster by using `az aks show`:
+```
+az aks show --resource-group ContainerWorkshop --name ContainerWorkshopCluster
+```
+
+Get admin credentials for the Kubernetes management API using `az aks get-credentials`:
 ```
 az aks get-credentials --resource-group ContainerWorkshop --name ContainerWorkshopCluster -a
+```
+
+Make sure that the `kubectl` tools will communicate with your new cluster:
+```
+kubectl config use-context ContainerWorkshopCluster-admin
 ```
 ### Using the Azure Portal to view your AKS cluster
 Get your subscription id by running `az account show`, the `id` field will contain your subscription id:

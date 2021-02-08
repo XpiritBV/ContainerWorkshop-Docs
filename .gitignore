@@ -93,3 +93,4 @@ istio-1.2.5/
 
 **/*-mod.yaml
 resources/lab12/istio-**/*
+resources/*/*LD.yaml
