@@ -66,9 +66,9 @@ And select the new 'blue' namespace as the default for this session:
 kubectl config set-context --current --namespace=blue
 ```
 
-Instead of using *curl*, we will use the tool *Fortio* to call the Service, as it allows for concurrent calls to be made to the blue Service later.
+Instead of using *curl*, we will use the tool *Fortio* to call the Service, as it allows for concurrent calls to be made to the blue Service later. Read more about the [Fortio tool here](https://github.com/fortio/fortio). Fortio will run as a CLI, which you can use to perform load tests on a Web Server.
 
-First, deploy Fortio:
+Deploy Fortio:
 ```
 kubectl apply -f ../lab12/istio-1.8.2/samples/httpbin/sample-client/fortio-deploy.yaml
 

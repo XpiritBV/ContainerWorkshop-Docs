@@ -38,12 +38,18 @@ For the best experience, run the entire workshop using Linux based terminals, ev
 ### Visual Studio 2019 / VS Code
 First, you will need to have a development IDE installed. The most preferable IDE is [Visual Studio 2019](https://www.visualstudio.com/vs/) if you are running the Windows operating system.
 
-You may want to consider installing [Visual Studio Code](https://code.visualstudio.com/) in the following cases:
-- Your development machine is running OSX or a Linux distribution.
-- You want to have an light-weight IDE or use an alternative to Visual Studio 2019.
-- You want to run any of the labs including and above lab 10.
+You can also use [Visual Studio Code](https://code.visualstudio.com/).
 
-> For Visual Studio Code, also install the [Kubernetes](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) and [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) extensions.
+#### VS Code Extensions:
+
+A couple of VS Code extensions are required to assist you during the labs. You can install them before the workshop or just in time. 
+
+- On Windows, install the [Remote WSL](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl) extension to open this repo in WSL.
+- For labs 10,11,12 -  Install the [Kubernetes](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) extension
+- For labs 2,3,4,5 Install the [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) extensions.
+   - and configure VS Code for debugging C# by installing the [C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)
+- For lab 8 - Install the [Azure DevOps extension](https://marketplace.visualstudio.com/items?itemName=ms-azure-devops.azure-pipelines)
+
 
 ### Docker Desktop (Windows & Mac)
 Second, you are going to need the Docker Community Edition tooling on your development machine. Depending on your operating system you need to choose the correct version of the tooling. Instructions for installing the tooling can be found [here](https://docs.docker.com/install/). You can choose either the stable or edge channel.
@@ -230,6 +236,7 @@ docker pull nginx
 docker pull alpine
 docker pull busybox
 docker pull curlimages/curl
+docker pull fortio/fortio
 ```
 
 ## Wrapup
