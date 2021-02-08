@@ -158,17 +158,23 @@ Get admin credentials for the Kubernetes management API:
 ```
 az aks get-credentials --resource-group ContainerWorkshop --name ContainerWorkshopCluster -a
 ```
+### Using the Azure Portal to view your AKS cluster
+Get your subscription id by running `az account show`, the `id` field will contain your subscription id:
+```
+az account show
 
-Get the portal url of the cluster:
+{
+  "environmentName": "AzureCloud",
+  "id": "6eb94a2c-34ac-45db-911f-c21438b4939c",
+  "isDefault": true,
 ```
-az aks browse --resource-group ContainerWorkshop --name ContainerWorkshopCluster
-```
-This will show output similar to this:
+
+To view the Kubernetes resources view, please open:
 
 ```
-To view the Kubernetes resources view, please open https://portal.azure.com/#resource/subscriptions/<your subscriptionid>/resourceGroups/ContainerWorkshop/providers/Microsoft.ContainerService/managedClusters/ContainerWorkshopCluster/workloads in a new tab
+https://portal.azure.com/#resource/subscriptions/<your subscriptionid>/resourceGroups/ContainerWorkshop/providers/Microsoft.ContainerService/managedClusters/ContainerWorkshopCluster/workloads
 ```
-Open the link, and you should see information about your cluster:
+Replace the part `<your subscriptionid>` with your subscription id. Open the link, and you should see information about your cluster:
 
 ![](images/AzurePortalK8s1.png)
 
