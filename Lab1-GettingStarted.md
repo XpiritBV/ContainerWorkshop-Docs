@@ -232,7 +232,7 @@ You can also use Docker Desktop to create a Kubernetes cluster, that runs on you
 1. Open the settings screen, by clicking on the whale-icon in your taskbar.
 1. In the 'Resources' tab, select 'WSL INTEGRATION'
 1. Check 'Enable integration with my default WSL distro
-1. Enable any additional WSL distro's if you like.
+1. Enable any additional WSL distro's if you like. You might have to upgrade these to WSL version 2 before the integration is available. See more [here](https://docs.docker.com/docker-for-windows/wsl/).
 
 After a few minutes, you should be able to run `wsl` and interact with Docker and Kubernetes.
 Check if everything works:

@@ -17,19 +17,19 @@ Goals for this lab:
 We will start with or continue running the existing ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to clone it now if you do not have the sources. Switch to the `Master` branch by using this command 
 
 ```cmd
-git checkout Master
+git checkout master
 ```
 
 > ##### Important
 > Make sure you have:
 >
-> - switched to the `Master` branch to use the right .NET solution.
-> - configured 'Docker Desktop' to run Linux containers.
+> - Switched to the `master` branch to use the right .NET solution.
+> - Configured 'Docker Desktop' to run Linux containers.
 
 Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to navigate the code and familiarize yourself with the various projects in the solution. You should be able to identify these:
 
 - `GamingWebApp`, an ASP.NET MVC Core frontend 
-- `Leaderboard.WebAPI`, an ASP.NET Core Web API
+- `LeaderboardWebAPI`, an ASP.NET Core Web API
 
 For now, a SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as desribed in [Lab 2](https://github.com/XpiritBV/ContainerWorkshop2018Docs/blob/master/Lab2-Docker101.md#lab-2---docker-101).
 
@@ -38,7 +38,7 @@ For now, a SQL Server for Linux container instance is providing the developer ba
 Docker registries are to Docker container images what NuGet feeds are to NuGet packages. They allow access to existing images that have been published by the owner. They can be private or publicly accessible.
 
 First, you will create an Azure Container Registry which allows (multiple) private repositories inside your registry. Run the following command from the command-line to create it:
-Find a unique name for your container registry, e.g. `ContainerWorkshopRegistry` plus your last name.
+Find a unique name for your container registry, e.g. `containerworkshopregistry` plus your last name. It is best to use lower-casing.
 
 ```cmd
 az group create --name ContainerWorkshop --location WestEurope
@@ -111,7 +111,6 @@ docker push <registry.azurecr.io>/gamingwebapp:latest
 Again remember to replace the registry name, with yours.
 The output of the push will resemble something like this:
 ```
-
 The push refers to repository [containerregistry.azurecr.io/gamingwebapp]
 d3dd2499dbb1: Pushed
 0506db78f43c: Pushed
@@ -119,6 +118,11 @@ d3dd2499dbb1: Pushed
 f689d872fdfe: Pushed
 cf5b3c6798f7: Pushed
 latest: digest: sha256:05d2b2ceea30bbaa1fd0f37ac88d1185e66f055a29b85bf6438ce4658e379da6 size: 1791
+```
+
+Verify that there is now a new repository in your registry by running:
+```
+az acr repository list --name <registry>
 ```
 
 Remove your local images for the web application release build from the Docker CLI by calling:
