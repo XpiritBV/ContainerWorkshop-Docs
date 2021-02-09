@@ -1,4 +1,4 @@
-//TODO: use new code
+//TODO: use new code, please note that Managed Identity chapter is already updated
 
 # Lab 7 - Security
 
