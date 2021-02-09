@@ -290,6 +290,82 @@ GO
 
 Try to deploy the manifest again using Azure SQL Database now instead of the containerized version.
 
+
+## Using Azure Managed Identity with ACR and AKS
+In this chapter we will use a Managed Identity to connect Kubernetes to an Azure Container Registry.
+
+### Important
+This lab requires prior knowledge of the Kubernetes platform. If you aren't familiar with `kubectl` and `az aks` we recommend that you first make [Lab 10 - Kubernetes](Lab10-Kubernetes.md) and then come back here.
+
+### Introduction
+
+If you want to store container images in a private repository and allow Kubernetes to use it, without managing credentials, you can use Azure Container Registry combined with [Azure Managed Identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview).
+To do this, we will configure the cluster to integate with a Container Registry.
+
+
+### Creating a Container Registry (if needed)
+If you do not have one yet, create an Azure Container Registry. Run the following command from the command-line to create it:
+Use a unique name for your container registry, e.g. `ContainerWorkshopContainerRegistry` plus your last name or initials.
+
+```cmd
+registryName=ContainerWorkshopContainerRegistry
+az group create --name ContainerWorkshop --location WestEurope
+az acr create --name $registryName --resource-group ContainerWorkshop --sku Basic --admin-enabled true --location WestEurope
+```
+
+Get the resource ID `id` value from the output. It should be similar to this:
+```  
+"id": "/subscriptions/<subscriptionid>/resourceGroups/ContainerWorkshop/providers/Microsoft.ContainerRegistry/registries/<registryName>"
+```
+
+### Connecting AKS to the registry
+Run the `az aks update` command to connect an existing AKS cluster to an existing Azure Container Registry, passing in the resource Id of the registry:
+```
+registryResourceId=/subscriptions/<subscriptionid>/resourceGroups/ContainerWorkshop/providers/Microsoft.ContainerRegistry/registries/$registryName
+
+az aks update --name ContainerWorkshopCluster --resource-group ContainerWorkshop --attach-acr $registryResourceId
+```
+
+This operation takes a few seconds to complete.
+
+### Test the connection
+To test the connection, we will import the nginx image into our private registry. 
+```
+az acr import  -n $registryName --source docker.io/library/nginx:latest --image nginx:v1
+```
+
+We will now create a Deployment that uses the nginx image from the private registry. We must first update the template to specify the registry name.
+Open the file `00-nginx-from-acr.yaml` and replace the `image` value with your registry name. (e.g. `containerworkshopcontainerregistry.azurecr.io/nginx:v1`)
+
+Now create the deployment using `kubectl apply`:
+```
+kubectl apply -f 00-nginx-from-acr.yaml
+```
+
+Assert that your Pod runs well by using `kubectl get pod `:
+```
+kubectl get pods
+
+NAME                               READY   STATUS    RESTARTS   AGE
+nginx-deployment-fc9fcfdd8-584xq   1/1     Running   0          29s
+nginx-deployment-fc9fcfdd8-c9x7v   1/1     Running   0          17s
+```
+
+If the status equals 'Running', everything works!
+
+## Cleanup
+
+Remove the nginx Pod:
+```
+kubectl delete -f 00-nginx-from-acr.yaml
+```
+
+Remove the Container Registry integration:
+```
+az aks update --name ContainerWorkshopCluster --resource-group ContainerWorkshop --detach-acr $registryResourceId
+```
+
+
 ## Wrapup
 
 In this lab you have created a composition that is able to deploy a stack of services to a cluster. Necessary changes to the environment variables were made and perhaps you even got to use an Azure SQL Database.
