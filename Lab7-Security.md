@@ -233,7 +233,7 @@ Redeploy the manifest with:
 kubectl apply -f .\gamingwebapp.k8s-static.yaml
 ```
 
-> Note that the secrets here are only base64 encoded and not protected. You should use [Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) in Azure to run your nodes in the cluster under a known-identity that has access to the Azure Key Vault. Using this strategy you do not need to maintain any secrets to get access to your Key Vault.
+Note that the secrets here are only base64 encoded and not protected. You should use [Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) in Azure to run your nodes in the cluster under a known-identity that has access to the Azure Key Vault. Using this strategy you do not need to maintain any secrets to get access to your Key Vault.
 
 ## <a name='kubernetessecrets'></a>(Optional) Using Kubernetes Secrets from Azure Key Vault
 
@@ -243,24 +243,33 @@ kubectl apply -f .\gamingwebapp.k8s-static.yaml
 
 > Note 3: Do not run this chapter on Docker Desktop!
 
-If you want to store secrets outside of the cluster, you can use Azure Key Vault.
-To do this, we will deploy a Secrets Store Driver (Built by Microsoft) to Kubernetes.
+### Important
+This lab requires prior knowledge of the Kubernetes platform. If you aren't familiar with `kubectl` and `az aks` we recommend that you first make [Lab 10 - Kubernetes](Lab10-Kubernetes.md) and then come back here.
 
-We will first need to get some information from your Managed Identity -enabled Kubernetes cluster.
+### Introduction
+
+If you want to store secrets outside of the cluster in a secure managed store, you can use Azure Key Vault combined with [Azure Managed Identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview).
+To do this, we will deploy a Secrets Store Driver (Built by Microsoft) to Kubernetes and use a user-assigned Managed Identity to get access to the vault.
+
+**This is an advanced Lab.**
+### Get some cluster information
+
+We will first need to get some information from your Managed Identity-enabled Kubernetes cluster.
 
 ```
 az aks show --name ContainerWorkshopCluster --resource-group ContainerWorkshop | grep -C 1 kubeletidentity
 
 "identityProfile": {
   "kubeletidentity": {
-    "clientId": "213645ec-5bf1-4450-8e89-aa72c9281be1",
+    "clientId": "60718dfc-1747-4f11-b203-3bbe9ffcc537",
 ```
 
-Make a note of the value of `identityProfile.kubeletidentity.clientid`, in the example that is `213645ec-5bf1-4450-8e89-aa72c9281be1`, your value will be different.
+Make a note of the value of `identityProfile.kubeletidentity.clientid`, in the example that is `60718dfc-1747-4f11-b203-3bbe9ffcc537`, your value will be different.
 
-Store the value in an environment variable, using the `set` command and the guid from your cluster:
+Store the value in an environment variable named `clusterClientId`, using the `set` command and the guid from your cluster:
+
 ```
-clientId=213645ec-5bf1-4450-8e89-aa72c9281be1
+clusterClientId=60718dfc-1747-4f11-b203-3bbe9ffcc537
 ```
 
 Get your subscription id using `az account show | grep id` and store that as well (your value will be different):
@@ -276,8 +285,19 @@ az account show | grep tenantId
 tenantId=00000000-0000-0000-0000-00000002
 ```
 
+You should now have 3 environment variables, check them using `echo`:
 
-In this chapter, we will use a tool called Helm, to deploy software from a (public) repository, straight onto Kubernetes. Helm can be compared with an App Store or Marketplace. 
+```
+echo "Cluster Id: $clusterClientId"
+
+echo "Subscription Id: $subscriptionId"
+
+echo "Tenant Id: $tenantId"
+```
+
+### Using Helm
+
+In this chapter, we will use a tool called Helm, to deploy a Secrets Store Driver from a (public) repository, straight onto Kubernetes. Helm can be compared with an App Store or Marketplace. 
 
 Check you Helm tool version, which should be version 3 or higher:
 ```
@@ -292,16 +312,33 @@ chmod 700 get_helm.sh
 rm -f get_helm.sh
 ```
 
-
 Install the Secrets Store Driver using `helm`:
 ```
 helm repo add csi-secrets-store-provider-azure https://raw.githubusercontent.com/Azure/secrets-store-csi-driver-provider-azure/master/charts
 
 helm repo update
 
-helm install csi-secrets-store-provider-azure/csi-secrets-store-provider-azure --generate-name 
+helm install csi-secrets-store-provider-azure/csi-secrets-store-provider-azure --generate-name
+```
+
+The Secrets Store Driver will be able to talk to Azure Key Vault, using the Pod's identity. It will create a volume that contains a file, that has the secret's value as its content.
+
+Check the deployment of the driver by listing the Pods using `kubectl get pods`:
 
 ```
+kubectl get pods
+
+NAME                                                              READY   STATUS    RESTARTS   AGE
+csi-secrets-store-provider-azure-1612818292-4v797                 1/1     Running   0          9s
+csi-secrets-store-provider-azure-1612818292-secrets-store-ff5kz   3/3     Running   0          9s
+```
+
+If the Status equals 'Running', we are good to go to the next step.
+
+---------
+#### Troubleshooting option
+
+**If the previous step was ok, skip this paragraph.**
 
 If Helm doesn't work, try this:
 ```
@@ -312,10 +349,15 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store
 kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/deploy/secrets-store-csi-driver.yaml
 kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/deploy/rbac-secretprovidersyncing.yaml
 ```
+-------
 
+### Creating an Azure Key Vault and Access Policies
+
+The secrets driver is now in place. It is time to create an Azure Key Vault.
 
 Create an Azure Key Vault, because the name of the vault needs to be unique within the region, append it with your initials.
 Store the name in an environment variable, make sure to change the value:
+
 ```
 vaultName=containerworkshopvault
 ```
@@ -331,32 +373,28 @@ az keyvault secret set --vault-name $vaultName --name "ConnectionStrings--Leader
 
 To create, list, or read a user-assigned managed identity, your AKS cluster needs to be assigned the Managed Identity Operator role: 
 ```
-az role assignment create --role "Managed Identity Operator" --assignee $clientId --scope /subscriptions/$subscriptionId/resourcegroups/ContainerWorkshop
+az role assignment create --role "Managed Identity Operator" --assignee $clusterClientId --scope /subscriptions/$subscriptionId/resourcegroups/ContainerWorkshop
 
-az role assignment create --role "Virtual Machine Contributor" --assignee $clientId --scope /subscriptions/$subscriptionId/resourcegroups/ContainerWorkshop
+az role assignment create --role "Virtual Machine Contributor" --assignee $clusterClientId --scope /subscriptions/$subscriptionId/resourcegroups/ContainerWorkshop
 ```
 
-Deploy AKS 'Pod Identity' so your Pods will run as the Managed Identity, ignore the warnings:
-```
-helm repo add aad-pod-identity https://raw.githubusercontent.com/Azure/aad-pod-identity/master/charts
+#### Check point
 
-helm install pod-identity aad-pod-identity/aad-pod-identity
-```
+You should now have 4 environment variables, check them using `echo`:
 
-Make sure that all Pods are have status Running:
 ```
-kubectl get pods
+echo "Cluster Id: $clusterClientId"
 
-aad-pod-identity-mic-5d4cbb8959-n97rp                             1/1     Running   0          53s
-aad-pod-identity-mic-5d4cbb8959-wsc5c                             1/1     Running   0          53s
-aad-pod-identity-nmi-zxs75                                        1/1     Running   0          53s
-csi-secrets-store-provider-azure-1612801369-2knnh                 1/1     Running   0          110s
-csi-secrets-store-provider-azure-1612801369-secrets-store-xlw5f   3/3     Running   0          110s
+echo "Subscription Id: $subscriptionId"
+
+echo "Tenant Id: $tenantId"
+
+echo "Key vault name: $vaultName"
 ```
 
->The names of your Pods will be slightly different
+### Create a Managed Identity as Pod identity
 
-Create a new Identity to run your Pods with:
+Create a new user assigned Managed Identity to use in your Pods:
 
 ```
 az identity create -g ContainerWorkshop -n PodRunnerIdentity
@@ -374,9 +412,10 @@ az identity create -g ContainerWorkshop -n PodRunnerIdentity
   "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
 }
 ```
-Make a note of the `principalId` that is returned. Store it as an environment variable
+Make a note of the `principalId` and `clientId` that are returned. Store them as an environment variables:
 ```
-principalId=aaaaaaaa-bae1-4f32-8f0e-d8cf29fba4fd
+miPrincipalId=aaaaaaaa-bae1-4f32-8f0e-d8cf29fba4fd
+miClientId=aaaaaaaa-192c-4f43-8e59-aaaaaaaa
 ```
 
 If you come back here later, but you don't remember the principalId, don't worry. You can get it by running `az identity show`:
@@ -385,26 +424,119 @@ If you come back here later, but you don't remember the principalId, don't worry
 az identity show -g ContainerWorkshop -n PodRunnerIdentity
 ```
 
+#### Checkpoint
 
-Assign the Azure Resource reader role, so it can see the Key Vault:
+You should now have 4 environment variables, check them using `echo`:
+
 ```
-az role assignment create --role "Reader" --assignee $principalId --scope /subscriptions/$subscriptionId/resourceGroups/ContainerWorkshop/providers/Microsoft.KeyVault/vaults/$vaultName
+echo "Cluster Id: $clusterClientId"
+
+echo "Subscription Id: $subscriptionId"
+
+echo "Tenant Id: $tenantId"
+
+echo "Key vault name: $vaultName"
+
+echo "Managed Id Principal Id: $miPrincipalId"
+echo "Managed Id Client Id: $miClientId"
 ```
 
-Create access policies, so the Managed Identity is allowed access to Key Vault secrets and keys:
+#### Assing RBAC roles
+In this paragraph, we will grant the Managed Identity read-access to Azure resources and Azure Key Vault data. To do this, we will use [Azure Role Based Access Control](https://docs.microsoft.com/en-us/azure/role-based-access-control/overview).
+
+Assign the 'Reader' role, so it can see the Azure Key Vault in the resource group named 'ContainerWorkshop':
 ```
-az keyvault set-policy -n $vaultName --secret-permissions get --spn $clientId
-az keyvault set-policy -n $vaultName --key-permissions get --spn $clientId
+az role assignment create --role "Reader" --assignee $miPrincipalId --scope /subscriptions/$subscriptionId/resourceGroups/ContainerWorkshop/providers/Microsoft.KeyVault/vaults/$vaultName
 ```
 
+Create [Azure Key Vault access policies](https://docs.microsoft.com/en-us/azure/key-vault/general/secure-your-key-vault#data-plane-and-azure-rbac-preview), so the Managed Identity is allowed read-only access to Key Vault secrets:
+```
+az keyvault set-policy -n $vaultName --secret-permissions get --spn $miClientId
+```
 
-Open the file named `00-secret.yaml` and put in values for `subscriptionId` and `tenantId`.
-You can find the values using `az account show`. After that, create the SecretProviderClass resource.
+### Deploy Pod Identity
+Deploy an AureIdentity resource to use the Managed Identity we created earlier as the Identity that runs your Pods.
 
+```
+az aks pod-identity add --resource-group ContainerWorkshop --cluster-name ContainerWorkshopCluster --name azureidentity --identity-resource-id "/subscriptions/$subscriptionId/resourcegroups/ContainerWorkshop/providers/Microsoft.ManagedIdentity/userAssignedIdentities/PodRunnerIdentity" --namespace default
+```
+
+This operation can take some time to complete.
+
+### Deploying a workload
+
+Create a `SecretProviderClass` that will fetch a single secret from the Key Vault.
+To do this, you will need to customize the template first. 
+
+Open the file named `00-secret.yaml` and put in values for `keyvaultName`, `subscriptionId` and `tenantId`. The values should still be available as environment variables. Alternatively, you can find the values using `az account show`. 
+
+> Please note the property `objectName: connectionstrings--leaderboardcontext` that indicates which Key Vault secret needs to be fetched. Also notice the property `keyvaultName: "containerworkshopvault"` that indicates which Key Vault should be used and finally the property `usePodIdentity: "true"` that indicates that the Pod's identity should be used to access the vault.
+
+After this, create the resource using `kubectl apply`:
 ```
 kubectl apply -f 00-secret.yaml 
 ```
 
+We can now deploy a Pod, and configure it to run using the 'PodRunnerIdentity' as it's Pod Identity. The identity can be used to get access to the Key Vault. To assign an identity to a Pod, we will add a `metadata` item named `label` to it, named `aadpodidbinding` with a value `azureidentity`. The value is the `--name` we passed to the `az aks pod-identity add` command earlier.
+
+Deploy Nginx with access to that secret using `kubectl apply`:
+```
+kubectl apply -f 01-nginx-with-secret-pod.yaml
+```
+
+### Checking the result
+Assert that the nginx Pod is running:
+
+```
+kubectl describe pod/nginx-secrets-store | grep ContainersReady
+
+  ContainersReady   True
+```
+
+List all available secrets by running `ls` on the volume:
+```
+kubectl exec -it nginx-secrets-store -- ls /mnt/secrets-store/
+
+connectionstrings--leaderboardcontext
+```
+
+And finally, list the content of the secret using `cat` on a file in the volume:
+
+```
+kubectl exec -it nginx-secrets-store -- cat /mnt/secrets-store/connectionstrings--leaderboardcontext
+
+Server=sql.retrogaming.internal;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False
+```
+
+## Cleanup
+Remove the nginx Pod:
+```
+kubectl delete -f 01-nginx-with-secret-pod.yaml
+```
+
+Remove the AzureIdentity:
+```
+az aks pod-identity delete --resource-group ContainerWorkshop --cluster-name ContainerWorkshopCluster --name azureidentity --namespace default
+```
+
+Remove the Managed Identity:
+```
+az identity delete -g ContainerWorkshop -n PodRunnerIdentity
+```
+
+List the installed Helm packages:
+```
+helm list
+
+NAME                                            NAMESPACE       REVISION       UPDATED                                                                                                                                                                                                 STATUS   CHART                                   APP VERSION
+csi-secrets-store-provider-azure-1612818292     default         1              2021-02-08 22:04:52.9564704 +0100 CET                                                                                                                                                                   deployed csi-secrets-store-provider-azure-0.0.16 0.0.12
+```
+
+Remove the Secrets Store driver by removing the Helm chart:
+
+```
+helm uninstall csi-secrets-store-provider-azure-1612818292
+```
 
 ## Wrapup
 

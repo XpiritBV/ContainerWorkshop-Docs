@@ -148,11 +148,19 @@ az provider register --namespace Microsoft.OperationalInsights
 
 #### Deploy Kubernetes
 
+First, update the CLI tooling:
+```
+az extension add --name aks-preview
+az extension update --name aks-preview
+```
+
 You can now create the cluster with the `az aks create` command:
 ```
-az aks create --resource-group ContainerWorkshop --name ContainerWorkshopCluster --node-count 1 --enable-addons monitoring --generate-ssh-keys --enable-managed-identity --network-plugin azure
+az aks create --resource-group ContainerWorkshop --name ContainerWorkshopCluster --node-count 1 --enable-addons monitoring --generate-ssh-keys --enable-managed-identity --enable-pod-identity --network-plugin azure
 ```
+
 If you get an error such as this message, simply retry the deployment:
+
 ```
 Deployment failed. Correlation ID: 019756e2-cadd-429d-86dc-1c2bd0d71339. Unable to get log analytics workspace info. 
 ```
