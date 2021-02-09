@@ -148,7 +148,20 @@ az provider register --namespace Microsoft.OperationalInsights
 
 #### Deploy Kubernetes
 
-First, update the CLI tooling:
+First, enable the Pod Identity preview by using the `az feature register` command:
+```
+az feature register --name EnablePodIdentityPreview --namespace Microsoft.ContainerService
+
+az feature show --name EnablePodIdentityPreview --namespace Microsoft.ContainerService
+```
+Make sure that the operation has completed before continuing, by using the `az feature show` command.
+
+Update the resource provider:
+```
+az provider register -n Microsoft.ContainerService
+```
+
+Update the CLI tooling:
 ```
 az extension add --name aks-preview
 az extension update --name aks-preview
