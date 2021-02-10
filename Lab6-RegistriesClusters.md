@@ -31,7 +31,7 @@ Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to na
 - `GamingWebApp`, an ASP.NET MVC Core frontend 
 - `LeaderboardWebAPI`, an ASP.NET Core Web API
 
-For now, a SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as desribed in [Lab 2](https://github.com/XpiritBV/ContainerWorkshop2018Docs/blob/master/Lab2-Docker101.md#lab-2---docker-101).
+For now, a SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as desribed in [Lab 2](Lab2-Docker101.md#lab-2---docker-101).
 
 ## <a name="push"></a>Pushing images to a registry
 
@@ -60,9 +60,9 @@ Now that we have a registry, you should try to create working images for our app
 ```
 REPOSITORY                        TAG                 IMAGE ID            CREATED             SIZE
 gamingwebapp                      latest              52ca01b894b7        26 minutes ago      302MB
-leaderboard.webapi                latest              388e4e4f4abd        26 minutes ago      303MB
+leaderboardwebapi                latest              388e4e4f4abd        26 minutes ago      303MB
 gamingwebapp                      dev                 838b58f6e96d        2 days ago          299MB
-leaderboard.webapi                dev                 86c3b70e7efa        2 days ago          299MB
+leaderboardwebapi                dev                 86c3b70e7efa        2 days ago          299MB
 ```
 
 The images for the release build are tagged with `latest`. Make sure you understand why a `Debug` build creates images that are tagged `:dev`.
@@ -101,7 +101,7 @@ Next, you can login with:
 az acr login --name <registry> -u <username>
 ```
 
-Replace the name with your unique registry's name and your username with , supply your username and supply one of the passwords that was displayed earlier when prompted.
+Replace the name with your unique registry's name and `<username>` with the one listed at the bottom of the output for `az acr credential show` and supply the one of the two passwords that were displayed.
 
 When you have successfully logged in, push both images to the their respective repositories in the registry:
 
@@ -138,8 +138,8 @@ When using DockerHub, visit your registry at https://hub.docker.com/r/<registry>
 
 When using ACR, use this command:
 ```cmd
-az acr repository list --resource-group ContainerWorkshop --name <registry>
-az acr repository show-tags --resource-group ContainerWorkshop --name containerregistry --repository gamingwebapp
+az acr repository list --name <registry>
+az acr repository show-tags --name <registry> --repository gamingwebapp
 ```
 
 Then, try to pull the image from the registry with:
@@ -148,7 +148,7 @@ docker pull <full-registry-name>/gamingwebapp:latest
 ```
 This process can be automated by a build and release pipeline. You will learn how to do that in a later lab.
 
-**Repeat the procedure for the Leaderboard Web API.
+**Repeat the procedure for the Leaderboard Web API.**
 
 ## Connecting to your cluster
 
@@ -195,8 +195,8 @@ Kubernetes does not use Docker Compose files for its deployments. The Visual Stu
 
 You need to make a few changes to the manifest for it to be useable. In particular, make sure you change the following markers:
 - `__containerregistry__`
-	- execute the command `az acr show -n <registry> --query loginServer` to get the value
-- change `gamingwebapp:demo` into `gamingwebapp:latest`
+	- Execute the command `az acr show -n <registry> --query loginServer` to get the value
+- Change `gamingwebapp:demo` into `gamingwebapp:latest`
 
 In order to be able to pull images from your registry into the cluster, you will need to authenticate against a private registry. If you are using Docker Hub, then this is not required. 
 
