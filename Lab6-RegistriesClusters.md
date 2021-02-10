@@ -1,5 +1,3 @@
-//TODO: use new code
-
 # Lab 6 - Container registries and clusters
 
 In this lab you are going to learn about registries and clusters. This includes pushing images to the registry and deploying compositions to a running cluster.
@@ -60,9 +58,9 @@ Now that we have a registry, you should try to create working images for our app
 ```
 REPOSITORY                        TAG                 IMAGE ID            CREATED             SIZE
 gamingwebapp                      latest              52ca01b894b7        26 minutes ago      302MB
-leaderboardwebapi                latest              388e4e4f4abd        26 minutes ago      303MB
+leaderboardwebapi                 latest              388e4e4f4abd        26 minutes ago      303MB
 gamingwebapp                      dev                 838b58f6e96d        2 days ago          299MB
-leaderboardwebapi                dev                 86c3b70e7efa        2 days ago          299MB
+leaderboardwebapi                 dev                 86c3b70e7efa        2 days ago          299MB
 ```
 
 The images for the release build are tagged with `latest`. Make sure you understand why a `Debug` build creates images that are tagged `:dev`.
@@ -226,11 +224,19 @@ Also, a DNS A-record and a public IP address will be created. After about 5 minu
 
 > Note that consecutive deployments of the same application, but with newer images, will go a lot faster.
 
-Open a browser and navigate to the URL you supplied as `__httpapplicationroutingdomain__` preceded by "http://containerworkshop." e.g:
+Find the external IP address of the `gamingwebapp` pod by running this command:
 
-`http://containerworkshop.6558a6c44f9d4e63aaa6.westeurope.aksapp.io`
+```cmd
+kubectl get service svc-gamingwebapp
+```
 
-You should see the page named 'All time highscore hall of fame'.
+Open a browser and navigate to the IP address listed under EXTERNAL-IP
+
+You should see the page named 'All time highscore hall of fame'. 
+> Note:
+> The external IP address of the pod is exposed. All traffic to this IP address will be routed to that particular pod. Normally you would use HTTP Application Routing (a feature of Azure AKS) or a service mesh to split traffic based on parts of a DNS name for the same IP address.
+
+If there are any errors, troubleshoot your setup and fix these.
 
 > ##### Using containerized SQL Server in production
 > It is not recommended to use SQL Server in a production scenario in this way. You will loose data, unless you take special measures, such as mounting volumes.
@@ -250,7 +256,10 @@ The steps you need to do are:
 
   You might have change the server name to be unique.
 
-- Add a firewall rule to the Azure SQL Server to allow traffic coming in from the cluster. You can find the IP address of the cluster in the external load balancer NAT rules.
+- Add a firewall rule to the Azure SQL Server to allow traffic coming in from the cluster. You can find the IP address of the cluster in the external load balancer NAT rules. As an alternative, you can give Azure resources access to the database server. Pay attention to the highlighted area in the firewall settings of your Azure SQL server resource.
+
+![](images/AzureSQLFirewall.png)
+
 - Connect with SQL Server Management Studio or any other query tool to execute a couple of SQL scripts to the server and database:
 
 ```sql
@@ -266,6 +275,8 @@ Create a SQL Create script for the two tables in your local SQL Server database 
 Next, run the following script on the database:
 
 ```sql
+USE [master]
+GO
 CREATE LOGIN retrogamer WITH PASSWORD='abc123!@'
 
 USE Leaderboard
@@ -351,20 +362,19 @@ nginx-deployment-fc9fcfdd8-584xq   1/1     Running   0          29s
 nginx-deployment-fc9fcfdd8-c9x7v   1/1     Running   0          17s
 ```
 
-If the status equals 'Running', everything works!
+If the status equals 'Running', everything works correctly.
 
 ## Cleanup
 
-Remove the nginx Pod:
+Remove the nginx pod:
 ```
 kubectl delete -f 00-nginx-from-acr.yaml
 ```
 
 Remove the Container Registry integration:
-```
+```cmd
 az aks update --name ContainerWorkshopCluster --resource-group ContainerWorkshop --detach-acr $registryResourceId
 ```
-
 
 ## Wrapup
 
