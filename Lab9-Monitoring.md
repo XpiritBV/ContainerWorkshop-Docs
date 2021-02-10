@@ -129,8 +129,137 @@ Fix the bug (by removing the code you added previously) by following a proper De
 - Perform a build and release to your Kubernetes cluster
 - Verify everything works and close the work item
 
+
+## Monitoring Kubernetes Pods with Istio
+In this chapter we will use Istio addons to visualize your Kubernetes environment.
+
+### Important
+This lab requires prior knowledge of the Kubernetes and Istio platform. If you aren't familiar with `kubectl`, `istioctl` and `az aks`, we recommend that you first make [Lab 10 - Kubernetes](Lab10-Kubernetes.md) and [Lab 12 - Working with Istio on Kubernetes](Lab12-Istio.md) and then come back here.
+
+### Introduction
+
+If you want to visualize your Kubernetes cluster, you can use Istio.
+
+### Getting started
+1. Install Istio by following the steps outlined in chapter 'Deploying Istio' of [Lab 12 - Working with Istio on Kubernetes](Lab12-Istio.md).
+2. Deploy an Istio enabled **buggy** workload (a .NET API that returns a color string) as described in chapter 'Deploying a workload' of [Lab 13 Retry and Circuit breaker with Istio](Lab13-IstioRetry-CircuitBreaker). Stop after deploying Fortio and return here.
+3. Generate some traffic to the workload, by running `fortio`:
+   ```
+   kubectl exec -it fortio-deploy-6dc9b4d7d9-p68rg -- fortio load -c 100 -qps 10  http://blue/api/color
+   ```
+
+### Prometheus
+Prometheus is an open source monitoring system and time series database. You can use Prometheus with Istio to record metrics that track the health of Istio and of applications within the service mesh. You can visualize metrics using tools like Grafana and Kiali.
+
+Prometheus will gather telemetry from the platform and store it in a database. We can query the data using a built-in web portal. 
+
+First, deploy Prometheus to Istio:
+
+```
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.8/samples/addons/prometheus.yaml
+```
+
+Create a port forwarding from your machine to the cluster using `istioctl dashboard` and passing the name `prometheus`. This command will block the terminal, until you press `Ctrl+c`:
+
+```
+istioctl dashboard prometheus
+```
+
+In your browser, navigate to http://localhost:9090
+
+![](images/prometheus01.png)
+
+Click on the 'Graph' tab.
+
+Execute the query 'istio_requests_total'. Depending on how much load you generated with Fortio, you should see some statistics about the total amount of requests processed by Istio.
+
+Try to find out why you can see two lines, while we are running just a single Pod. (It's not the sidecar...)
+
+Run the `fortio` tool a couple of times in a different terminal, to generate some more data.
+
+Let's zoom in on the failed responses returned by the Service named 'blue', by filtering out the successful calls. Run the following query:
+
+```
+istio_requests_total{destination_service=~"blue.*", response_code="503"}
+```
+You should see one line that indicates the total amount of failed requests. It should look similar to the image below, try to zoom in a little if needed, by changing the time scale to 15m:
+
+![](images/prometheus02.png)
+
+Press `Ctrl+c` to stop the `istioctl` port forward.
+### Grafana
+
+Grafana is an open source monitoring solution that can be used to configure dashboards for Istio. You can use Grafana to monitor the health of Istio and of applications within the service mesh. Grafana will query the data that was gathered by Prometheus.
+
+Generate some more test data:
+```
+kubectl exec -it fortio-deploy-6dc9b4d7d9-p68rg -- fortio load -c 100 -qps 10  http://blue/api/color
+```
+
+Add the Grafana (visualization tooling) addon to Istio:
+
+```
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.8/samples/addons/grafana.yaml
+```
+
+Just like Prometheus, Grafana comes with a built-in Portal. Create a port forward to Grafana by using the `istioctl dashboard` command again, but passing `grafana` as the name:
+```
+istioctl dashboard grafana
+```
+
+In your browser, navigate to the Grafana portal. We will open the 'Data sources' tab, to check if the connection to Prometheus works:
+
+```
+http://localhost:3000/datasources
+```
+![](images/grafana01.png)
+
+Let's see if we can query the request totals again:
+Navigate to the 'Explore' tab:
+
+```
+http://localhost:3000/explore
+```
+
+Enter the following query:
+
+```
+istio_requests_total{destination_service=~"blue.*", response_code="503"}
+```
+
+It should show the same chart, as Prometheus:
+![](images/grafana02.png)
+
+The added benefit of Grafana is that you can combine data from multiple data sources. Another great thing about the Grafana addon is that it comes with a couple of built-in Istio dashboards. Also, Grafana has an auto-refresh option, so it will regularly update the charts for you.
+(Grafana charts also look a lot nicer.)
+
+In your browser, navigate to:
+```
+http://localhost:3000/dashboards
+```
+It should show you a 'folder' named Istio.
+
+With your mouse, hover over the folder and click on 'Go to folder'
+
+![](images/grafana03.png)
+
+Select the dashboard named 'Istio Service Dashboard' and open the tab 'Service Workloads'. It will show information about incoming requests. Use this dashboard to see current usage of your Services in near-real time.
+
+![](images/grafana05.png)
+
+Go back and open the dashboard named 'Istio Performance Dashboard'. It will show information about Istio's resource consumption. Return here to investigate performance issues.
+
+![](images/grafana04.png)
+
+Look around in the Istio dashboards for a few minutes. See if you can find more useful charts.
+
+Break the port forward by pressing `Ctrl+c`.
+
+
 ## Wrapup
 
 In this lab you have added the first monitoring support to the application and Web API. You used Application Insights to capture telemetry of multiple Azure resources and introduced semantic logging to create rich log information.
+
+
 
 
