@@ -1,5 +1,3 @@
-//TODO: use new code, please note that Managed Identity chapter is already updated
-
 # Lab 7 - Security
 
 During this lab you will look at a specific security related aspect for containers: secrets in configuration. There is a lot more to be said and done about security  for containers though. Your focus will be to remove all secrets from configuration files and into secure stores for development and production.
@@ -23,9 +21,9 @@ git checkout master
 
 Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to navigate the code and familiarize yourself with the various projects in the solution. You should be able to identify these:
 - `GamingWebApp`, an ASP.NET MVC Core frontend 
-- `Leaderboard.WebAPI`, an ASP.NET Core Web API.
+- `LeaderboardWebAPI`, an ASP.NET Core Web API.
 
-For now, a SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as desribed in [Lab 2](https://github.com/XpiritBV/ContainerWorkshop2018Docs/blob/master/Lab2-Docker101.md#lab-2---docker-101).
+For now, a SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as desribed in [Lab 2](Lab2-Docker101.md#lab-2---docker-101).
 
 Navigate to 'user@machine:/mnt/c/Sources/ContainerWorkshop-Docs/resources/lab07'
 
@@ -95,7 +93,7 @@ This Azure AD application registration represents a service principal that you a
 
 <img src="images/AADApplicationID.png" width="600" />
 
-Allow the Web API service principal to access the Key Vault. For that you need a Client ID and Secret. The Client ID is the application ID you stored earlier. The secret is a key you have to create under the application registration. Go to the `Keys` section and create a password. Give it `KeyVaultSecret` as a name. Set its expiration date to a year and save it. Make sure you copy and store the value that is generated. It should resemble the following format:
+Allow the Web API service principal to access the Key Vault. For that you need a Client ID and Secret. The Client ID is the application ID you stored a moment ago. The secret is a key you have to create under the application registration. Go to the `Certificates and Secrets` section and create a new Client Secret. Give it `KeyVaultSecret` as a name and set its expiration date to a year and save it. Make sure you copy and store the value that is generated. It should resemble the following format:
 
 ```cmd
 vFwBC9rEtBfO7BNVgeYmSLcpxhTGQfqKG4/ZAoCKhjh=
@@ -113,27 +111,40 @@ Client Secret | vFwBC9rEtBfO7BNVgeYmSLcpxhTGQfqKG4/ZAoCKhjh=
 
 with your specific values.
 
-## Use Key Vault values in .NET Core
+## Use Key Vault values in .NET
 
-The configuration system of .NET Core makes it relatively easy to access Key Vault values as part of your configuration.
+The configuration system of .NET makes it relatively easy to access Key Vault values as part of your configuration.
 
-Open the `Leaderboard.WebAPI` project and add three key/value pairs to the `appsettings.json` file, replacing the values with your own.
+Open the `LeaderboardWebAPI` project and add three key/value pairs to the `appsettings.json` file, replacing the values with your own.
 
 ```json
 "KeyVaultName": "https://your-keyvault.vault.azure.net/",
+"KeyVaultTenantID": "6bd3e9d3-9df6-2f81-42c6-1f31d60beb63",
 "KeyVaultClientID": "1f31d60b-2f81-42c6-9df6-eb636bd3e9d3",
 "KeyVaultClientSecret": "vFwBC9rEtBfO7BNVgeYmSLcpxhTGQfqKG4/ZAoCKhjh=",
 ```
 
-Add code to the `Startup` class's constructor to add the Azure Key Vault into the configuration system.
+Add references to the packages `Azure.Extensions.AspNetCore.Configuration.Secrets` and `Azure.Identity` in the `LeaderboardWebAPI` project. Next, configure the application's configuration by adding the `AzureKeyVault` provider when running in production. To do this, change the code in `CreateHostBuilder` inside `Program.cs` to create a `SecretClient` instance and `KeyVaultSecretManager` to establish a connection to your KeyVault using Client ID and secret.
 
 ```c#
-builder.AddAzureKeyVault(
-    configuration["KeyVaultName"],
-    configuration["KeyVaultClientID"],
-    configuration["KeyVaultClientSecret"]
-);
-Configuration = builder.Build();
+Host.CreateDefaultBuilder(args)
+    .ConfigureAppConfiguration((context, config) => {
+        //if (context.HostingEnvironment.IsProduction())
+        {
+            var hostConfig = config.Build();
+            var secretClient = new SecretClient(
+                new Uri(hostConfig["KeyVaultName"]),
+                new ClientSecretCredential(
+                    hostConfig["KeyVaultTenantID"],
+                    hostConfig["KeyVaultClientID"],
+                    hostConfig["KeyVaultClientSecret"])
+            );
+            config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+        }
+      );
+      config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+  })
+  // Existing code
 ```
 
 At this point you are ready to store the connection string in the Key Vault. Open the blade for the Key Vault and go to `Secrets`. Add a new secret with the name `ConnectionStrings--LeaderboardContext`. The value is the connection string for the SQL Server instance in your container or the Azure SQL Database.
@@ -143,73 +154,39 @@ For the containerized database you would use this value:
 
 The double-dash in the name of the secret, is a convention to indicate a section. In this format it will surface as a connection string just like before.
 
-Remove the connection string value from `appsettings.json`.
-
-Run your web API separately by clicking `Debug, Start new instance` from the right-click context menu of the project. Add a breakpoint in the ConfigureServices method and check whether the connection string is read correctly. If all is well, run the composition locally.
+Add a breakpoint in the ConfigureServices method of the web API project. Run your composition and check whether the connection string is read correctly.
 
 ## <a name='usersecrets'></a> Using User Secrets
 
 Now that all secrets are safely stored in the Key Vault you are one step closer to managing the sensitive configuration information of your Docker solution.
 
-You must have noticed how there is still a set of secrets present in the solution. (The service principal credentials.) This must be resolved too, as these secrets allow access to the Key Vault and enable anyone to retrieve secrets from the vault.
+You must have noticed how there is still a set of secrets present in the solution: the service principal credentials in particular. This must be resolved too, as these secrets allow access to the Key Vault and enable anyone to retrieve all secrets from the vault.
 
 First, let's store the Key Vault access information in a safe place during development on your machine. Right-click the Web API project and choose `Manage User Secrets` from the context menu. It will open a JSON file called `secrets.json` that is not added to the project. Instead it exists on the file system in a special location `%AppData%\Roaming\Microsoft\UserSecrets\<UserSecretsId>\secrets.json`. Find the location of this file and verify that the `UserSecretsId` corresponds to the new entry in the `.csproj` file of the Web API project.
 
-Cut the values for the Key Vault connection from the `appsettings.json` file and add these to the `secrets.json` file. Save the file and go to the `Startup` class.
-Assert the presence of code below in the constructor to add user secrets to the configuration system of .NET Core.
+Cut the values for the Key Vault access from the `appsettings.json` file and add these to the `secrets.json` file. Save the file and go to the `Program` class.
+Add a breakpoint in the `ConfigureAppConfiguration` method and inspect the configuration providers. With the presence of a `secrets.json` file there should be an additional provider of type `JspnConfigurationProvider` using the `secrets.json` file.
 
-```c#
-  .AddEnvironmentVariables(); // Existing code
+Check if the user secrets are used when running the Web API outside of a container again. When it does, try running it in the complete composition. You should find that it does. Think about why this works when running from a container.
 
-  if (env.IsDevelopment())
-  {
-    builder.AddUserSecrets<Startup>(true);
-  }
-  Configuration = builder.Build();
-```
-
-Check if the user secrets are used when running the Web API outside of a container again. When it does, try running it in the complete composition. You should find that it does not. Think about why it does not work anymore when run from a container.
-
-To fix the issue of the user secrets not being available in the container, you need **remove** the connection string environment variable from the `docker-compose.override.yml` file.
-
-```yaml
-- ConnectionStrings:LeaderboardContext=Server=sql.retrogaming.internal;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False
-```
-
-Additionally, you need to give the container access to the local file system to be able to read the `secrets.json` file. You can mount a volume to the container that maps the user secrets folder into the container.
-
-Assert the presence of the following line in your `docker-compose.override.yml` file:
-
-on Windows:
-```yaml
-volumes:
-  - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-```
-or on Linux:
-```
-volumes:
-  - $HOME/.microsoft/usersecrets/$USER_SECRETS_ID:/root/.microsoft/usersecrets/$USER_SECRETS_ID
-```
+The answer is that the Visual Studio tooling for Docker helps in mounting the user secrets file inside a composition. If you are interested in finding how, check out the file `docker-compose.vs.debug.g.yml` insode the folder `obj\Docker` under the solution root for your source code. 
 
 Using user secrets is well suited for development scenarios and single host machine. When running in a cluster for production scenarios it is not recommended. Instead you can store 'Secrets' on your cluster host machines. 
 
 ## <a name='kubernetessecrets'></a>(Optional) Using Kubernetes Secrets
 
 > This uses a Kubernetes cluster. If you don't have one yet, go to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to see how to create one.
-You can store the secrets in a secure way in your cluster. The way this is done depends on the type of orchestrator you have. Kubernetes has its own implementation for secrets. In this final step you are going to create three secrets for the Azure Key Vault connection details, so all secrets are "securely" stored in a combination of the cluster and the Azure Key Vault.
+You can store the secrets in a secure way in your cluster. The way this is done depends on the type of orchestrator you have. Kubernetes has its own implementation for secrets. In this step you are going to create four secrets for the Azure Key Vault connection details, so all secrets are "securely" stored in a combination of the cluster and the Azure Key Vault: one set of cluster-based connection details to the Key Vault, and all other secrets in the vault. 
 
-Open the file `appsettings.secrets.json` and edit the details of the file a Docker CLI and connect to your cluster.
-Using a command prompt at the folder with the secrets file:
-
+Open the file `appsettings.secrets.json` from the solution items and edit the details to reflect the contents of four configuration settings for the KeyVault. Open a terminal window, navigate to the `deployment` folder in your solution folder. Use the Docker CLI to connect to your cluster and create a secret named `secret-appsettings`:
 ```cmd
 kubectl create secret generic secret-appsettings --from-file=./appsettings.secrets.json
 ```
 
-to create a secret containing that file in the default namespace.
-Open the dashboard again and navigate to the `Secrets` section under `Config and Storage`.
+This creates a secret containing that file in the default namespace. Open the dashboard of your local cluster or the Azure portal to your AKS cluster and navigate to the `Secrets` section under `Configuration`, `Secrets`.
 You should see the new secret there.
 
-In the deployment manifest add the following to the `spec` section of the `leaderboardwebapi`:
+In the deployment manifest add the following directly under the `spec` section of the `template` in the `dep-leaderboardwebapi` deployment definition:
 
 ```yaml
 spec:
@@ -219,7 +196,7 @@ spec:
       secretName: secret-appsettings
 ```
 
-Also, under `containers` for the `leaderboardwebapi` deployment definition add:
+Also, directly under `containers` for the `dep-leaderboardwebapi` deployment definition add:
 ```yaml
 volumeMounts:
 - name: secretsettings
@@ -227,13 +204,24 @@ volumeMounts:
   readOnly: true
 ```
 
-Redeploy the manifest with:
+The `mountPath` indicates where the volume will appear in our container. Since the container is running with a working directory of `/app` you can read the config file starting from the `secrets` subfolder. Add the following code to `Program` class of the `LeaderboardWebAPI` project, right before the configuration is built:
+
+```C#
+.ConfigureAppConfiguration((context, config) => {
+    config.AddJsonFile("secrets/appsettings.secrets.json", optional: true);
+    var hostConfig = config.Build();
+    // ...
+```
+
+Rebuild your container images locally by pressing Ctrl+Shift+B. Tag and push the new images and redeploy the manifest to your local and Azure AKS cluster with:
 
 ```cmd
 kubectl apply -f .\gamingwebapp.k8s-static.yaml
 ```
+Remember to set the correct context before you apply the manifest. 
+Verify that the `appsettings.secrets.json` file was read correctly in the cluster and that everything works correctly.
 
-Note that the secrets here are only base64 encoded and not protected. You should use [Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) in Azure to run your nodes in the cluster under a known-identity that has access to the Azure Key Vault. Using this strategy you do not need to maintain any secrets to get access to your Key Vault.
+Note that the secrets here are only base64 encoded and not protected. It is more secure to use [Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) in Azure to run your nodes in the cluster under a known-identity that has access to the Azure Key Vault. Using this strategy you do not need to maintain any secrets to get access to your Key Vault anymore.
 
 ## <a name='kubernetessecrets'></a>(Optional) Using Kubernetes Secrets from Azure Key Vault
 
