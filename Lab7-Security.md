@@ -465,10 +465,17 @@ template:
       app: leaderboardwebapi
       aadpodidbinding: azureidentity # Add this line
 ```
-Deploy your new manifest after saving the YAML file.
+Also, an adjustment to the way the web API code connects to the Azure KeyVault must be made. Replace the `ClientSecretCredential` instance with `DefaultAzureCredential` in the `CreateHostBuilder` method of the `Program` class:
+```c#
+var secretClient = new SecretClient(
+    new Uri(hostConfig["KeyVaultName"]),
+    new DefaultAzureCredential()
+```
+
+Notice how there is only the configurable endpoint for the Azure KeyVault left. Build, tag and push the updated `LeaderboardWebAPI` image and deploy your new solution by applying the static manifest .
 
 ### Checking the result
-Assert that the `leaderboardwebapi` pod is still running. Next, list all available secrets by running `ls` on the volume. Make sure to replace `<leaderboardwebapi-podname>` with the name of the pod instance. Use `kubectl get pods` to find it.
+Assert that the `leaderboardwebapi` pod is still running after deployment. Next, list all available secrets by running `ls` on the volume. Make sure to replace `<leaderboardwebapi-podname>` with the name of the pod instance. Use `kubectl get pods` to find it.
 
 ```
 kubectl exec -it <leaderboardwebapi-podname> -- ls /app/secrets/
