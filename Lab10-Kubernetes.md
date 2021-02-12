@@ -4,8 +4,8 @@ During this lab, you will become familiar with Kubernetes concepts, showing you 
 
 Goals for this lab:
 - Gain a basic understanding of the *kubectl* tooling for Kubernetes.
-- See what a Node, Deployment, and Pod is.
-- How to inspect and see the logs of a Pod.
+- See what a node, deployment and pod is.
+- How to inspect and see the logs of a pod.
 - Understand how to scale up and down the number of instances of a container.
 - Use a service to define networking.
 
@@ -47,7 +47,7 @@ Client Version: version.Info{Major:"1", Minor:"19", GitVersion:"v1.19.3", GitCom
 Server Version: version.Info{Major:"1", Minor:"18", GitVersion:"v1.18.14", GitCommit:"89182bdd065fbcaffefec691908a739d161efc03", GitTreeState:"clean", BuildDate:"2020-12-18T16:05:02Z", GoVersion:"go1.13.15", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
-## <a name='select-ns'></a>Selecting a namespace to work with
+## <a name='select-ns'></a>Selecting your work namespace
 Kubernetes resources are deployed in containers called 'namespaces'. 
 Select the built-in Namespace 'default' as the default for this session:
 
@@ -86,9 +86,9 @@ Conditions:
 
 In this case, the node is in a _Ready_ state and can run Pods.
 
-## <a name='deployment'></a>Create a Deployment
-When you want to run a containerized application inside the cluster, you will use a Deployment configuration to schedule a Pod. The 'Deployment' resource will govern the lifecycle of a 'Pod'.
-A Pod is a group of one or more containers running on 1 node. It can have its own storage and networking setup and contains specifications on how to run the actual containers.
+## <a name='deployment'></a>Create a deployment
+When you want to run a containerized application inside the cluster, you will use a Deployment configuration to schedule a pod. The `Deployment` resource will govern the lifecycle of a `Pod`.
+A pod is a group of one or more containers running on 1 node. It can have its own storage and networking setup and contains specifications on how to run the actual containers.
 
 Start a new deployment using `kubectl create deployment` by creating a Pod running an nginx container:
 
@@ -98,7 +98,7 @@ kubectl create deployment hello-nginx --image=nginx
 deployment.apps/hello-nginx created
 ```
 
-Verify that the Deployment is working, by using the describe functionality again, this time by querying the deployment by using `kubectl describe deployment` and passing the deployment name:
+Verify that the deployment is working, by using the describe functionality again, this time by querying the deployment by using `kubectl describe deployment` and passing the deployment name:
 
 ```
 kubectl describe deployment hello-nginx
@@ -136,7 +136,7 @@ Events:
   Normal  ScalingReplicaSet  22s   deployment-controller  Scaled up replica set hello-nginx-5c7ddf5c4 to 1
 ```
 
-You will get all the details about the running Pod. For a quick overview of all deployments, use the command `kubectl get deployments`.
+You will get all the details about the running pod. For a quick overview of all deployments, use the command:
 
 ```
 kubectl get deployments
@@ -149,7 +149,7 @@ NAME            READY   UP-TO-DATE   AVAILABLE   AGE
 hello-nginx   0/1     1            0           87s
 ```
 
-### Dealing with Pods
+### Dealing with pods
 Now let's see if we can get some information about the Pod that was created for us by the Deployment, by using `kubectl get pods`:
 
 ```
@@ -157,30 +157,31 @@ kubectl get pods
 
 NAME                          READY   STATUS    RESTARTS   AGE
 hello-nginx-8688958b4-skdvg   1/1     Running   0          106s
+...
 ```
 
 > Note that your Pod name will be different. 
 
-As you can see, the Deployment created a Pod for us, and it's running happily. 
+As you can see, the deployment created a pod for us and it's running happily.
 
-Get more details about the Pod. 
-Copy the Pod name and pass it to the `kubectl describe pod` command:
+Get more details about the pod. 
+Copy the pod name and pass it to the `kubectl describe pod` command:
 
 ```
 kubectl describe pod hello-nginx-8688958b4-skdvg
 ```
 
-In the output you'll see detailed information about the container(s) running inside the Pod.
+In the output you'll see detailed information about the container(s) running inside the pod.
 The last part, that describes `Events` is very important; if your container fails to start there is more information about it here.
 
 ### Pod networking
-Another interesting element of the Pod is that it has an IP address. See if you can find it in the output from `kubectl describe pod`. It should be similar to this: 'IP: 10.244.0.16'.
+Another interesting element of the pod is that it has an IP address. See if you can find it in the output from `kubectl describe pod`. It should be similar to this: `IP: 10.244.0.16`.
 
-> What this means, is that we can connect Pods to a network, similar to what we did with `docker-compose` in [Lab 4 - Networking](Lab4-Networking.md) earlier.
+> What this means, is that we can connect pods to a network, similar to what we did with `docker-compose` in [Lab 4 - Networking](Lab4-Networking.md) earlier.
 
 ### Pod lifecycle
 
-Let's see why Deployments are very useful tools in Kubernetes by simulating an application crash inside the nginx container.
+Let's see why deployments are very useful tools in Kubernetes by simulating an application crash inside the nginx container.
 
 ```
 kubectl delete pod hello-nginx-8688958b4-skdvg
@@ -188,7 +189,7 @@ kubectl delete pod hello-nginx-8688958b4-skdvg
 pod "hello-nginx-8688958b4-skdvg" deleted
 ```
 
-Quickly check the list of running Pods again:
+Quickly check the list of running pods again:
 
 ```
 kubectl get pods
@@ -197,7 +198,7 @@ NAME                          READY   STATUS    RESTARTS   AGE
 hello-nginx-8688958b4-4xt5v   1/1     Running   0          39s
 ```
 
-You should see that a brand new Pod was created. The Deployment noticed that the first Pod went away, and responded by creating a new Pod. A Deployment adds resillience to your applications running on Kubernetes!
+You should see that a brand new pod was created. The deployment noticed that the first Pod went away, and responded by creating a new pod. A deployment adds resillience to your applications running on Kubernetes!
 
 ### Cleanup
 
@@ -209,9 +210,9 @@ kubectl delete deployment hello-nginx
 deployment.apps "hello-nginx" deleted
 ```
 
-## <a name='deployment-using-template'></a>Deploy an application using a Pod template
+## <a name='deployment-using-template'></a>Deploy an application using a pod template
 
-Earlier, we created a container running in a Pod, by creating a deployment using the `kubectl` CLI. Instead of creating Pods imperatively, we can also use a Pod template to create them declaratively. This way we can define the desired state (which image, resources, networking, etc.) and Kubernetes will ensure that the required changes are made.
+Earlier, we created a container running in a pod, by creating a deployment using the `kubectl` CLI. Instead of creating pods imperatively, we can also use a pod template to create them declaratively. This way we can define the desired state (which image, resources, networking, etc.) and Kubernetes will ensure that the required changes are made.
 
 > If you worked at [Lab 4 - Networking](Lab4-Networking.md) before, you'll see similarities between using the docker CLI (imperative) and the docker-compose CLI (declarative).
 
@@ -227,12 +228,12 @@ metadata:
 spec:
   containers:
   - name: myapp-container
-    image: nginx
+    image: alpine
     command: ['sh', '-c', 'echo Hello Kubernetes!']
 ```
-It describes a Pod and specifies a Pod name by using metdata. In the Pod `spec` you can see that the container is based on `image` busybox. It also specifies which command to run inside the container after it has been created.
+It describes a pod and specifies a pod name by using metadata. In the pod `spec` you can see that the container is based on `alpine` image. It also specifies which command to run inside the container after it has been created.
 
-### Creating a Pod from a template
+### Creating a pod from a template
 In your terminal, move to the repository directory named 'resources/lab10'.
 ```
 user@machine:/mnt/d/Projects/gh/ContainerWorkshop-Docs$ cd resources/lab10/
@@ -246,7 +247,7 @@ kubectl apply -f 00-nginx-pod.yaml
 pod/myapp-pod created
 ```
 
-Make sure that the Pod is running by using `kubectl get pods`:
+Verify that the pod is running by using `kubectl get pods`:
 ```
 kubectl get pods       
 
@@ -254,7 +255,7 @@ NAME        READY   STATUS    RESTARTS   AGE
 myapp-pod   1/1     Running   0          14s
 ```
 
-We have now directly created a Pod, without using a Deployment. Kill the Pod to simulate an application crash again:
+We have now directly created a pod, without using a deployment. Kill the Pod to simulate an application crash again:
 
 ```
 kubectl delete pod myapp-pod
@@ -262,18 +263,18 @@ kubectl delete pod myapp-pod
 pod "myapp-pod" deleted
 ```
 
-Now check running Pods again, to see if it was automatically restarted by Kubernetes:
+Now check running pods again, to see if it was automatically restarted by Kubernetes:
 ```
 kubectl get pods   
 
 No resources found in default namespace.
 ```
 
-As you can see, a Pod without a Deployment to manage its lifecycle will not be recreated when it is deleted.
+As you can see, a pod without a deployment to manage its lifecycle will not be recreated when it is deleted.
 
 ## <a name='deployment-scaling'></a>Scale a deployment
-In the example above, we created a Pod using a Pod template. We can also use a Deployment template. Kubernetes will maintain the desired state described in the Deployment.
-Deployment resources will not only govern the lifecycle of a Pod, it can also be used for networking and scaling.
+In the example above, we created a pod using a pod template. We can also use a deployment template. Kubernetes will maintain the desired state described in the deployment.
+Deployment resources will not only govern the lifecycle of a pod. It can also be used for networking and scaling.
 
 Please examine this YAML code:
 
@@ -300,21 +301,21 @@ spec:
         ports:
         - containerPort: 80
 ```
-This Deployment will create a Pod with a single container based on the nginx image. It will also expose port 80 of the container on the Pod's IP address.
+This deployment will create a pod with a single container based on the nginx image. It will also expose port 80 of the container on the pod's IP address.
 
-Let's roll out nginx again, but this time we're using a Deployment resource:
+Let's roll out nginx again, but this time we're using a deployment resource:
 
 ```
 kubectl apply -f 01-nginx-deployment.yaml
 ```
 
-It might take some time to become available, so query the state of the deployment using the _get_ command until it is available:
+It might take some time to become available, so query the state of the deployment using the `get` command until it is available:
 
 ```
 kubectl get deployment nginx-deployment
 ```
 
-The number of replicas is now set to 1. When the container crashes for some reason, Kubernetes will make sure there is at least one container running. Running a single instance might not always be enough. When can scale the number of pods by issuing a _scale_ command:
+The number of replicas is now set to 1. When the container crashes for some reason, Kubernetes will make sure there is at least one container running. Running a single instance might not always be enough. When can scale the number of pods by issuing a `scale` command:
 
 ```
 kubectl scale deployment.v1.apps/nginx-deployment --replicas=3
@@ -328,7 +329,7 @@ Query the state by checking the deployment:
 kubectl get deployment nginx-deployment
 ```
 
-And you should now see three Pods are running:
+And you should now see three pods are running:
 
 ```
 NAME               READY   UP-TO-DATE   AVAILABLE   AGE
@@ -345,16 +346,16 @@ nginx-deployment-d46f5678b-hlvj5   1/1     Running   0          8m27s
 nginx-deployment-d46f5678b-k95wr   1/1     Running   0          2m1s
 ```
 This list is sorted alphabetically, and Pod names are generated, so your list will look different.
-Two of three Pods were created by scaling out, so they have a younger age.
+Two of three pods were created by scaling out, so they have a younger age.
 
 ## <a name='services'></a>Use services
-As we saw earlier, in Kubernetes, each Pod will get a unique IP address. In theory, you can use this to communicate with other Pods. However, when a Pod dies and gets resurrected (by the Deployment resource), its IP address will be different. 
+As we saw earlier, in Kubernetes each pod will get a unique IP address. In theory you can use this to communicate with other pods. However, when a pod dies and gets recreated by the deployment resource, its IP address will be different. 
 
-So, when a front-end pod needs to talk to a back-end pod, we need a reliable way to communicate. Services are the solution to this. A Service is an IP address inside the Cluster, that never changes.It can be attached to Pods by using selection criteria, using a `selector`. A Service will live forever as it doesn't have any moving parts. The Pods connected to a Service may come and go. This way, you have a fixed endpoint within the Kubernetes cluster, that acts as a load balancer into a dynamic collection of Pods.
+So, when a front-end pod needs to talk to a back-end pod, we need a reliable way to communicate. Services are the solution to this. A service is an IP address inside the cluster, that never changes. It can be attached to pods by using selection criteria with a `selector`. A sService will live forever as it doesn't have any moving parts. The Pods connected to a Service may come and go. This way, you have a fixed endpoint within the Kubernetes cluster, that acts as a load balancer into a dynamic collection of pods.
 
-As an example, let's see if we can add a Service to the nginx Deployment. We will add a Service in front of the running Pods. The Service will target Pods matching a given app (based on the Pod's `metadata` - `label.app` attribute value 'nginx'. 
+As an example, let's see if we can add a service to the nginx deployment. We will add a service in front of the running pods. The service will target Pods matching a given app (based on the pod's `metadata` - `label.app` attribute value 'nginx'. 
 
-This is the relevant part of the Deployment YAML:
+This is the relevant part of the deployment YAML:
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -365,7 +366,7 @@ spec:
       labels:
         app: nginx
 ```
-This YAML will cause a metadata attribute `app: nginx` to be added to all created Pods. We will create a Service with a `selector` to find all Pods with that label:
+This YAML will cause a metadata attribute `app: nginx` to be added to all created pods. We will create a Service with a `selector` to find all pods with that label:
 
 In the YAML below, you can see how that works:
 
@@ -382,7 +383,7 @@ spec:
       port: 8080
       targetPort: 80
 ```
-The Service will forward traffic from Service port 8080 to port 80 of the Pod.
+The service will forward traffic from Service port 8080 to port 80 of the pod.
 
 ### Creating a Service
 Apply the service template:
@@ -390,7 +391,7 @@ Apply the service template:
 kubectl apply -f 02-nginx-service.yaml
 ```
 
-And inspect the outcome:
+and inspect the outcome:
 
 ```
 kubectl get service nginx-service
@@ -405,7 +406,7 @@ To validate that we can resolve the name using the internal DNS to a service, we
 kubectl run wget --image=busybox -i --tty --restart=Never
 ```
 
-In the terminal that opens, run `nslookup` and pass the name of the Service 'nginx-service', it will return the IP address of the Service:
+In the terminal that opens, run `nslookup` and pass the name of the service 'nginx-service', it will return the IP address of the service:
 
 ```
 nslookup nginx-service
