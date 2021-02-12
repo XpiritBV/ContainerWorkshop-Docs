@@ -1,10 +1,10 @@
 # Lab 11 Blue/Green deployments on Kubernetes with Contour
 
-During this lab, you will become familiar with Kubernetes networking concepts, like Service and Ingress.
+During this lab, you will become familiar with Kubernetes networking concepts, like services and ingress.
 
 Goals for this lab:
 - Gain an understanding of basic networking concepts in Kubernetes.
-- Learn how to use Ingress to expose Services based on routing keys.
+- Learn how to use Ingress to expose services based on routing keys.
 - Run multiple versions of a workload on Kubernetes concurrently, combined with traffic routing to perform [Blue/Green testing](https://martinfowler.com/bliki/BlueGreenDeployment.html).
 
 ## Prerequisites
@@ -21,7 +21,7 @@ C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab11>
 ```
 
 ## <a name='deploy-contour'></a>Deploying the Contour ingress controller
-An ingress controller manages traffic into and out of the cluster. You can use it to get network connectivity between Pods and software outside of the cluster.
+An ingress controller manages traffic into and out of the cluster. You can use it to get network connectivity between pods and software outside of the cluster.
 
 Kubernetes does not have a built-in [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) controller. We first need to deploy one. For this lab, we chose [Contour](https://github.com/heptio/contour). Other popular [options](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) are Nginx and Traefik.
 
@@ -36,31 +36,27 @@ kubectl apply -f 00-contour.yaml
 This command will install custom resource definitions and pods to serve as ingress controller within the local cluster.
 
 ## <a name='deploy-workloads'></a>Deploying two versions of a container
-We will now deploy a small demo application, it is a .NET Core Web Api. There are two versions, 'blue' and 'green'. (In real life, this would probably be something similar to v1 and v2.) The demo application with version *'blue'* is configured to return string value *'blue'* when it is called. The *'green'* version, likewise returns string value *'green'*. This way, we can easily see which application version answers our call when we call the API's later.
+We will now deploy a small demo application. It is a .NET Core Web Api. There are two versions, 'blue' and 'green'. In real life, this would probably be something similar to v1 and v2. The demo application with version *'blue'* is configured to return string value `blue` when it is called. The *'green'* version, likewise returns string value `green`. This way, we can easily see which application version answers our call when we call the API's later.
 
 Deploy the two versions of the workload by running these commands:
 
 ```
 kubectl apply -f 01-green.yaml
-```
-
-and
-
-```
 kubectl apply -f 02-blue.yaml
 ```
+
 > In this lab, we will move from the 'green' version to 'blue'.
 
-Each of these commands will first ensure that the namespace 'BlueGreen' exists, and then create a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment) and expose it by using a [Service](https://kubernetes.io/docs/concepts/services-networking/service/).
+Each of these commands will first ensure that the namespace 'BlueGreen' exists, and then create a [deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment) and expose it by using a [service](https://kubernetes.io/docs/concepts/services-networking/service/).
 
 > If you have no idea what this is about, consider doing [Lab 10 - How to use Kubernetes](Lab10-Kubernetes.md) first.
 
 The first command creates the 'green' version of the workload, and the second will create the 'blue' version.
-After this step, you will have two active Pods who can be called individually. 
+After this step, you will have two active pods who can be called individually. 
 
 ### Check the resources
 
-Kubernetes groups resources in Namespaces. Namespaces can also act as a security boundary. The YAML files we applied earlier, created a new Namespace 'bluegreen'.
+Kubernetes groups resources in namespaces. Namespaces can also act as a security boundary. The YAML files we applied earlier, created a new Namespace 'bluegreen'.
 
 List all Namespaces by running `kubectl get namespace`:
 
@@ -70,7 +66,7 @@ kubectl get namespace
 NAME              STATUS   AGE
 bluegreen         Active   1m22s
 default           Active   2d5h
-heptio-contour    Active   8m39s
+projectcontour    Active   8m39s
 kube-node-lease   Active   2d5h
 kube-public       Active   2d5h
 kube-system       Active   2d5h
@@ -87,7 +83,7 @@ When omitting the namespace from `kubectl` commands, it will use the Namespace n
 Check if the service is deployed correctly by running this command:
 
 ```
-kubectl get -n heptio-contour service contour -o wide
+kubectl get -n projectcontour service contour -o wide
 ```
 
 This should return something similar to this:
@@ -96,8 +92,9 @@ This should return something similar to this:
 NAME      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE   SELECTOR
 contour   ClusterIP   10.0.168.105   <none>        8001/TCP   11m   app=contour
 ```
-### Docker Desktop
-If you're running Docker Desktop, note down the Node IP address by running this command:
+
+### Finding node internal IP address for Docker Desktop
+If you're running Docker Desktop, write down the node IP address shown by running this command:
 ```
 kubectl get node/docker-desktop -o wide
 ```
@@ -108,12 +105,12 @@ NAME             STATUS   ROLES    AGE    VERSION   INTERNAL-IP    EXTERNAL-IP  
 docker-desktop   Ready    master   2d6h   v1.19.3   192.168.65.3   <none>        Docker Desktop   4.19.128-microsoft-standard   docker://20.10.2
 ```
 
-### Azure Kubernetes Service
-If you're running on Azure, use this command to get the first Node name:
+### Finding node internal IP address for Azure Kubernetes Service
+If you're running on Azure, use this command to get the first node name:
 ```
 kubectl get nodes
 ```
-Use the Node name to get information (your Node name will be different):
+Use the node name to get information (your node name will be different):
 ```
 kubectl get node aks-nodepool1-36156572-vmss000000 -o wide
 ```
@@ -124,13 +121,13 @@ NAME                                STATUS   ROLES   AGE    VERSION    INTERNAL-
 aks-nodepool1-36156572-vmss000000   Ready    agent   2d5h   v1.18.14   10.240.0.4    <none>        Ubuntu 18.04.5 LTS   5.4.0-1035-azure   docker://19.3.14
 ```
 
-> Later in this lab, we will need the value of 'INTERNAL-IP'. So make a note of it.
+> Later in this lab, we will need the values of 'INTERNAL-IP'. So make a note of both.
 
 ## <a name='ingress'></a>Adding an HTTPProxy
 We now want to consume both services at a single endpoint, so we can perform Blue/Green testing. In this lab, ninety percent of traffic will be sent to the 'green' version, the remaining 10 percent will be sent to the 'blue' version.
 
 To do this, we'll create a Contour-specific 'HTTPProxy' resource.
-This resource acts as a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) that routes incoming HTTP requests to one or more deployed Services. Being able to target multiple services (e.g. blue & green) allows us to perform Blue/Green testing!
+This resource acts as a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) that routes incoming HTTP requests to one or more deployed services. Being able to target multiple services (e.g. blue & green) allows us to perform Blue/Green testing.
 
 ```
 apiVersion: projectcontour.io/v1
@@ -153,7 +150,7 @@ spec:
           port: 80
           weight: 90
 ```
-The value in 'virtualhost' will be matched against the `Host` header of incoming HTTP requests. The value in 'match' will be matched with the path of the URL. In this lab we will simply forward all HTTP requests  '/'. The values in 'services' indicate the back-end Services that will receive the forwarded calls.
+The value in 'virtualhost' will be matched against the `Host` header of incoming HTTP requests. The value in `prefix` will be matched with the path of the URL. In this lab we will simply forward all HTTP requests for '/'. The values in `services` indicate the back-end services that will receive the forwarded calls.
 
 Create the ingress by running this command:
 
@@ -178,7 +175,7 @@ ingress   demo.local                valid    Valid HTTPProxy
 
 ## <a name='results'></a>Checking the results.
 
-To test the new ingress route, we'll run a terminal in a temporary Pod.
+To test the new ingress route, we'll run a terminal in a temporary pod.
 Open up a **new terminal** and run:
 
 ```
@@ -193,18 +190,19 @@ Inside the terminal, run this command to test the ingress, by making 100 web req
 
 Repeat the call, to see both words being returned.
 
-> Remember to replace the IP address with the value you noted down for 'INTERNAL-IP' (the Host's IP address) earlier in this lab. You can display it again, by running this command:
-`kubectl get node/docker-desktop  -o wide`
+> Remember to replace the IP address with the value you noted down for 'INTERNAL-IP' (the host's IP address) earlier in this lab. You can display it again, by running this command:
+`kubectl get node/docker-desktop -o wide`
 
 Running the command, should display output similar to this:
 
 ```
-9 blue
+ 1
+ 9 blue
 91 green
 ```
 > You should see that around 90 percent of the calls returned were answered by the *green* version, returning the word 'green' and that around 10 percent of the calls returned 'blue'.
 
-Switch back to your terminal and leave the test Pod running.
+Switch back to your terminal and leave the test pod running.
 
 ### Blue/Green testing
 You can now perform Blue/Green testing, and (gradually) shift traffic towards the (newer) 'blue' version of the software.
@@ -224,7 +222,7 @@ Change the weights into:
   weight: 20
 ``` 
 
-Running the `curl` loop again:
+Save the file and run the `curl` loop again:
 
 ```
 (for i in {1..100}; do echo -e ""; curl -s http://192.168.65.3/api/color -H 'Host: demo.local';  done;) | sort | uniq -c
@@ -233,31 +231,25 @@ Running the `curl` loop again:
 This time, it should display a result like this:
 
 ```
+ 1
 78 blue
 22 green
 ```
 
-In real life, you can use this technique to gradually increase traffic to a new version of your software, with the means of moving back to the previous version in a few seconds in case of issues. For every software release, you would flip from blue, to green, to blue, etc. 
-
+In real life, you can use this technique to gradually increase traffic to a new version of your software, with the means of moving back to the previous version in a few seconds in case of issues. For every software release, you would flip from blue, to green, to blue, etc.
 
 ## <a name='clean'></a>Cleaning up
 
-Uninstall Contour:
+Uninstall Contour and delete the workloads:
 
 ```
 kubectl delete -f '00-contour.yaml'
-```
-
-Delete workloads:
-
-```
 kubectl delete namespace bluegreen
 kubectl delete ns heptio-contour 
 ```
 
-
 ## Wrapup
 
-In this lab you experimented with Kubernetes network connectivity from the command line. You have learned how to shape traffic flowing into Pods using Countour HTTPProxy.
+In this lab you experimented with Kubernetes network connectivity from the command line. You have learned how to shape traffic flowing into pods using Countour HTTPProxy.
 
 Continue with [Lab 12 - Working with Istio on Kubernetes](Lab12-Istio.md).
