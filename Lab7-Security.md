@@ -277,9 +277,7 @@ You should now have 3 environment variables, check them using `echo`:
 
 ```
 echo "Cluster Id: $clusterClientId"
-
 echo "Subscription Id: $subscriptionId"
-
 echo "Tenant Id: $tenantId"
 ```
 
@@ -309,7 +307,7 @@ helm repo update
 helm install csi-secrets-store-provider-azure/csi-secrets-store-provider-azure --generate-name
 ```
 
-The Secrets Store Driver will be able to talk to Azure Key Vault, using the Pod's identity. It will create a volume that contains a file, that has the secret's value as its content.
+The Secrets Store Driver will be able to talk to Azure Key Vault, using the pod's identity. It will create a volume that contains a file, that has the secret value as its content.
 
 Check the deployment of the driver by listing the Pods using `kubectl get pods`:
 
@@ -354,7 +352,7 @@ vaultName=containerworkshopvault
 az keyvault create --name $vaultName --resource-group "ContainerWorkshop" --location "westeurope"
 ```
 
-Put the SQL password string into the Vault, replace the underscores in the secret name with dashes.:
+Put the SQL password string into the Vault with the Azure CLI using the `az keyvault` command. Notice how the separator for the hierarchy in an appsetting uses `--` in the KeyVault's secret name:
 ```
 az keyvault secret set --vault-name $vaultName --name "ConnectionStrings--LeaderboardContext" --value "Server=sql.retrogaming.internal;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False"
 ```
@@ -364,20 +362,6 @@ To create, list, or read a user-assigned managed identity, your AKS cluster need
 az role assignment create --role "Managed Identity Operator" --assignee $clusterClientId --scope /subscriptions/$subscriptionId/resourcegroups/ContainerWorkshop
 
 az role assignment create --role "Virtual Machine Contributor" --assignee $clusterClientId --scope /subscriptions/$subscriptionId/resourcegroups/ContainerWorkshop
-```
-
-#### Check point
-
-You should now have 4 environment variables, check them using `echo`:
-
-```
-echo "Cluster Id: $clusterClientId"
-
-echo "Subscription Id: $subscriptionId"
-
-echo "Tenant Id: $tenantId"
-
-echo "Key vault name: $vaultName"
 ```
 
 ### Create a Managed Identity as Pod identity
@@ -414,17 +398,13 @@ az identity show -g ContainerWorkshop -n PodRunnerIdentity
 
 #### Checkpoint
 
-You should now have 4 environment variables, check them using `echo`:
+You should now have 6 environment variables, check them using `echo`:
 
 ```
 echo "Cluster Id: $clusterClientId"
-
 echo "Subscription Id: $subscriptionId"
-
 echo "Tenant Id: $tenantId"
-
 echo "Key vault name: $vaultName"
-
 echo "Managed Id Principal Id: $miPrincipalId"
 echo "Managed Id Client Id: $miClientId"
 ```
@@ -453,8 +433,7 @@ This operation can take some time to complete.
 
 ### Deploying a workload
 
-Create a `SecretProviderClass` that will fetch a single secret from the Key Vault.
-To do this, you will need to customize the template first. 
+Create a `SecretProviderClass` resource type in your Kubernetes cluster that will fetch a single secret from the Key Vault. To do this, you will need to customize a template from the labs resources folder `resources/lab07` first. 
 
 Open the file named `00-secret.yaml` and put in values for `keyvaultName`, `subscriptionId` and `tenantId`. The values should still be available as environment variables. Alternatively, you can find the values using `az account show`. 
 
@@ -465,54 +444,62 @@ After this, create the resource using `kubectl apply`:
 kubectl apply -f 00-secret.yaml 
 ```
 
-We can now deploy a Pod, and configure it to run using the 'PodRunnerIdentity' as it's Pod Identity. The identity can be used to get access to the Key Vault. To assign an identity to a Pod, we will add a `metadata` item named `label` to it, named `aadpodidbinding` with a value `azureidentity`. The value is the `--name` we passed to the `az aks pod-identity add` command earlier.
+We can now deploy a pod and configure it to run using the 'PodRunnerIdentity' as its pod identity. The identity can be used to get access to the Key Vault. To assign an identity to a pod, we will add a `metadata` item named `label` to it, named `aadpodidbinding` with a value `azureidentity`. The value is the `--name` we passed to the `az aks pod-identity add` command earlier.
 
-Deploy Nginx with access to that secret using `kubectl apply`:
+Make two changes to the gamingwebapp.k8s-static.yaml file:
+- Change the volume type to use `csi` instead of `secret`:
+```yaml
+volumes:
+- name: secretsettings
+  csi:
+    driver: secrets-store.csi.k8s.io
+    readOnly: true
+    volumeAttributes:
+      secretProviderClass: containerworkshopvault
 ```
-kubectl apply -f 01-nginx-with-secret-pod.yaml
+- Add the label for identity binding inside the `dep-leaderboardwebapi` deployment definition:
+```yaml
+template:
+  metadata:
+    labels:
+      app: leaderboardwebapi
+      aadpodidbinding: azureidentity # Add this line
 ```
+Deploy your new manifest after saving the YAML file.
 
 ### Checking the result
-Assert that the nginx Pod is running:
+Assert that the `leaderboardwebapi` pod is still running. Next, list all available secrets by running `ls` on the volume. Make sure to replace `<leaderboardwebapi-podname>` with the name of the pod instance. Use `kubectl get pods` to find it.
 
 ```
-kubectl describe pod/nginx-secrets-store | grep ContainersReady
-
-  ContainersReady   True
-```
-
-List all available secrets by running `ls` on the volume:
-```
-kubectl exec -it nginx-secrets-store -- ls /mnt/secrets-store/
+kubectl exec -it <leaderboardwebapi-podname> -- ls /app/secrets/
 
 connectionstrings--leaderboardcontext
 ```
-
-And finally, list the content of the secret using `cat` on a file in the volume:
+Finally, list the content of the secret using `cat` on a file in the volume, after having replaced the current pod name in the command again:
 
 ```
-kubectl exec -it nginx-secrets-store -- cat /mnt/secrets-store/connectionstrings--leaderboardcontext
-
-Server=sql.retrogaming.internal;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False
+kubectl exec -it <leaderboardwebapi-podname> -- cat /app/secrets/connectionstrings--leaderboardcontext
 ```
+The connection string from the Azure KeyVault should be displayed.
+
+For final testing, visit the homepage of the web application at the public IP address and check whether the high scores are still listed. 
+
+If not, verify that the pod for the leaderboard Web API is still running. View the logs and create a port forward to access the API directly and troubleshoot it till you get it fixed.
+
+You now have a pod running as a managed identity that is used to get access to the Azure KeyVault, where it can access a single read-only secret. No passwords are stored anywhere. 
 
 ## Cleanup
-Remove the nginx Pod:
-```
-kubectl delete -f 01-nginx-with-secret-pod.yaml
-```
+You can choose to remove the resources of the last part on managed identities, or continue with this setup. 
 
-Remove the AzureIdentity:
+In case you want to remove all, start by removing the AzureIdentity:
 ```
 az aks pod-identity delete --resource-group ContainerWorkshop --cluster-name ContainerWorkshopCluster --name azureidentity --namespace default
 ```
-
-Remove the Managed Identity:
+Next, remove the Managed Identity:
 ```
 az identity delete -g ContainerWorkshop -n PodRunnerIdentity
 ```
-
-List the installed Helm packages:
+List the installed Helm packages to find the one that installed the secrets store provider and driver:
 ```
 helm list
 
@@ -520,7 +507,7 @@ NAME                                            NAMESPACE       REVISION       U
 csi-secrets-store-provider-azure-1612818292     default         1              2021-02-08 22:04:52.9564704 +0100 CET                                                                                                                                                                   deployed csi-secrets-store-provider-azure-0.0.16 0.0.12
 ```
 
-Remove the Secrets Store driver by removing the Helm chart:
+Remove the secrets store provider and driver by removing the Helm chart:
 
 ```
 helm uninstall csi-secrets-store-provider-azure-1612818292
@@ -528,6 +515,6 @@ helm uninstall csi-secrets-store-provider-azure-1612818292
 
 ## Wrapup
 
-In this lab you have stored the secrets of your application in the Azure Key Vault. You also moved the remaining secrets, containing the details to get access to the vault, in user secrets for development scenarios. In production these secrets are stored as Kubernetes secrets.
+In this lab you have stored the secrets of your application in the Azure Key Vault. You also moved the remaining secrets, containing the details to get access to the vault, in user secrets for development scenarios. In production these secrets are stored as Kubernetes secrets, or as a managed identity for Azure AKS scenarios.
 
 Continue with [Lab 8 - Azure DevOps Pipelines](Lab8-AzDOPipelines.md).
