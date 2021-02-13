@@ -90,7 +90,7 @@ In this case, the node is in a _Ready_ state and can run Pods.
 When you want to run a containerized application inside the cluster, you will use a Deployment configuration to schedule a pod. The `Deployment` resource will govern the lifecycle of a `Pod`.
 A pod is a group of one or more containers running on 1 node. It can have its own storage and networking setup and contains specifications on how to run the actual containers.
 
-Start a new deployment using `kubectl create deployment` by creating a Pod running an nginx container:
+Start a new deployment using `kubectl create deployment` by creating a pod running an nginx container:
 
 ```
 kubectl create deployment hello-nginx --image=nginx
@@ -150,7 +150,7 @@ hello-nginx   0/1     1            0           87s
 ```
 
 ### Dealing with pods
-Now let's see if we can get some information about the Pod that was created for us by the Deployment, by using `kubectl get pods`:
+Now let's see if we can get some information about the pod that was created for us by the Deployment, by using `kubectl get pods`:
 
 ```
 kubectl get pods
@@ -160,7 +160,7 @@ hello-nginx-8688958b4-skdvg   1/1     Running   0          106s
 ...
 ```
 
-> Note that your Pod name will be different. 
+> Note that your pod name will be different. 
 
 As you can see, the deployment created a pod for us and it's running happily.
 
@@ -198,7 +198,7 @@ NAME                          READY   STATUS    RESTARTS   AGE
 hello-nginx-8688958b4-4xt5v   1/1     Running   0          39s
 ```
 
-You should see that a brand new pod was created. The deployment noticed that the first Pod went away, and responded by creating a new pod. A deployment adds resillience to your applications running on Kubernetes!
+You should see that a brand new pod was created. The deployment noticed that the first pod went away, and responded by creating a new pod. A deployment adds resillience to your applications running on Kubernetes!
 
 ### Cleanup
 
@@ -255,7 +255,7 @@ NAME        READY   STATUS    RESTARTS   AGE
 myapp-pod   1/1     Running   0          14s
 ```
 
-We have now directly created a pod, without using a deployment. Kill the Pod to simulate an application crash again:
+We have now directly created a pod, without using a deployment. Kill the pod to simulate an application crash again:
 
 ```
 kubectl delete pod myapp-pod
@@ -336,7 +336,7 @@ NAME               READY   UP-TO-DATE   AVAILABLE   AGE
 nginx-deployment   3/3     3            3           4m
 ```
 
-Confirm this by listing Pods:
+Confirm this by listing the running pods:
 ```
 kubectl get pods
 
@@ -345,15 +345,15 @@ nginx-deployment-d46f5678b-6gd9h   1/1     Running   0          2m1s
 nginx-deployment-d46f5678b-hlvj5   1/1     Running   0          8m27s
 nginx-deployment-d46f5678b-k95wr   1/1     Running   0          2m1s
 ```
-This list is sorted alphabetically, and Pod names are generated, so your list will look different.
+This list is sorted alphabetically, and pod names are generated, so your list will look different.
 Two of three pods were created by scaling out, so they have a younger age.
 
 ## <a name='services'></a>Use services
 As we saw earlier, in Kubernetes each pod will get a unique IP address. In theory you can use this to communicate with other pods. However, when a pod dies and gets recreated by the deployment resource, its IP address will be different. 
 
-So, when a front-end pod needs to talk to a back-end pod, we need a reliable way to communicate. Services are the solution to this. A service is an IP address inside the cluster, that never changes. It can be attached to pods by using selection criteria with a `selector`. A sService will live forever as it doesn't have any moving parts. The Pods connected to a Service may come and go. This way, you have a fixed endpoint within the Kubernetes cluster, that acts as a load balancer into a dynamic collection of pods.
+So, when a front-end pod needs to talk to a back-end pod, we need a reliable way to communicate. Services are the solution to this. A service is an IP address inside the cluster, that never changes. It can be attached to pods by using selection criteria with a `selector`. A sService will live forever as it doesn't have any moving parts. The pods connected to a Service may come and go. This way, you have a fixed endpoint within the Kubernetes cluster, that acts as a load balancer into a dynamic collection of pods.
 
-As an example, let's see if we can add a service to the nginx deployment. We will add a service in front of the running pods. The service will target Pods matching a given app (based on the pod's `metadata` - `label.app` attribute value 'nginx'. 
+As an example, let's see if we can add a service to the nginx deployment. We will add a service in front of the running pods. The service will target pods matching a given app (based on the pod's `metadata` - `label.app` attribute value 'nginx'. 
 
 This is the relevant part of the deployment YAML:
 ```yaml
@@ -443,14 +443,14 @@ written to stdout
 
 > Note, replace the IP address with the value for __your__ Service and make sure to target port 8080.
 
-You can see that the response of the `wget` call was created by an nginx Pod. We have created a Service which we can interact with by using the built-in DNS server of Kubernetes. It will be reachable regardless of individual Pod restarts or scaling of the number of Pods.
+You can see that the response of the `wget` call was created by an nginx pod. We have created a Service which we can interact with by using the built-in DNS server of Kubernetes. It will be reachable regardless of individual pod restarts or scaling of the number of pods.
 
 ## <a name='clean'></a>Cleaning up
 If your terminal is still active, exit it by running:
 ```
 exit
 ```
-Delete the 'wget' Pod:
+Delete the 'wget' pod:
 ```
 kubectl delete pod wget
 ```
@@ -471,7 +471,7 @@ kubectl delete -f 02-nginx-service.yaml
 
 ## Wrapup
 
-In this lab you experimented with Kubernetes from the command line. You have learned how to manage Pods using Deployments and how to add network connectivity to Pods.
+In this lab you experimented with Kubernetes from the command line. You have learned how to manage pods using Deployments and how to add network connectivity to pods.
 
-Continue with [Lab 11 - Blue/Green deployments on Kubernetes with Contour](Lab11-BlueGreen.md).
+Continue with [Lab 7 - Registries and clusters](Lab7-RegistriesClusters.md).
 

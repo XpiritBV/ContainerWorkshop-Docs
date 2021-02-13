@@ -351,4 +351,4 @@ kubectl delete ns buggygreen
 
 In this lab you experimented with network traffic blocking using Istio, from the command line. You have learned how to protect a legacy resource from being overwhelmed by clients, and how to implement retry behavior on behalf of the client to deal with transient errors.
 
-Continue with [Lab 13 Retry and Circuit breaker with Istio](Lab13-IstioRetry-CircuitBreaker).
+Continue with [Lab 12 - Monitoring](Lab12-Monitoring.md).

@@ -231,9 +231,6 @@ Note that the secrets here are only base64 encoded and not protected. It is more
 
 > Note 3: Do not run this chapter on Docker Desktop!
 
-### Important
-This lab requires prior knowledge of the Kubernetes platform. If you aren't familiar with `kubectl` and `az aks` we recommend that you first make [Lab 10 - Kubernetes](Lab10-Kubernetes.md) and then come back here.
-
 ### Introduction
 
 If you want to store secrets outside of the cluster in a secure managed store, you can use Azure Key Vault combined with [Azure Managed Identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview).
@@ -524,4 +521,4 @@ helm uninstall csi-secrets-store-provider-azure-1612818292
 
 In this lab you have stored the secrets of your application in the Azure Key Vault. You also moved the remaining secrets, containing the details to get access to the vault, in user secrets for development scenarios. In production these secrets are stored as Kubernetes secrets, or as a managed identity for Azure AKS scenarios.
 
-Continue with [Lab 8 - Azure DevOps Pipelines](Lab8-AzDOPipelines.md).
+Continue with [Lab 9 - Blue/Green deployments on Kubernetes with Contour](Lab9-BlueGreen.md).

@@ -403,4 +403,4 @@ az aks update --name ContainerWorkshopCluster --resource-group ContainerWorkshop
 
 In this lab you have created a composition that is able to deploy a stack of services to a cluster. Necessary changes to the environment variables were made and perhaps you even got to use an Azure SQL Database.
 
-Continue with [Lab 7 - Security](Lab7-Security.md).
+Continue with [Lab 8 - Security](Lab8-Security.md).

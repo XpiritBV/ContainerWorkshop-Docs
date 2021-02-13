@@ -8,7 +8,7 @@ Goals for this lab:
 - Deploy images to cluster
 
 ## <a name="run"></a>Get existing application
-We will start with or continue running the existing ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to clone it now if you do not have the sources. Switch to the `master` branch by using this command :
+We will start with or continue running the completed ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to clone it now if you do not have the sources. Switch to the `master` branch by using this command :
 
 ```
 git checkout master
@@ -58,7 +58,7 @@ Enter `build` as the Command that will execute for `Run a Docker Compose command
 
 Select the pipeline at the top again to fill in all linked properties, as described below.
 
-Notice that this template assumes that you will use an Azure Container Registry. You can use one if you created it before. If not, refer back to [Lab 6](Lab6-RegistriesClusters.md) to read how to create the container registry.
+Notice that this template assumes that you will use an Azure Container Registry. You can use one if you created it before. If not, refer back to [Lab 7](Lab7-RegistriesClusters.md) to read how to create the container registry.
 
 You need to create a connection between Azure DevOps and your Azure subscription. Open the details of the first task, locate the property for the `Azure subscription` and add your subscription details.
 
@@ -146,8 +146,8 @@ keyvaultclientid | ca5a0aeb-0eec-49a3-a527-a29e2524fa5b
 keyvaultclientsecret | 45gSC1AZ3lkaSUHpsqFfL/+vddtbshVs1umC0IZWsVY=
 keyvaulturl | https://Containerworkshop.vault.azure.net
 
-**If you did Lab 7 before:**
-Each of these variable names should be familiar and known to you (except the `aikey`, which remains empty for now). For the key vault related values (e.g. keyvaultclientid), use the values from the [Security Lab](Lab7-Security.md#adding-support-for-azure-key-vault).
+**If you did Lab 8 before:**
+Each of these variable names should be familiar and known to you (except the `aikey`, which remains empty for now). For the key vault related values (e.g. `keyvaultclientid`), use the values from the [Security Lab](Lab8-Security.md#adding-support-for-azure-key-vault).
 Some of these will be used later.
 You can remove the `volumeMounts` and `spec` from the `dep-leaderboardwebapi` deployment, now that the values in it are coming from the pipeline variables and the environment variables. 
 
@@ -157,5 +157,3 @@ Try your release pipeline by creating a new release. Check whether the release i
 ## Wrapup
 
 In this lab you have created a build pipeline to build and push the container images for your .NET solution. You used a release pipeline to deploy the composition to a cluster in Azure.
-
-Continue with [Lab 9 - Monitoring](Lab9-Monitoring.md).

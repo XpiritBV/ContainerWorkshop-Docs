@@ -49,8 +49,6 @@ kubectl apply -f 02-blue.yaml
 
 Each of these commands will first ensure that the namespace 'BlueGreen' exists, and then create a [deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment) and expose it by using a [service](https://kubernetes.io/docs/concepts/services-networking/service/).
 
-> If you have no idea what this is about, consider doing [Lab 10 - How to use Kubernetes](Lab10-Kubernetes.md) first.
-
 The first command creates the 'green' version of the workload, and the second will create the 'blue' version.
 After this step, you will have two active pods who can be called individually. 
 
@@ -252,4 +250,4 @@ kubectl delete ns heptio-contour
 
 In this lab you experimented with Kubernetes network connectivity from the command line. You have learned how to shape traffic flowing into pods using Countour HTTPProxy.
 
-Continue with [Lab 12 - Working with Istio on Kubernetes](Lab12-Istio.md).
+Continue with [Lab 10 - Working with Istio on Kubernetes](Lab10-Istio.md).

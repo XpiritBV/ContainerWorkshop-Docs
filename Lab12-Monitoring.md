@@ -1,5 +1,3 @@
-//TODO: use new code
-
 # Lab 9 - Monitoring
 
 During this lab you will use Azure Application Insights and instrument the web application and the Web API to collect telemetry, and logging information. Also, you are going to review the existing implementation of the structured logging and health endpoints. Finally, you will introduce an actual bug and monitor the behavior of the application, and fix the bug afterwards.
@@ -141,16 +139,9 @@ Fix the bug (by removing the code you added previously) by following a proper De
 ## Monitoring Kubernetes Pods with Istio
 In this chapter we will use Istio addons to visualize your Kubernetes environment.
 
-### Important
-This lab requires prior knowledge of the Kubernetes and Istio platform. If you aren't familiar with `kubectl`, `istioctl` and `az aks`, we recommend that you first make [Lab 10 - Kubernetes](Lab10-Kubernetes.md) and [Lab 12 - Working with Istio on Kubernetes](Lab12-Istio.md) and then come back here.
-
-### Introduction
-
-If you want to visualize your Kubernetes cluster, you can use Istio.
-
 ### Getting started
-1. Install Istio by following the steps outlined in chapter 'Deploying Istio' of [Lab 12 - Working with Istio on Kubernetes](Lab12-Istio.md).
-2. Deploy an Istio enabled **buggy** workload (a .NET API that returns a color string) as described in chapter 'Deploying a workload' of [Lab 13 Retry and Circuit breaker with Istio](Lab13-IstioRetry-CircuitBreaker). Stop after deploying Fortio and return here.
+1. Install Istio by following the steps outlined in chapter 'Deploying Istio' of [Lab 10 - Working with Istio on Kubernetes](Lab10-Istio.md).
+2. Deploy an Istio enabled **buggy** workload (a .NET API that returns a color string) as described in chapter 'Deploying a workload' of [Lab 11 Retry and Circuit breaker with Istio](Lab11-IstioRetry-CircuitBreaker). Stop after deploying Fortio and return here.
 3. Generate some traffic to the workload, by running `fortio`:
    ```
    kubectl exec -it fortio-deploy-6dc9b4d7d9-p68rg -- fortio load -c 100 -qps 10  http://blue/api/color
@@ -268,6 +259,4 @@ Break the port forward by pressing `Ctrl+c`.
 
 In this lab you have added the first monitoring support to the application and Web API. You used Application Insights to capture telemetry of multiple Azure resources and introduced semantic logging to create rich log information.
 
-
-
-
+Continue with [Lab 13 - Azure DevOps Pipelines](Lab13-AzDOPipelines.md).
