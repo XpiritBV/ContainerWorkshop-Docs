@@ -12,7 +12,7 @@ Goals for this lab:
 
 ## <a name='appinsights'></a>Create an Application Insights resource
 
-Go to the Azure portal and create a new Application Insights resource in the existing resource group. Once created go to the overview and take note of the AppInsights instrumentation key.
+Go to the Azure portal and create a new Application Insights resource in the existing resource group `ContainerWorkshop`. Once created go to the overview and take note of the AppInsights instrumentation key.
 
 Currently, you cannot [easily](https://docs.microsoft.com/en-us/cli/azure/ext/application-insights/monitor/app-insights?view=azure-cli-latest) create the AppInsights resource from the Azure CLI. It is possible to use Azure Resource Management (ARM templates) to automate the provisioning.
 
@@ -76,13 +76,18 @@ Notice how the name of the log message format does not resemble the name of the 
 
 Two main log providers know how to deal with semantic logging: Azure Application Insights and SeriLog. We will be using AppInsights again.
 
-Finally, open the `Startup.cs` file and go to the `Configure` method. Notice how there is a statement:
+Finally, open the `Program.cs` file and go to the `CreateHostBuilder` method. Examine the `ConfigureLogging` to see how logging to Application Insights is configured:
 
 ```c#
-loggerFactory.AddApplicationInsights(app.ApplicationServices, LogLevel.Information);
+.ConfigureLogging((context, builder) =>
+{
+   builder.AddApplicationInsights(options =>
+   {
+      options.IncludeScopes = true;
+      options.TrackExceptionsAsExceptionTelemetry = true;
+   });
+})
 ```
-
-that will configure Application Insights as a log provider.
 
 Go to the Azure Portal and open the blade for the AppInsights resource you created. Refresh the home page of the Look at Live Metrics and Log Analytics to see the effects of the logging and telemetry.
 
@@ -90,29 +95,33 @@ Go to the Azure Portal and open the blade for the AppInsights resource you creat
 
 With monitoring in place, you can now start to do a full outer cycle to your production cluster from your local development environment.
 
-Create a bug by adding the following code at the beginning of the `Get` method of the `LeaderboardController` class:
+Create a bug by adding the following method to the `LeaderboardController` class:
 
 ```c#
-// This is a demo bug, supposedly "hard" to find
-do
+private void AnalyzeLimit(int limit)
 {
-    limit--;
+   // This is a demo bug, supposedly "hard" to find
+   do
+   {
+         limit--;
+   }
+   while (limit != 0);
 }
-while (limit != 0);
 ```
-
-and add a parameter to the signature of the `Get` method:
-
+and calling it at the beginning of the `Get` method:
 ```c#
-public async Task<ActionResult<IEnumerable<HighScore>>> Get(int limit = 0)
+public async Task<ActionResult<IEnumerable<HighScore>>> Get(int limit = 10)
+{
+   logger.LogError("Retrieving score list with a limit of {SearchLimit}.", limit);
+   AnalyzeLimit(limit);
 ```
 
-Compile your changes locally. If it compiles, check it the source code and perform a build and release into your cluster. After a successful deployment, check how the website is behaving. You might want to create some load on the cluster from PowerShell:
+Compile your changes locally. If it compiles, check in the source code and perform a build and release into your cluster. After a successful deployment, check how the website is behaving. You might want to create some load on the cluster from PowerShell:
 
 ```PowerShell
-for ($i = 0 ; $i -lt 10000; $i++)
+for ($i = 0 ; $i -lt 100; $i++)
 {
-   Invoke-WebRequest -uri http://<yourcluster>.westeurope.aksapp.io/
+   Invoke-WebRequest -uri http://<yourclusterip>/?limit=0
 }
 ```
 
@@ -128,7 +137,6 @@ Fix the bug (by removing the code you added previously) by following a proper De
 - Make a pull request to master
 - Perform a build and release to your Kubernetes cluster
 - Verify everything works and close the work item
-
 
 ## Monitoring Kubernetes Pods with Istio
 In this chapter we will use Istio addons to visualize your Kubernetes environment.

@@ -11,25 +11,12 @@ Goals for this lab:
 - [Run and manage composition in cluster](#run)
 - [(Optional) Switch to Azure SQL Database](#sql)
 
-## <a name="run"></a>Run existing application
-We will start with or continue running the existing ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to clone it now if you do not have the sources. Switch to the `Master` branch by using this command 
-
-```cmd
-git checkout master
-```
-
 > ##### Important
 > Make sure you have:
 >
-> - Switched to the `master` branch to use the right .NET solution.
+> - Checked out the `start` from the repository.
+> - Completed previous labs.
 > - Configured 'Docker Desktop' to run Linux containers.
-
-Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to navigate the code and familiarize yourself with the various projects in the solution. You should be able to identify these:
-
-- `GamingWebApp`, an ASP.NET MVC Core frontend 
-- `LeaderboardWebAPI`, an ASP.NET Core Web API
-
-For now, a SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as desribed in [Lab 2](Lab2-Docker101.md#lab-2---docker-101).
 
 ## <a name="push"></a>Pushing images to a registry
 
@@ -150,23 +137,61 @@ This process can be automated by a build and release pipeline. You will learn ho
 
 ## Connecting to your cluster
 
-At this point you will need to have access to a Docker cluster. If you haven't done so already, create an Azure Kubernetes Service cluster in Azure. [Module 1](Lab1-GettingStarted.md) describes how you can create one.
+At this point you will need to have access to a Docker cluster. You can use your local cluster running in Docker Desktop and Azure Kubernetes Service. If you haven't done so already, create an Azure Kubernetes Service cluster in Azure. [Lab 1](Lab1-GettingStarted.md) describes how you can create one.
 
-Open the dashboard of your cluster. There are several ways to connect to it. The easiest way is to use VSCode and the Kubernetes extension. Navigate to the Kubernetes pane on the left and find your cluster listed. Right-click it and use `Set as current cluster` if you have more than one cluster and yours is not selected yet. Right-click again and select `Open Dashboard` from the context menu. This should create a port mapping from your localhost machine to the master node of your cluster. A browser window will open at `http://localhost:10000` and show the Kubernetes dashboard.
+First, connect to your local cluster in Docker Desktop. There are several ways to connect to it:
 
-Alternatively, you can run the command:
+The easiest way is to use Visual Studio Code and the Kubernetes extension. Navigate to the Kubernetes pane on the left and find your local cluster listed as `docker-desktop`. Right-click it and use `Set as current cluster` if you have more than one cluster and yours is not selected yet. The `>` glyph in front of the cluster node indicates the current cluster.  
+![](images/VSCodeKubernetesExtension.png)
 
-```cmd
-az aks browse --name ContainerWorkshopCluster --resource-group ContainerWorkshop
+You can also deploy a Kubernetes hosted dashboard using this command:
 ```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+```
+You can reach the dashboard by running a proxy:
+```
+kubectl proxy
+```
+The dashboard can be found at this endpoint:
+```
+http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+```
+You will reach a login screen where you need to provide a token (or kubeconfig file).
+![](images/KubernetesDashboardLogin.png)
+The token can be found in two steps. First run this command:
+```
+kubectl -n kube-system get secret
+```
+This will list all registered system-specific secrets in Kubernetes. Find the name for the `default-token` in the list. It is similar to `default-token-v9rxc`, but the last part will differ for your installation. 
 
-and navigating to the localhost address `http://localhost:8001` that forwards to the actual cluster. Most likely a browser window will already open.
+```
+kubectl -n kube-system describe secret default-token-v9rxc
+```
+The command gives output similar to:
+```
+Name:         default-token-v9rxc
+Namespace:    kube-system
+Labels:       <none>
+Annotations:  kubernetes.io/service-account.name: default
+              kubernetes.io/service-account.uid: 08a100bd-df9a-4f3f-b11a-106fe92d2871
+
+Type:  kubernetes.io/service-account-token
+
+Data
+====
+token:      eyJhbGciOiJSUzI1NiIsImtpZCI6InI0U29nakdwNmR1T3RLVzBRTVBUZUxGSWhtYl9ZRExsNXpBYmNvdjl0MWcifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXY5cnhjIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiIwOGExMDBiZC1kZjlhLTRmM2YtYjExYS0xMDZmZTkyZDI4NzEiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.lNaY8rnoZv0BTNoI-F7fj-CtxtWF_fulymFL1k2y0BpgvPRfojsKy7HBzBi9qnUwipLK46AksCOzgg0Z3DbpF9BN_4VIBQmfJ4_yH1v8TYqC7LSriyIYEST_hJIRCQbJ919CXxSxW-Teo8mJ3mZo9PheBiARLas3P-e2e_xu14_Q5DnvjCcmgxTpPBEBhi5G-4O7fDybVljZxgeBQM65ODCd5pTjPp_SPrFykw2qWCHnEl28q5wUvtGYlXle9aAN1arZq1O2_h98LAYUUryYzGNEp4Ma7CIdytf1nwwpSaAmRUAC4RYWL41DDp3oeD9-hiQsZ-hLYWxZlQ8A
+ca.crt:     1066 bytes
+namespace:  11 bytes
+```
+Copy and paste the line for `token` into the login field that reads `Enter token` and click `Sign in`. You should see the dashboard appear.
+
+![](images/KubernetesDashboard.png)
 
 > ****Important****
 >
 > If you get any errors in the Kubernetes dashboard, revisit [Module 1](Lab1-GettingStarted.md) and fix the dashboard by changing the RBAC configuration.
 
-You also set your cluster as the active context and interact with it using kubectl commands. First, retrieve a list of the current available clusters and contexts with `kubectl` commands and then set your cluster as active. All `kubectl` will be executed against that context from now.
+You can also set your cluster as the active context and interact with it using kubectl commands. First, retrieve a list of the current available clusters and contexts with `kubectl` commands and then set your cluster as active. All `kubectl` will be executed against that context from now.
 ```
 kubectl cluster-info
 kubectl config get-clusters
@@ -187,16 +212,14 @@ Inside this resource group you will find the underlying resources of your AKS cl
 
 ## Deploy your Docker composition to a cluster
 
-> You can switch back to the master branch and build your images from there. Commit or undo any pending changes.
+Kubernetes does not use Docker Compose files for its deployments. Instead, it uses deployment manifests. The resources files under Lab 6  has a file called `01-gamingwebapp.k8s-static.yaml`. Create a folder `deployment` in the root of your code repository and copy the file into it. Right-click your Visual Studio solution and add the YAML file as an existing file. The manifest file should appear in `Solution items` in the Solution Explorer. Open the file and examine the contents.
 
-Kubernetes does not use Docker Compose files for its deployments. The Visual Studio solution contains a folder `Deployments` under `Solution Items`. You should find a Kubernetes deployment manifest in it, called `gamingwebapp.k8s-static.yaml`. Kubernetes use these files instead of composition files. Open a command prompt and navigate to the folder.
+You need to make a few changes to the manifest for it to be useable. In particular, make sure you change the following marker
+`__containerregistry__`
+	
+Execute the command `az acr show -n <registry> --query loginServer` to get the fully qualified name of the registry and replace the marker with its value.
 
-You need to make a few changes to the manifest for it to be useable. In particular, make sure you change the following markers:
-- `__containerregistry__`
-	- Execute the command `az acr show -n <registry> --query loginServer` to get the value
-- Change `gamingwebapp:demo` into `gamingwebapp:latest`
-
-In order to be able to pull images from your registry into the cluster, you will need to authenticate against a private registry. If you are using Docker Hub, then this is not required. 
+In order to be able to pull images from your registry into the cluster, you will need to authenticate against a private registry. This is not required, if you are using the public Docker Hub.
 
 For Azure Container Registry, you can create another service principal that will be allowed access to the registry. Execute the following command after having replaced the placeholders with your specific details.
 
@@ -205,9 +228,9 @@ az ad sp create-for-rbac --scopes /subscriptions/<your-subscription-id>/resource
 ```
 This command creates a principal that has the Contributor role in the ACR. Take a note of the password that is generated in the output.
 
-> Note: if you cannot create this Service Principal, you can use the admin credentials you used for `docker login` earlier.
+> Note: if you cannot create this service principal, you can use the admin credentials you used for `docker login` earlier.
 
-Next, you are going to create a secret in the cluster to hold the credentials for this principal. The secret is specific to container registries and allows the manifest deployment to use the credentials to pull images for the Kubernetes services.
+Next, you are going to create a secret named `pullkey` in the cluster to hold the credentials for this principal. The secret is specific to container registries and allows the manifest deployment to use the credentials to pull images for the Kubernetes services.
 
 ```
 kubectl create secret docker-registry pullkey --docker-server <your-registry-name>.azurecr.io --docker-email <your-email> --docker-username=<your-principal-appid> --docker-password <generated-password>
@@ -217,12 +240,22 @@ Later, secrets will be covered in more detail. Execute the next command, again r
 
 Save your work and go to the command prompt. Run the command:
 ```
+kubectl config use-context docker-desktop
 kubectl apply -f .\gamingwebapp.k8s-static.yaml
 ```
-and watch the results from the dashboard. This deployment could take some time to complete. As container images must be downloaded and additional virtual disks will be deployed to your cluster resource group in Azure.
-Also, a DNS A-record and a public IP address will be created. After about 5 minutes, everything should be up and running.
+and watch the results from the dashboard (assuming the proxy is still running). This deployment could take some time to complete as container images must be downloaded to your local cluster. 
 
 > Note that consecutive deployments of the same application, but with newer images, will go a lot faster.
+
+Visit the gaming web app by going to `http://localhost`. You should see the page named 'All time highscore hall of fame'. 
+
+> If you get  collisions on port 80, it is probably already in use on your development machine. You will need to shut down your local W3SVC service by running `net stop w3svc`, or change the `port` mapping in your deployment manifest.
+
+If all is working well, try to deploy the solution to your AKS cluster as well. Switch the context to AKS and deploy the manifest:
+```
+kubectl config use-context ContainerWorkshopCluster-admin
+kubectl apply -f .\gamingwebapp.k8s-static.yaml
+```
 
 Find the external IP address of the `gamingwebapp` pod by running this command:
 
@@ -232,7 +265,6 @@ kubectl get service svc-gamingwebapp
 
 Open a browser and navigate to the IP address listed under EXTERNAL-IP
 
-You should see the page named 'All time highscore hall of fame'. 
 > Note:
 > The external IP address of the pod is exposed. All traffic to this IP address will be routed to that particular pod. Normally you would use HTTP Application Routing (a feature of Azure AKS) or a service mesh to split traffic based on parts of a DNS name for the same IP address.
 
@@ -260,20 +292,18 @@ The steps you need to do are:
 
 ![](images/AzureSQLFirewall.png)
 
-- Connect with SQL Server Management Studio or any other query tool to execute a couple of SQL scripts to the server and database:
+- Connect with SQL Server Management Studio or any other query tool to execute a couple of SQL scripts to the server and database. 
+> **Tip**: Visual Studio has a Server Explorer that also allows easy connections to local and Azure hosted databases.
 
+Execute the following script to create the new `Leaderboard` database:
 ```sql
 CREATE DATABASE [Leaderboard]
 GO
-
-USE [Leaderboard]
-GO
 ```
 
-Create a SQL Create script for the two tables in your local SQL Server database in the Docker container, or use the provided `CreateDatabase.sql` file in the Git repository.
+Open the provided `02-createdatabase.sql` file in the lab resources. This SQL script adds two tables in your SQL Server `Leaderboard` database. Run it to create the tables and some initial test data. 
 
-Next, run the following script on the database:
-
+Next, run this following script on the database:
 ```sql
 USE [master]
 GO
@@ -297,22 +327,15 @@ GO
 - ConnectionStrings:LeaderboardContext=Server=tcp:<your-sql-server>.database.windows.net,1433;Initial Catalog=Leaderboard;Persist Security Info=False;User ID=retrogamer;Password=abc123!@;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
 ```
 
-- Set the `ASPNETCORE_ENVIRONMENT` for the `LeaderboardWebAPI` to `Production` again.
-
 Try to deploy the manifest again using Azure SQL Database now instead of the containerized version.
-
 
 ## Using Azure Managed Identity with ACR and AKS
 In this chapter we will use a Managed Identity to connect Kubernetes to an Azure Container Registry.
 
-### Important
-This lab requires prior knowledge of the Kubernetes platform. If you aren't familiar with `kubectl` and `az aks` we recommend that you first make [Lab 10 - Kubernetes](Lab10-Kubernetes.md) and then come back here.
-
 ### Introduction
 
 If you want to store container images in a private repository and allow Kubernetes to use it, without managing credentials, you can use Azure Container Registry combined with [Azure Managed Identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview).
-To do this, we will configure the cluster to integate with a Container Registry.
-
+To do this, we will configure the cluster to integate with a container registry.
 
 ### Creating a Container Registry (if needed)
 If you do not have one yet, create an Azure Container Registry. Run the following command from the command-line to create it:

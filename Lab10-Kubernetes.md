@@ -14,7 +14,7 @@ Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6)
 
 ## Getting started
 ![](images/kubernetes01.png)
-Launch VS Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster.
+Launch Visual Studio Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster.
 Click on the 'Install dependencies' button if needed.
 
 Also, in the terminal, change directories to the Docs repository directory named 'resources/lab10'
@@ -455,14 +455,14 @@ Delete the 'wget' Pod:
 kubectl delete pod wget
 ```
 
-Delete the nginx Service and Deployment
+Delete the nginx service and deployment
 
 ```
 kubectl delete deployment nginx-deployment
 kubectl delete service nginx-service
 ```
 
-An alternative way to delete the Deployment and Service is by undoing the `kubectl apply` by using `kubectl delete`:
+An alternative way to delete the deployment and service is by undoing the `kubectl apply` by using `kubectl delete`:
 
 ```
 kubectl delete -f 01-nginx-deployment.yaml

@@ -42,17 +42,14 @@ cd resources/lab12
 
 curl -L https://istio.io/downloadIstio | sh -
 ```
-This will make sure that the tool is installed in a folder named 'istio-1.8.2' and available for the next steps.
+This will make sure that the tool is installed in a folder named 'istio-1.9.0' and available for the next steps.
 
 > Note that your version may be different.
 
-1. Add `istioctl` to your Path definitions. Move to the new folder:
+1. Add `istioctl` to your `PATH` definitions. Copy and run the `export PATH="..."` command that is shown in the output of the script that was executed
+1. Run the Istion precheck command to validate Istio can be installed correctly:
 ```
-cd istio-1.8.2
-```
-and add it:
-```
-export PATH=$PWD/bin:$PATH
+istioctl x precheck
 ```
 
 1. Install the 'demo' profile of Istio:
@@ -90,14 +87,7 @@ istiod-7d8f784f96-cvf6g                 1/1     Running   0          106m
 
 ## <a name='deploy-workload'></a> Deploying a workload
 
-Move back up to the `/resources/lab12` folder.
-```
-cd ..
-
-user@machine:/mnt/c/Sources/ContainerWorkshop-Docs/resources/lab12/$ 
-```
-
-Now it is time to see ingress in action. 
+Now it is time to see ingress in action.
 1. First, make sure that we start with a clean slate by deleting the existing namespace 'bluegreen', which may have been left over from Lab 11:
 
 ```
@@ -118,7 +108,7 @@ deployment.apps/green created
 service/green created
 ```
 
-And version 2:
+and also for version 2:
 
 ```
 kubectl apply -f ../lab11/02-blue.yaml
@@ -128,7 +118,7 @@ deployment.apps/blue created
 service/blue created
 ```
 
-And select the new 'bluegreen' namespace as the default for this session:
+Select the new 'bluegreen' namespace as the default for this session:
 
 ```
 kubectl config set-context --current --namespace=bluegreen
@@ -150,11 +140,11 @@ green-78c68dfbb5-cfcbr   2/2     Running   4          28m   10.1.0.30   docker-d
 green-78c68dfbb5-mcvch   2/2     Running   3          28m   10.1.0.26   docker-desktop   <none>           <none>
 ```
 
-In the output, you can see that each Pod - configured to run a **single** container - is now running **two** containers (indicated by '2/2'). Let's investigate what happened...
+In the output, you can see that each pod - configured to run a **single** container - is now running **two** containers (indicated by '2/2'). Let's investigate what happened.
 
-> Note that the name of your Pod will be different from what is displayed here.
+> Note that the names of your pods will be different from what is displayed here.
 
-Get the `yaml` definition of your Pod by running this command, replacing the name of the Pod with the output of the previous command:
+Get the `yaml` definition of one of the pods by running this command, replacing the name of the pod with the output of the previous command:
 
 ```
  kubectl get pod blue-6d5c8869bb-4zxtd -o yaml | grep image
@@ -176,7 +166,7 @@ In the output you should see the image of the sample workload 'xpiritbv/bluegree
   image: istio/proxyv2:1.8.2
   imageID: docker-pullable://istio/proxyv2@sha256:2f5931b4c0856ae48a9b17cae2ddc384cdd97b0f40d455e61e8636d32a6392f3
 ```
-The 'istio/proxy' image - is a '[user-level](https://en.wikipedia.org/wiki/User_space) [Layer 7](https://en.wikipedia.org/wiki/OSI_model#Layer_7:_Application_Layer)' proxy, that manages all network access into and out of the Pod. It was automatically added to the Deployment by Istio, because the namespace 'bluegreen' has a label `istio-injection=enabled`. The added container is called the 'sidecar proxy'. In this lab, you will learn some of the useful features that are made possible by this sidecar.
+The 'istio/proxy' image - is a '[user-level](https://en.wikipedia.org/wiki/User_space) [Layer 7](https://en.wikipedia.org/wiki/OSI_model#Layer_7:_Application_Layer)' proxy, that manages all network access into and out of the pod. It was automatically added to the deployment by Istio, because the namespace 'bluegreen' has a label `istio-injection=enabled`. The added container is called the 'sidecar proxy'. In this lab, you will learn some of the useful features that are made possible by this sidecar.
 
 Examine the metadata of the Namespace 'bluegreen' by running `kubectl get namespace`:
 ```
@@ -185,13 +175,13 @@ kubectl get namespace bluegreen -o yaml | grep \"metadata\"
       {"apiVersion":"v1","kind":"Namespace","metadata":{"annotations":{},"labels":{"istio-injection":"enabled"},"name":"bluegreen"}}
 ```
 
-Istio adds network proxies to Pods in designated Namespaces. This approach can work, because containers running in a Pod share an IP Address. This way, the proxy can listen on port 80 and forward traffic to the 'bluegreen' API listening at port 8080. The proxy can also manage network traffic going out of the Pod.
+Istio adds network proxies to pods in designated namespaces. This approach can work, because containers running in a pod share an IP address. The proxy can listen on port 80 and forward traffic to the 'bluegreen' API listening at port 8080. The proxy can also manage network traffic going out of the pod.
 
-## <a name='simple-ingress'></a>Exposing a Pod to the outside world
-Let us get back on topic. We will expose the Pod that is running the 'blue' version to the outside world. Deploying Istio in the previous steps has resulted in the deployment of a Pod that manages ingress into the mini-cluster. 
+## <a name='simple-ingress'></a>Exposing a pod to the outside world
+Let us get back on topic. We will expose the Pod that is running the 'blue' version to the outside world. Deploying Istio in the previous steps has resulted in the deployment of a pod that manages ingress into the mini-cluster. 
 
 ### Ingress gateway
-Run this command to display the Istio Pods running in the 'istio-system' Namespace again:
+Run this command again to display the Istio pods running in the 'istio-system' Namespace again:
 
 ```
 kubectl get pods -n istio-system
@@ -202,8 +192,7 @@ istio-ingressgateway-865d46c7f5-qp9lx   1/1     Running   1          18h
 istiod-7f785478df-trvgl                 1/1     Running   1          18h
 ```
 
-One of the Pods has a name that starts with 'istio-ingressgateway'. This [ingress gateway](https://istio.io/docs/tasks/traffic-management/ingress/ingress-control/) is the load balancer we will configure with some policies later on. This is the Istio alternative for an IngressController in Kubernetes.
-
+One of the pods has a name that starts with 'istio-ingressgateway'. This [ingress gateway](https://istio.io/docs/tasks/traffic-management/ingress/ingress-control/) is the load balancer we will configure with some policies later on. This is the Istio alternative for an IngressController in Kubernetes.
 
 Examine the description of the Service resources in the Namespace 'istio-system' by running `kubectl get svc`:
 
@@ -224,14 +213,13 @@ istio-ingressgateway   LoadBalancer   10.0.231.29   20.71.15.44   15021:31119/TC
 ```
 
 > Note that the value of 'EXTERNAL-IP' shows 'localhost' when running on the Docker Desktop. This means that you can access this service from the host that runs the cluster (i.e. your laptop), by using 'localhost'. This is convenient for local testing.
-
-
-**If the value of 'EXTERNAL-IP' is not 'localhost', make a note of the value, replace 'localhost' with that value in the CURL commands below. In our cluster, it's 20.71.15.44, for your cluster it will be different.**
+>
+>  **If the value of 'EXTERNAL-IP' is not 'localhost', make a note of the value, replace 'localhost' with that value in the CURL commands below. In the output above this would be 20.71.15.44. For your cluster it will be a different address.**
 
 At this time, no services are exposed yet. So if you run the following command, you will receive an empty response:
 
 ```
-curl -v http://127.0.0.1/
+curl -v http://localhost/
 ```
 
 It should return something like this:
@@ -256,9 +244,9 @@ At this time, you are running these resources:
 | ------------- |:-------------:|:---------- |:-------------------------------|
 | bluegreen     | Pod           | blue       | 3 instances                    |
 | bluegreen     | Pod           | green      | 3 instances                    |
-| bluegreen     | Service       | blue       | targeting blue Pods            |
-| bluegreen     | Service       | green      | targeting green Pods           |
-| bluegreen     | Service       | bluegreen  | targeting blue and green Pods  |
+| bluegreen     | Service       | blue       | Targeting blue pods            |
+| bluegreen     | Service       | green      | Targeting green pods           |
+| bluegreen     | Service       | bluegreen  | Targeting blue and green pods  |
 
 See if you can visualize these resources in VS Code:
 
@@ -321,7 +309,7 @@ gateway.networking.istio.io/blue-gateway created
 virtualservice.networking.istio.io/blue created
 ```
 
-After a few seconds, you will be able to access the 'blue' service. The VirtualService is configured to route traffic for   host "blue.example.com" to service 'blue'.
+After a few seconds, you will be able to access the 'blue' service. The VirtualService is configured to route traffic for host `blue.example.com` to service `blue`.
 
 Call the 'blue' API by using the `curl` command from your terminal:
 
@@ -331,7 +319,7 @@ curl -HHost:blue.example.com http://localhost/api/color
 
 > Note that on WSL, the answer is written in front of your username in the prompt: `blueuser@machine:/mnt/c/Sources/ContainerWorkshop-Docs/resources/lab12$` or `blueuser@Azure:~$ `
 
-> Also note that we have exposed an endpoint using the ingress gateway, which has now been configured to route traffic to the 'blue' Service, using the `destination` attribute.
+> Also note that we have exposed an endpoint using the ingress gateway, which has now been configured to route traffic to the 'blue' service, using the `destination` attribute.
 
 Let's see if we can use this for some Blue/Green deployment.
 Delete the Gateway and VirtualService before the next step:

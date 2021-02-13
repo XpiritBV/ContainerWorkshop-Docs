@@ -15,7 +15,7 @@ Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
 ## <a name="run"></a>Run the application
 We will start with running the existing ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to clone it now if you do not have the sources. 
 
-Switch to the `Start` branch by using this command:
+Switch to the `start` branch by using this command:
 
 ```cmd
 git checkout start
@@ -40,9 +40,9 @@ For now, the SQL Server for Linux container instance is providing the developer 
 
 Right-click both the GamingWebApp and LeaderboardWebAPI and start to debug a new instance.
 
-First, navigate to the web site located at https://localhost:44325/. There should be a single highscore listed. Notice what the operating system is that you are currently running on.
+First, navigate to the web site located at https://localhost:44326/. There should be a single highscore listed. Notice what the operating system is that you are currently running on.
 
-Next, navigate to the Web API endpoint at https://localhost:44369/swagger. Experiment with the GET and POST operations that are offered from the Swagger user interface. Try to retrieve the list of high scores, and add a new high score for one of the registered player names.
+Next, navigate to the Web API endpoint at https://localhost:44370/swagger. Experiment with the GET and POST operations that are offered from the Swagger user interface. Try to retrieve the list of high scores, and add a new high score for one of the registered player names.
 
 Make sure you know how this application is implemented. Set breakpoints if necessary and navigate the flow of the application for the home page.
 
@@ -93,17 +93,18 @@ leaderboardwebapi:
     - "44325:443"
 ```
 
-Change the `LeaderboardWebApi:BaseUrl` setting in `appsettings.json` to point to the new endpoint of the Web API with the internal address `http://leaderboardwebapi`.
+The setting for `LeaderboardWebApi:BaseUrl` should now point to the new endpoint of the Web API with the internal address `http://leaderboardwebapi`.
 
 > You will learn more on networking later on. For now, notice that the URL is not referring to `localhost` but `leaderboardwebapi`, which is the name of the Docker container service as defined in the `docker-compose.yml` file.
 
 > Make sure you use the HTTP endpoint, because hosting an HTTPS endpoint with self-signed certificates in a cluster does not work by default.
 
-Choose the right place to make that change, considering that you are now running from Docker containers.
+Give some thought to where right place to make that change would be, considering that you are now running from Docker containers.
   
 > ##### Hint
 > Changing the setting in the `appsettings.json` file will work and you could choose to do so for now. It does mean that the setting for running without container will not work anymore. So, what other place can you think of that might work? Use that instead if you know, or just change `appsettings.json`.
 
+In case you thought of changing the setting via environment variables, you can make this change inside of the `docker.override.yml` file.
 ```
 gamingwebapp:
   environment:
@@ -111,7 +112,7 @@ gamingwebapp:
     - LeaderboardApiOptions__BaseUrl=http://leaderboardwebapi
 ```
 
-Change the IP address of the connection string in the application settings for the Web API to be your local IP address (of your LAN) instead of `127.0.0.1`. This is a temporary fix.
+Make sure you changed the IP address of the connection string in the application settings for the Web API to be your local IP address (of your LAN) instead of `127.0.0.1` or `localhost`. This is a temporary fix.
 
 Start the solution by pressing `F5`. See if it works correctly. Timebox your efforts to try to fix any errors.
 

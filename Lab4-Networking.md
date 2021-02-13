@@ -113,7 +113,7 @@ docker ps -a
 ```
 and remove them if needed:
 ```
-docker rm -f <<containerid>>
+docker rm -f <containerid>
 ```
 
 ## <a name="create"></a>Manually create a docker network

@@ -202,7 +202,7 @@ az account show
 
 {
   "environmentName": "AzureCloud",
-  "id": "6eb94a2c-34ac-45db-911f-c21438b4939c",
+  "id": "6eb94a2c-34ac-45db-911f-c21438b49abc",
   "isDefault": true,
 ```
 

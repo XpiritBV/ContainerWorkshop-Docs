@@ -1,5 +1,3 @@
-//TODO: use new code
-
 # Lab 5 - Working with environments
 
 In this lab you will learn how to create and run compositions. 
@@ -49,7 +47,7 @@ The command will 'up' (meaning 'start') the composition and perform a build and 
 
 You could use this composition in your build pipeline to perform the build and publishing of the binaries required to create the container images of the solution.
 
-There is also a new way to accomplish the same thing. This way is by using multi-stage builds in the Dockerfile. Instead of running a new composition that spins up a container to build a container, you can create a Dockerfile that uses stages to build your application. As an example look at the following file
+There is also a new way to accomplish the same thing. This way is by using multi-stage builds in the Dockerfile. Instead of running a new composition that spins up a container to build a container, you can create a Dockerfile that uses stages to build your application. As an example look at the following file:
 
 ```docker
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim AS base
