@@ -1,4 +1,4 @@
-# Lab 10 How to use Kubernetes
+# Lab 6 - How to use Kubernetes
 
 During this lab, you will become familiar with Kubernetes concepts, showing you how to deploy a container, scale the number of instances, and see the output of a running application.
 

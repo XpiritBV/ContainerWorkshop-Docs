@@ -1,4 +1,4 @@
-# Lab 12 Working with Istio on Kubernetes
+# Lab 10 - Working with Istio on Kubernetes
 
 During this lab, you will become familiar with [Istio](https://istio.io/docs/concepts/what-is-istio/) concepts, like the sidecar proxy-pattern, canary release, and connection resiliency.
 

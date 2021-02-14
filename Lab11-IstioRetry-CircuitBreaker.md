@@ -1,4 +1,4 @@
-# Lab 13 Retry and Circuit breaker with Istio
+# Lab 11 - Retry and Circuit breaker with Istio
 
 During this lab, you will become familiar with the [Istio](https://istio.io/docs/concepts/what-is-istio/) concepts 'retry' and 'circuit breaker'.
 

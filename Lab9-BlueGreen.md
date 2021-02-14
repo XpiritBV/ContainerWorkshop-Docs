@@ -1,4 +1,4 @@
-# Lab 11 Blue/Green deployments on Kubernetes with Contour
+# Lab 9 - Blue/Green deployments on Kubernetes with Contour
 
 During this lab, you will become familiar with Kubernetes networking concepts, like services and ingress.
 

@@ -1,4 +1,4 @@
-# Lab 7 - Security
+# Lab 8 - Security
 
 During this lab you will look at a specific security related aspect for containers: secrets in configuration. There is a lot more to be said and done about security  for containers though. Your focus will be to remove all secrets from configuration files and into secure stores for development and production.
 

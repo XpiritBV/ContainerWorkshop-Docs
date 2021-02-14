@@ -1,4 +1,4 @@
-# Lab 9 - Monitoring
+# Lab 12 - Monitoring
 
 During this lab you will use Azure Application Insights and instrument the web application and the Web API to collect telemetry, and logging information. Also, you are going to review the existing implementation of the structured logging and health endpoints. Finally, you will introduce an actual bug and monitor the behavior of the application, and fix the bug afterwards.
 
