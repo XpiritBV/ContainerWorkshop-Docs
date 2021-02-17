@@ -24,34 +24,47 @@ Open Visual Studio and the solution for the retro gaming application. We need to
 > Is the key to be considered a secret?
 > What would be a good place to specify the key?
 
-Go to the place where you think the key should be located and specify it there.
+Go to the place where you think the instrumentation key should be located and specify it there.
 
 Repeat this for the Web API project.
 Redeploy the solution. If you made changes to files, you will have to commit the code and build and release with the pipelines. If you did not change the code, it might be enough to create only a new release.
 
 Open a browser and navigate to the web application. Refresh the page a number of times. Next, visit the AppInsights resource in the Azure portal again and go to the Application Map. View the statistics there. Also view the Live Metrics and make another set of requests. Observe the behavior of the application under these normal circumstances. You might want to look at the Kubernetes dashboard as well to get a complete impression of how the application behaves.
 
-## <a name='review'></a>Review structured logging and health endpoints
+## <a name='review'></a>Add health endpoints
 
-The Web API already has structured (also known as semantic logging) and health endpoints implemented. You will review at the existing code and get an understanding of both.
+Being able to monitor the health of your application is important, both from an observability perspective, but also for the container orchestrator. You can easily add health endpoints to your solution.
 
-First, open the `Program.cs` file and look for the call to `UseHealthChecks`. This call specifies the relative path where the health endpoint will be hosted. You can change this to be at a specific port. Use the comment at the line to change it if you want to try using a port.
+First, open the `Startup.cs` file and look for the calls to `ConfigureTelemetry` and `ConfigureSecurity`.Add a new call with a similar signature `ConfigureHealth`. 
+Implement the configuration of health as follows:
+```c#
+private void ConfigureHealth(IServiceCollection services)
+{
+   services.AddHealthChecks();
 
-Next, go to `Startup.cs` and find to the `ConfigureHealth` method. Inspect the implementation and notice how a health check is added. There is a second health check behind a feature flag. That is for there for experimenting in the next lab. Right now, the feature flag is not active and the second health check is not really added.
+   // Uncomment next two lines for self-host healthchecks UI
+   //services.AddHealthChecksUI()
+   //    .AddSqliteStorage($"Data Source=sqlite.db"); ;
+}
+```
+
+This method registers the required services in ASP.NET Core. 
+
+Next, go to the `Configure` method in `Startup` and find to the call to `app.UseEndpoints`. Add a new mapping for the health endpoint, that will be reachable from the relative route `/ping`. 
+ Inspect the implementation and notice how a health check is added. There is a second health check behind a feature flag. That is there for experimenting in the next lab. Right now, the feature flag is not active and the second health check is not really added.
 
 You can try the health endpoint by navigating to the correct URL.
 
 ```url
-https://localhost:44369/health (local hosted)
-https://<cluster-address>/health (Azure hosted)
+https://localhost:44369/ping (local hosted)
 ```
 
-For the semantic logging, you will implement a minimal set of code. Find the constructor of the `LeaderboardController` and add an additional argument:
+## <a name='review'></a>Add structured logging
+For the structured (or semantic) logging, you will implement a minimal set of code. Find the constructor of the `LeaderboardController` and add an additional argument:
 
 ```c#
 public LeaderboardController(LeaderboardContext context, ILoggerFactory loggerFactory)
 ```
-
 Introduce a field called `logger` of type `ILogger<LeaderboardController>`:
 
 ```c#
@@ -114,7 +127,13 @@ public async Task<ActionResult<IEnumerable<HighScore>>> Get(int limit = 10)
    AnalyzeLimit(limit);
 ```
 
-Compile your changes locally. If it compiles, check in the source code and perform a build and release into your cluster. After a successful deployment, check how the website is behaving. You might want to create some load on the cluster from PowerShell:
+Compile your changes locally. If it compiles, run the Docker composition first to see how the website is behaving. 
+Check that there is a bug by refreshing the home page of the web application at [http://localhost/?limit=0](http://localhost/?limit=0). 
+
+If all is correct, the page should display without any highscores.
+
+Next, perform a build and release into your cluster. After a successful deployment, check how the website is behaving for the same URL. 
+You might want to create some load on the cluster from PowerShell to see some bigger effect in Application Insights:
 
 ```PowerShell
 for ($i = 0 ; $i -lt 100; $i++)
@@ -122,8 +141,6 @@ for ($i = 0 ; $i -lt 100; $i++)
    Invoke-WebRequest -uri http://<yourclusterip>/?limit=0
 }
 ```
-
-Check that there is a bug by refreshing the home page of the web application. If all is correct, the page should display without any highscores.
 
 Use the Kubernetes dashboard, the telemetry data and the logging information to investigate what is happening. Also, trace back from the current Docker images running in production to the commits that were made in this particular release.
 
