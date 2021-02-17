@@ -15,42 +15,98 @@ git checkout master
 > ##### Important
 > Make sure you have switched to the `master` branch to use the right .NET solution.
 
-## Working with Azure DevOps
 
-Before you can get started with building pipelines, you need a Azure DevOps (AZDO) account and a team project. You can use an existing AZDO account, or create a new one at [dev.azure.Com ](https://dev.azure.com).
+## Prerequisites
+You will need an Azure Kubernetes Service (AKS) cluster. Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'. 
 
-Also, your cloned Git repository needs to be pushed to the AzDO project. Assuming you have your current work branch checked out, you can change the URL for the origin to point to the Git repo in your Team Project.
+You will also need an Azure Container Registry. Please visit [Lab 7 - Container registries and clusters](Lab7-RegistriesClusters.md) and review the chapter named 'Pushing images to a registry' to see how to create a new container registry.
+
+The final step before you can get started with building pipelines, is to get access to an Azure DevOps (AZDO) account and a team project. You can use an existing AZDO account, or create a new one at [dev.azure.com ](https://dev.azure.com). 
+
+> Make sure that you use the same user account for both Azure and Azure DevOps.
+
+Create a new project named 'ContainerWorkshop'
+
+After this, your cloned Git repository needs to be pushed to the AzDO project. Assuming you have your current work branch checked out, you can change the URL for the git `origin` to point to the Git repo in your Team Project by using `git remote set-url`.
 
 ```cmd
 git remote set-url origin https://dev.azure.com/<your-vsts-account>/<your-teamproject>/_git/containerworkshop
+```
+
+Now push your code to the new origin, including any branches by using `git push`.
+```
 git push -u origin --all
 ```
+> The URL should look similar to this: `https://xpirit@dev.azure.com/xpirit/ContainerWorkshop/_git/workshop`
+
+You now have a private code repo inside Azure DevOps. Now let's see if we can deploy that code to Kubernetes.
+
+### Reverting back to Github in case of disasters
+
+In case you want to revert back to Github at some point, run this command:
+```
+git remote set-url origin https://github.com/XpiritBV/ContainerWorkshop-Code.git
+```
+> Don't run this as part of the lab, only if you want to start over.
 
 ## Create build pipelines
 
-Login to your AZDO account and switch to the correct team project. Go to `Repos, Files` and check that your source code is there. Switch to `Pipelines, Build` and create a new definition for a Build pipeline. Select the link for Visual Designer at the start. Pick `Azure Repos Git` and the master branch of your Git repo.
+Login to your AZDO account and switch to the `ContainerWorkshop` team project. Go to `Repos, Files` and verify that your source code is there. Switch to `Pipelines, Build` and create a new definition for a Build pipeline. 
 
-From the available templates select the `ASP.NET Application with containers` template to give yourself a head start.
+You will get a question stating "Where is your code?". 
+Pick `Azure Repos Git`, select the proper repository, and the master branch of that Git repository.
 
-<img src="images/ASPNETWithContainersVSTSBuildTemplate.png" width="400" />
+<img src="images/AzureDevOpsTemplate.png" width="400" />
 
-Under the `Pipeline` properties for the build process, select `Hosted Ubuntu 1604` as the Agent pool:
+From the available templates select the `Starter pipeline` template, so we can start adding tasks.
 
-<img src="images/BuildProcessVSTS.png" width="600" />
 
-Inspect the tasks in the pipeline. You can see that there are three tasks related to building the source code. Additionally, there are tasks for creating container images, and pushing these to your registry. The final two steps will place build items in a staging directory and publish these as part of the build artifacts.
+After completing that step, you should see a YAML pipeline that looks similar to this:
 
-Remove the first 3 tasks from the pipeline, as those are meant for ASP.NET, not ASP.NET Core. You will build your application code using containers with the Docker composition file.
-Add a new `Docker Compose` task and name it `Compile assemblies`.
+```yaml
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
 
-Click the little exclamation mark next to the properties:
+trigger:
+- main
 
-- Container Registry Type
-- Azure subscription
-- Azure Container Registry
-- Docker Compose File
-- Environment Variables
-and choose `Link` from the popup window.
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+
+- script: |
+    echo Add other tasks to build, test, and deploy your project.
+    echo See https://aka.ms/yaml
+  displayName: 'Run a multi-line script'
+```
+
+### Adding tasks to the pipeline
+
+Remove the two generated `script` steps, as they are useless to us.
+
+You will build your application code using containers with the Docker composition file.
+
+Click on 'Show Assistant' to display the toolbox.
+
+> Make sure your cursor is on line 13 of the YAML file before the next step.  
+
+In the toolbox, select a task named 'Docker Compose'.
+
+Leave the container registry type 'Azure Container Registry'
+
+Select the Azure subscription that holds your Container Registry.
+
+Click on 'Authorize' to create a Service Connection that can access your Container Registry.
+
+Leave the value of the 'Docker Compose File' as is.
+
+
+//////////////////LD: stopped at this point
 
 Enter `build` as the Command that will execute for `Run a Docker Compose command`.
 
