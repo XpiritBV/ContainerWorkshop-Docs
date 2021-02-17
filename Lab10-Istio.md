@@ -12,19 +12,18 @@ You can deploy the mini-cluster by right clicking on the icon in the tool bar.
 Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'
 
 ## Getting started
-![](images/kubernetes01.png)
-Launch VS Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster.
-Click on the 'Install dependencies' button if needed.
+![](images/kubernetes02.png)
+
+Launch VS Code and open the Kubernetes extension. Make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster. Click on the 'Install dependencies' button if needed.
 
 > Regularly switch to VS Code to examine the resources of your cluster. It will help you understand this lab.
 
-Also, in the terminal, change directories to the Docs repository directory named 'resources/lab12':
+Also, in the terminal, change directories to the Docs repository directory named 'resources/lab10':
 ```
-user@machine:/mnt/c/Sources/ContainerWorkshop-Docs/resources/lab12/$ 
+user@machine:/mnt/c/Sources/ContainerWorkshop-Docs/resources/lab10/$ 
 ```
 
 ## Important
-
 The local Istio tooling uses a Linux based executable. Make sure to run this lab on:
 - WSL on Windows (like Ubuntu)
 - Azure Cloud Shell (in the Terminal) on Windows 

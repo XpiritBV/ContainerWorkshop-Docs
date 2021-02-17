@@ -17,6 +17,7 @@ Goals for this lab:
 > - Checked out the `start` from the repository.
 > - Completed previous labs.
 > - Configured 'Docker Desktop' to run Linux containers.
+> - Changed terminal working directory to `resources/lab06`
 
 ## <a name="push"></a>Pushing images to a registry
 

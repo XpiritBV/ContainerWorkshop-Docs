@@ -7,25 +7,14 @@ Goals for this lab:
 - [Store user secrets during development](#usersecrets)
 - [Use Kubernetes Secrets to store Key Vault credentials](#kubernetessecrets)
 
-## <a name="run"></a>Run existing application
-We will start with or continue running the existing ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to clone it now if you do not have the sources. Switch to the `master` branch by using this command:
-
-```cmd
-git checkout master
-```
-
 > ##### Important
-> Make sure you have: 
-> - Switched to the `master` branch to use the right .NET solution.
+> Make sure you have:
+>
+> - Checked out the `start` from the repository.
+> - Completed previous labs.
 > - Configured 'Docker Desktop' to run Linux containers.
 
-Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to navigate the code and familiarize yourself with the various projects in the solution. You should be able to identify these:
-- `GamingWebApp`, an ASP.NET MVC Core frontend 
-- `LeaderboardWebAPI`, an ASP.NET Core Web API.
-
-For now, a SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as desribed in [Lab 2](Lab2-Docker101.md#lab-2---docker-101).
-
-Navigate to 'user@machine:/mnt/c/Sources/ContainerWorkshop-Docs/resources/lab07'
+Navigate to 'user@machine:/mnt/c/Sources/ContainerWorkshop-Docs/resources/lab08'
 
 ## Secrets and Docker
 
