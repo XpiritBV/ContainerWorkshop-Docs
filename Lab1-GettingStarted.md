@@ -14,7 +14,7 @@ Goals for this lab:
 ## <a name="1"></a>1. Get optional subscriptions
 If you want to learn how to work with Azure and Azure DevOps, make sure to get access to (trial) subscriptions.
 
-For [Lab 8 - Azure DevOps pipelines](Lab8-AzDOPipelines.md), you'll need an Azure DevOps subscription. Get one for free here: [dev.azure.com](https://dev.azure.com).
+For [Lab 13 - Azure DevOps pipelines](Lab13-AzDOPipelines.md), you'll need an Azure DevOps subscription. Get one for free here: [dev.azure.com](https://dev.azure.com).
 
 To create a Kubernetes cluster and/or a Container Registry inside Azure, you will need an Azure subscription.
 Create a free [trial account here](https://azure.microsoft.com/en-us/free/).
@@ -31,7 +31,7 @@ Make sure that your laptop is up-to-date with the latest security patches. This 
 
 > If you cannot do this, you will use a Linux Virtual Machine to run Linux containers on Windows later.
 
-> Also, you'll need to run [Lab 12 - Working with Istio on Kubernetes](Lab12-Istio.md) in an [Azure Cloud Shell](https://devblogs.microsoft.com/commandline/the-azure-cloud-shell-connector-in-windows-terminal/).
+> Also, you'll need to run [Lab 10 - Working with Istio on Kubernetes](Lab10-Istio.md) in an [Azure Cloud Shell](https://devblogs.microsoft.com/commandline/the-azure-cloud-shell-connector-in-windows-terminal/).
 
 For the best experience, run the entire workshop using Linux based terminals, even on Windows.
 
@@ -45,10 +45,10 @@ You can also use [Visual Studio Code](https://code.visualstudio.com/).
 A couple of VS Code extensions are required to assist you during the labs. You can install them before the workshop or just in time. 
 
 - On Windows, install the [Remote WSL](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl) extension to open this repo in WSL.
-- For labs 10,11,12 -  Install the [Kubernetes](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) extension
-- For labs 2,3,4,5 Install the [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) extensions.
+- For labs 6, 9, 10, 11 -  Install the [Kubernetes](https://marketplace.visualstudio.com/items?itemName=ms-kubernetes-tools.vscode-kubernetes-tools) extension
+- For labs 2, 3, 4, 5 Install the [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) extensions.
    - and configure VS Code for debugging C# by installing the [C# extension](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csharp)
-- For lab 8 - Install the [Azure DevOps extension](https://marketplace.visualstudio.com/items?itemName=ms-azure-devops.azure-pipelines)
+- For lab 13 - Install the [Azure DevOps extension](https://marketplace.visualstudio.com/items?itemName=ms-azure-devops.azure-pipelines)
 
 
 ### Docker Desktop (Windows & Mac)
@@ -75,13 +75,12 @@ Download [git](https://git-scm.com/downloads) if needed. Store the file in a loc
 The following optional tools are recommended, but not required.
 
 - [GitHub Desktop](https://desktop.github.com/) for Git Shell and Git repository utilities
-- [PuTTY](http://www.putty.org/) for `PuTTY.exe` and `PuTTYgen.exe`
 
 ## <a name="4"></a>4. Clone Git repositories with labs and code
 The workshop uses an example to get you started with Dockerizing a typical ASP.NET Core application. 
 
 Clone the repository to your development machine:
-- Create a folder for the source code, e.g. `C:\Sources\ContainerWorkshop`.
+- Create a folder for the source code, e.g. `C:\Sources\ContainerWorkshop` or in WSL `user@machine:/mnt/c/Sources/ContainerWorkshop$`.
 - Open a command prompt (terminal) from that folder
 - Clone the Git repositories for the workshop files
 
