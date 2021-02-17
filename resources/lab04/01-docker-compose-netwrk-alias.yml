@@ -1,0 +1,32 @@
+version: "3"
+services:
+
+  frontend:
+    image: nginx
+    networks:
+      - frontend
+      
+  backend:
+    image: nginx
+    networks:
+      - frontend
+      - backend
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - SA_PASSWORD=Pass@word
+      - MSSQL_PID=Developer
+      - ACCEPT_EULA=Y
+    ports:
+      - "5433:1433"
+    networks:
+      backend:
+        aliases:
+          - "sql.containerworkshop.local"
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
