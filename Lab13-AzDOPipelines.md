@@ -300,9 +300,53 @@ Next, click on the 'Run' button that appears after that, and 'Run' again to queu
 
 Click on the Job named 'Job' to monitor progress.
 
+<img src="images/AzureDevOpsGreenPipeline.png" height="400px" />
+
+
 When the pipeline had completed, open your cluster on the Azure portal. Go to the Workloads tab and see if the Pods have deployed successfully.
 
 
+<img src="images/AzurePortalK8s2.png"  />
+
+Spend some time on the Azure Portal to see how you can interact with your cluster.
+It offers great insights into your workloads.
+
+Open the 'Services and ingresses' tab. It should show a Service named 'svc-gamingwebapp' of type 'LoadBalancer'. That line should also contain a public IP address (in the screenshot, it has the value '51.1124.19.183').
+
+<img src="images/AzurePortalK8s3.png"  />
+
+Click on the IP address. The Service is connected (using a `selector`) to your Gaming WebApp Pod, so your browser should now load the frontend application.
+
+You have now deployed your code into a production environment.
+
+### Continuous integration
+
+In Azure DevOps, please examine the yaml pipeline again. Note that the build trigger points to a branch name `main`. However, our branch still has the old name `master`. Change the yaml, so the pipeline will run for every commit on master.
+
+```yaml
+trigger:
+- main
+```
+
+## Improvements
+
+This pipeline is the absolute minimal setup that you can create. There's room for improvements.
+
+- The ability to target different environments (staging, production).
+- Using Managed Identity to connect to Azure Key Vault to store the connection string.
+- Running multiple Pods of the same type, for high availability.
+- Using an external SQL Server database, e.g. in Azure.
+
+Using the knowledge from the other Labs, you should be able to add these features.
+
+### Additional improvements
+
+Additional improvements that you might make include:
+
+- Adding multiple build [stages](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/stages?view=azure-devops&tabs=yaml#specify-stages), to deploy updates to environments progressively.
+- Running a build, with tests that runs for pull requests, but does not deploy to Kubernetes by using [conditions](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/stages?view=azure-devops&tabs=yaml#conditions).
+- Adding [approval](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass) steps to the pipeline to require human approval before deploying to a specific environment.
+- Creating a [Helm package](https://andrewlock.net/deploying-asp-net-core-applications-to-kubernetes-part-4-creating-a-helm-chart-for-an-aspnetcore-app/) to simplify deployment across different environments.
 
 ## Wrapup
 
