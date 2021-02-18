@@ -87,7 +87,7 @@ leaderboardwebapi:
     - "4972:80"
     - "44369:443"
 ...
-leaderboardwebapi:
+gamingwebapp:
   ports:
     - "5618:80"
     - "44325:443"
