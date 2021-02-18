@@ -1,0 +1,21 @@
+#Unlike the K8s built-in Ingress, Contours' HTTPProxy allows multiple services under one route.
+#allowing traffic shifting with minimal efforts. 
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata: 
+  name: ingress
+  namespace: bluegreen
+spec: 
+  virtualhost:
+    fqdn: demo.local
+  routes: 
+    - conditions:
+      - prefix: / # matches everything
+      permitInsecure: true
+      services: 
+        - name: blue
+          port: 80
+          weight: 10
+        - name: green
+          port: 80
+          weight: 90

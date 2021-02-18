@@ -1,0 +1,118 @@
+#Using 1 Service instance exposing 2 Pods.
+#Service 'buggygreen', that groups deployments 'buggy' and 'green' by using a selector on label 'app: buggygreen-app'.
+#DestinationRoute that routes traffic to service buggygreen. Pods labeled 'green' are grouped as 'v1' and Pods labeled 'buggy' are 'v2'.
+#VirtualService to forward 50% of traffic to v1 Pods (labeled 'green') and 50% to v2 (labeled 'buggy').
+#test by using the name of the fortio pod with the following command:
+#kubectl exec -n bluegreen -it fortio-deploy-cd48fb5db-nh5np -c fortio /usr/bin/fortio -- load -c 4 -qps 0 -n 20 http://buggygreen.buggygreen/api/color
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: buggygreen
+  labels:
+    istio-injection: enabled
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buggy
+  namespace: buggygreen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buggygreen-app
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: buggygreen-app
+        version: v2
+    spec:
+      containers:
+      - name: blue
+        image: xpiritbv/bluegreen:buggy
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: green
+  namespace: buggygreen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buggygreen-app
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: buggygreen-app
+        version: v1
+    spec:
+      containers:
+      - name: green
+        image: xpiritbv/bluegreen:green
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: buggygreen
+  namespace: buggygreen
+  labels:
+    app: buggygreen-app
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: buggygreen-app
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: buggygreen-destinationrule
+  namespace: buggygreen
+spec:
+  host: buggygreen
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: buggygreen-vsvc
+  namespace: buggygreen
+spec:
+  hosts:
+  - buggygreen
+  http:
+  - route:
+    - destination:
+        port:
+          number: 80
+        host: buggygreen
+        subset: v1
+      weight: 50
+    - destination:
+        port:
+          number: 80
+        host: buggygreen
+        subset: v2
+      weight: 50
+    timeout: 60s

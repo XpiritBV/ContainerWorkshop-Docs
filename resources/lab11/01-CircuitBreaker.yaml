@@ -1,0 +1,68 @@
+#Using 1 Service instance exposing 1 Pod (the API that returns 'blue').
+#DestinationRoute that routes traffic to service blue, disallowing concurrent connections. 
+#Call from within the cluster: curl http://blue/api/color -> blue
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: blue
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blue
+  namespace: blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blue-app
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: blue-app
+        version: v2
+    spec:
+      containers:
+      - name: blue
+        image: xpiritbv/bluegreen:blue
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blue
+  namespace: blue
+  labels:
+    app: blue-app
+spec:
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: blue-app
+    version: v2
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: blue-destinationrule
+  namespace: blue
+spec:
+  host: blue
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 1
+      http:
+        http1MaxPendingRequests: 1
+        maxRequestsPerConnection: 1
+    outlierDetection:
+      consecutiveGatewayErrors: 1
+      consecutive5xxErrors: 1
+      interval: 1s
+      baseEjectionTime: 3m
+      maxEjectionPercent: 100
