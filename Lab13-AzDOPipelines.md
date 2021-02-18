@@ -85,13 +85,13 @@ steps:
   displayName: 'Run a multi-line script'
 ```
 
-### Adding tasks to the pipeline
+### Adding a Docker-Compose build task to the pipeline
 
 Remove the two generated `script` steps, as they are useless to us.
 
 You will build your application code using containers with the Docker composition file.
 
-Click on 'Show Assistant' to display the toolbox.
+Click on 'Show assistant' to display the toolbox.
 
 > Make sure your cursor is on line 13 of the YAML file before the next step.  
 
@@ -103,111 +103,253 @@ Select the Azure subscription that holds your Container Registry.
 
 Click on 'Authorize' to create a Service Connection that can access your Container Registry.
 
-Leave the value of the 'Docker Compose File' as is.
+Leave the value of the 'Docker Compose File' as is. The docker-compose.yml file is in the root of the repo.
 
+At the 'Command', enter 'build', so the build agent will execute a `docker-compose build` command, to compile sources and generate container images for both 'GamingWebApp' and 'LeaderboardWebAPI' by using the 'Dockerfile' files in each folder.
 
-//////////////////LD: stopped at this point
+<img src="images/AzureDevOpsComposeTask01.png" height="400px" />
 
-Enter `build` as the Command that will execute for `Run a Docker Compose command`.
+Click on the 'Add' button.
+In the resulting yaml, add an additional attribute called `displayName` with value `Docker Compose Build`.
 
-Select the pipeline at the top again to fill in all linked properties, as described below.
-
-Notice that this template assumes that you will use an Azure Container Registry. You can use one if you created it before. If not, refer back to [Lab 7](Lab7-RegistriesClusters.md) to read how to create the container registry.
-
-You need to create a connection between Azure DevOps and your Azure subscription. Open the details of the first task, locate the property for the `Azure subscription` and add your subscription details.
-
-<img src="images/NewVSTSConnection.png" width="600" />
-
-After the registration of your subscription is completed, select your container registry from the dropdown below.
-
-Notice how the Docker Compose file is already preselected to be `docker-compose.yml`. This aligns with the previous design decision to only include actual images relevant to the application components to be in this Docker Compose file.
-
-Further down, specify an environment variable for the registry, so the created images have the correct fully qualified name:
-
-```cmd
-DOCKER_REGISTRY=<registry>.azurecr.io/
-```
-
-You can specify additional Docker Compose files. Remove the reference to file `docker-compose.ci.yml` from the other three Docker Compose tasks.
-
-Link the environment variables for all four Docker Compose tasks.
-
-This completes your first task to build your sources. The other 3 tasks 
-
-In the `Copy Files` task set the `Contents` property to this file:
-```
-**/gamingwebapp.k8s-dep.yaml
-```
-In the last task for `Publish Artifacts`, specify `artifacts` as the Artifact name.
-
-Save the build definition and queue a new build. Check whether the build completes successfully and fix any errors that might occur. Inspect the build artifacts, notice that there are 2 artifacts there, the Kubernetes manifest and a modified Docker compose file. Download the `docker-compose.yml` file and open it. It should resemble this:
+It should look very similar to this:
 
 ```yaml
-services:
-  gamingwebapp:
-    build:
-      context: ./src/RetroGaming2017/src/Applications/GamingWebApp
-      dockerfile: Dockerfile
-    image: <your-registry>.azurecr.io/gamingwebapp@sha256:e198caef40f1e886c3a70db008a69aa9995dc00301a035867757aad9560d9088
-  leaderboard.webapi:
-    build:
-      context: ./src/RetroGaming2017/src/Services/Leaderboard.WebAPI
-      dockerfile: Dockerfile
-    image: <your-registry>.azurecr.io/leaderboard.webapi@sha256:40b83b74b7e6c5a06da2adbaf5d99aec64cde63c16a66956091cbddb93349f86
-version: '3.0'
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: DockerCompose@0
+  displayName: Docker Compose Build
+  inputs:
+    containerregistrytype: 'Azure Container Registry'
+    azureSubscription: 'Microsoft Azure (00000000-6c99-40d9-8390-00000000)'
+    azureContainerRegistry: '{"loginServer":"containerworkshopregistry-on.azurecr.io", "id" : "/subscriptions/00000000-6c99-40d9-8390-00000000/resourceGroups/containerworkshopregistry/providers/Microsoft.ContainerRegistry/registries/containerworkshopregistry"}'
+    dockerComposeFile: '**/docker-compose.yml'
+    action: 'Run a Docker Compose command'
+    dockerComposeCommand: 'build'
+```
+### Adding a Docker-Compose push task to the pipeline
+
+We now have container images on the build agent. If we want to run containers on Kubernetes, we will have to upload them into a container registry. 
+
+Copy and paste the previous task, as a shortcut. Hover over the `settings` element that appears above the task definition, and click on it to edit. 
+
+Change the value of 'Command' into 'push', and click on the 'Add' button to update the task.
+Update the display name, so your second task looks like this:
+
+```yaml
+- task: DockerCompose@0
+  displayName: Docker Compose Push
+  inputs:
+    containerregistrytype: 'Azure Container Registry'
+    azureSubscription: 'Microsoft Azure (00000000-6c99-40d9-8390-00000000)'
+    azureContainerRegistry: '{"loginServer":"containerworkshopregistry-on.azurecr.io", "id" : "/subscriptions/00000000-6c99-40d9-8390-00000000/resourceGroups/containerworkshopregistry/providers/Microsoft.ContainerRegistry/registries/containerworkshopregistry"}'
+    dockerComposeFile: '**/docker-compose.yml'
+    action: 'Run a Docker Compose command'
+    dockerComposeCommand: 'push'
 ```
 
-Notice how the image names have an appended SHA256 digest value to confirm their identity in the registry. This file could be used to release the images into the cluster later on.
+### Running the pipeline for the first time
 
-When your build has completed without errors, you should find that your container registry has a new image that is tagged with the build number. Verify this at your registry from the Azure portal.
+Click on 'Save and run', to save your build pipeline definition file and queue the build to run on an agent. Click on the job named 'job1' to see details.
 
-If this all is working correctly you are ready to release the new image to the cluster.
+<img src="images/AzureDevOpsSavePipeline.png" height="400px" />
 
-## Release new images to cluster
+At this point, you might need to authorize the pipeline to use a Service Connection to interact with Azure.
 
-With the Docker images located in the registry, you can release these to your cluster by instructing it deploy the composition defined in the Kubernetes manifest file. This file `gamingwebapp.k8s-dep.yaml` is now part of the build artifacts. This file contains various tokens that need to be replaced by actual values, such as the build ID and sensitive data.
+<img src="images/AzureDevOpsAuthPipeline.png" height="400px" />
 
-Create a new release definition from the Releases tab in AZDO. Choose an `Deploy to a Kubernetes cluster` and name the first stage `Production`.
-Add a new artifact and select the previously made pipeline as the `Source`.
+Click on the 'Permit' button to continue.
 
-Select the tasks in the Production environment from the link `1 job, 1 task` link. Navigate to its empty task list and set the Agent selection to `Hosted VS2017` under the Agent job.
+View the output of the build pipeline to monitor progress.
 
-Next, select the `Deploy to Kubernetes` task and create a connection to your cluster with the `+ New` button. A modal dialog pops up. Give the connection a name, such as `ContainerWorkshopCluster`.
-Finally, you need to get the KubeConfig from your Kubernetes cluster. Run the command:
+<img src="images/AzureDevOpsRunPipeline.png" height="400px" />
+
+After a few minutes, you should see that your build has completed. At that point, you should have 2 brand new container images in your Container Registry.
+
+### Deploying to Azure Kubernetes Service
+
+After doing lab 6, you know that we can deploy workloads to Kubernetes by using `kubectl apply` and passing in a filename.
+
+We have created such a file for you in the code repo. It's in the 'deployment' folder named 'gamingwebapp.k8s-static.yaml'.
+
+Open the file and examine the contents. Please note that it contains a few placeholders, marked with two underscores `__` as prefix and postfix. For example, it contains the name of the container registry to use for images.
+
+> We need to pass in these values on the build agent. To do this in real life, we would use a Token replacement task to replace these values with environment specific values.
+For now, you can just replace them with your single environment.
+
+| Line          | Placeholder  | Value      |
+| ------------- |:-------------|:---------- |
+| 77            | `image: __containerregistry__/gamingwebapp:demo` | `image: containerworkshopregistry-on.azurecr.io/gamingwebapp:latest` |
+| 118           | `image: __containerregistry__/leaderboardwebapi:demo`| `image: containerworkshopregistry-on.azurecr.io/leaderboardwebapi:latest` | 
+
+Save the file under a different name, e.g. 'gamingwebapp.k8s-test.yaml'.
+Commit and push the changes using the `git` cli:
+
 ```
-az aks get-credentials --name ContainerWorkshopCluster --resource-group ContainerWorkshop -a --file -
+git add .
+git commit -m "add test deployment file"
+git pull
+git push
 ```
-This will dump the configuration to the output window. Copy it in the dialog of AZDO. Check the checkbox for `Accept untrusted certificates`. Verify the connection. If all is well, close the dialog by clicking `OK`.
 
-Set the property for Namespace to `$(namespace)`.
+We have now pushed a copy of the Kubernetes template file to Azure DevOps, so we can run our pipeline using this file later.
 
-Check the checkbox Use Configuration Files and choose the `gamingwebapp.k8s-dep.yaml` file from the artifacts.
+As we might not have configured a Managed Identity with this cluster yet, we will quickly do that now.
 
-Finally, you are going to add a number of pipeline variables to serve as the replacement values in the deployment manifest and the namespace in the cluster to which will be deployed.
+> Make sure to use a different file name and remember the new name.
 
-Add a `Replace Tokens` task as the first task of the release pipeline. You might have to download it from the Marketplace first. It is a task by Guillaume Rouchon and you can find more information [here](https://github.com/qetza/vsts-replacetokens-task#readme).
+#### Connecting AKS to ACR
 
-Name the new task `Replace tokens in manifest` and set the root directory to `$(System.DefaultWorkingDirectory)/_RetroGaming2019CIBuild/docker-compose`. Specify `deployment/gamingwebapp.k8s-dep.yaml` as the Target Files property. Set the Prefix and Suffix to __.
+> If you have completed [Lab 7](Lab7-RegistriesClusters.md) and left the connection between your cluster and the container registry in place, you can skip this chapter.
 
-Here is the list of variables you need to create:
+To get the resource Id for your container registry, run `az acr show`:
 
-Name | Value (example)
---- | ---
-containerregistry | <your-registry> (e.g. 'containerworkshopregistry.azurecr.io' or else 'xpiritbv')
-namespace | workshop
-aikey | (empty)
-keyvaultclientid | ca5a0aeb-0eec-49a3-a527-a29e2524fa5b
-keyvaultclientsecret | 45gSC1AZ3lkaSUHpsqFfL/+vddtbshVs1umC0IZWsVY=
-keyvaulturl | https://Containerworkshop.vault.azure.net
+```json
+az acr show --resource-group ContainerWorkshop --name <registry>
 
-**If you did Lab 8 before:**
-Each of these variable names should be familiar and known to you (except the `aikey`, which remains empty for now). For the key vault related values (e.g. `keyvaultclientid`), use the values from the [Security Lab](Lab8-Security.md#adding-support-for-azure-key-vault).
-Some of these will be used later.
-You can remove the `volumeMounts` and `spec` from the `dep-leaderboardwebapi` deployment, now that the values in it are coming from the pipeline variables and the environment variables. 
+{
+  "adminUserEnabled": false,
+  "creationDate": "2019-04-23T06:42:10.403448+00:00",
+  "dataEndpointEnabled": false,
+  "dataEndpointHostNames": [],
+  "encryption": {
+    "keyVaultProperties": null,
+    "status": "disabled"
+  },
+  "id": "/subscriptions/00000000-6c99-40d9-8390-00000000/resourceGroups/containerworkshop/providers/Microsoft.ContainerRegistry/registries/containerworkshopregistry",
+```
 
-### Try it out
-Try your release pipeline by creating a new release. Check whether the release is successful and fix any errors. You might want to check the Kubernetes dashboard to see if the cluster deployment succeeded as well. 
+Run the `az aks update` command to connect an existing AKS cluster to an existing Azure Container Registry, passing in the resource Id of the registry:
+```
+registryResourceId=/subscriptions/<subscriptionid>/resourceGroups/ContainerWorkshop/providers/Microsoft.ContainerRegistry/registries/$registryName
+
+az aks update --name ContainerWorkshopCluster --resource-group ContainerWorkshop --attach-acr <registry ResourceId>
+```
+
+This operation takes a few seconds to complete.
+
+### Connecting to AKS from the build agent
+
+To deploy our yaml file to Kubernetes, we will run `kubectl` from an Azure DevOps task.
+
+In your browser, on the page that displays the build results, navigate back using the arrow pointing leftward. Click on the button with 3 vertical dots in the top right corner. 
+
+Select 'Edit pipeline'
+
+<img src="images/AzureDevOpsEditPipeline.png" height="400px" />
+
+In the toolbox, click on the 'Deploy to Kubernetes' task.
+
+#### Creating a new Service Connection to AKS
+
+The Kubernetes deployment task requires an existing service connection to Kubernetes. 
+Let's see if we can create one.
+
+Press `Ctrl` and click on the 'Project Settings' button in the bottom left corner, to navigate to the project settings page.
+
+Click on 'Service Connections'
+
+Click on 'New Service Connection'
+
+From the list, select 'Kubernetes'
+
+On the next screen, select the Azure subscription that holds the AKS cluster.
+
+Select your 'ContainerWorkshop' cluster
+
+Select the namespace 'default'
+
+Below 'Service connection name', type 'ContainerWorkshopServiceConnection'
+
+Make sure the check for 'Grant access permissions to all pipelines' is checked
+
+Click on the 'Save' button
+
+Close the settings tab to return to your pipeline definition
+
+#### Adding the task to the pipeline
+
+You should now be back on the browser tab to edit your pipeline definition.
+
+Refresh the page, so your new Service Connection will show.
+
+In the yaml build definition, put the cursor on a clear line on the bottom. (e.g. line 33)
+
+In the toolbox, click on the 'Deploy to Kubernetes' task again, this time you should be able to select your new service connection.
+
+Use these values, without the quotes:
+
+Action: 'deploy'
+Kubernetes service connection: 'ContainerWorkshopServiceConnection'
+Namespace: 'default'
+Strategy: 'none'
+Manifests: '$(Build.SourcesDirectory)/deployment/gamingwebapp.k8s-test.yaml'
+
+> Note that we're using the file we updated and pushed earlier.
+
+Click on the 'Add' button, to add the yaml task to the pipeline. Again, add a readable description like `displayName: AKS Deploy`.
+
+Click on the 'Save' button, and 'Save' again
+
+Next, click on the 'Run' button that appears after that, and 'Run' again to queue a new build.
+
+Click on the Job named 'Job' to monitor progress.
+
+<img src="images/AzureDevOpsGreenPipeline.png" height="400px" />
+
+
+When the pipeline had completed, open your cluster on the Azure portal. Go to the Workloads tab and see if the Pods have deployed successfully.
+
+
+<img src="images/AzurePortalK8s2.png"  />
+
+Spend some time on the Azure Portal to see how you can interact with your cluster.
+It offers great insights into your workloads.
+
+Open the 'Services and ingresses' tab. It should show a Service named 'svc-gamingwebapp' of type 'LoadBalancer'. That line should also contain a public IP address (in the screenshot, it has the value '51.1124.19.183').
+
+<img src="images/AzurePortalK8s3.png"  />
+
+Click on the IP address. The Service is connected (using a `selector`) to your Gaming WebApp Pod, so your browser should now load the frontend application.
+
+You have now deployed your code into a production environment.
+
+### Continuous integration
+
+In Azure DevOps, please examine the yaml pipeline again. Note that the build trigger points to a branch name `main`. However, our branch still has the old name `master`. Change the yaml, so the pipeline will run for every commit on master.
+
+```yaml
+trigger:
+- main
+```
+
+## Improvements
+
+This pipeline is the absolute minimal setup that you can create. There's room for improvements.
+
+- The ability to target different environments (staging, production).
+- Using Managed Identity to connect to Azure Key Vault to store the connection string.
+- Running multiple Pods of the same type, for high availability.
+- Using an external SQL Server database, e.g. in Azure.
+
+Using the knowledge from the other Labs, you should be able to add these features.
+
+### Additional improvements
+
+Additional improvements that you might make include:
+
+- Adding multiple build [stages](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/stages?view=azure-devops&tabs=yaml#specify-stages), to deploy updates to environments progressively.
+- Running a build, with tests that runs for pull requests, but does not deploy to Kubernetes by using [conditions](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/stages?view=azure-devops&tabs=yaml#conditions).
+- Adding [approval](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass) steps to the pipeline to require human approval before deploying to a specific environment.
+- Creating a [Helm package](https://andrewlock.net/deploying-asp-net-core-applications-to-kubernetes-part-4-creating-a-helm-chart-for-an-aspnetcore-app/) to simplify deployment across different environments.
 
 ## Wrapup
 
 In this lab you have created a build pipeline to build and push the container images for your .NET solution. You used a release pipeline to deploy the composition to a cluster in Azure.
+
+Congratulations, you can now do Docker DevOps style!
