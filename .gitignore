@@ -88,7 +88,8 @@ rcf/
 #Ignore marker-file used to know which docker files we have.
 .dotnextgaming_*
 
-istio-1.2.5/
 .vscode/settings.json
 
 **/*-mod.yaml
+resources/lab*/istio-**/*
+resources/*/*LD.yaml
