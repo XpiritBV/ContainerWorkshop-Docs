@@ -15,7 +15,7 @@ Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
 
 ## Getting started
 
-In the terminal, change directories to the Docs repository directory named 'resources/lab10'
+In the terminal, change directories to the Docs repository directory named 'resources/lab04'
 ```
 C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab04>
 ```
