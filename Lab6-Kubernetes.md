@@ -17,9 +17,9 @@ Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6)
 Launch Visual Studio Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster.
 Click on the 'Install dependencies' button if needed.
 
-Also, in the terminal, change directories to the Docs repository directory named 'resources/lab10'
+Also, in the terminal, change directories to the Docs repository directory named 'resources/lab06'
 ```
-C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab10>
+C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab06>
 ```
 
 ## <a name='inspect-cluster'></a>Inspecting the cluster

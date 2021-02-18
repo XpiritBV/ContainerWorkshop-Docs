@@ -13,15 +13,15 @@ Also, make sure you have installed Istio as described in [Lab 12 - Working with 
 >Make sure to complete the entire chapter.
 
 ## Getting started
-![](images/kubernetes01.png)
-Launch VS Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster.
-Click on the 'Install dependencies' button if needed.
+![](images/kubernetes02.png)
+
+Launch VS Code and open the Kubernetes extension. Make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster. Click on the 'Install dependencies' button if needed.
 
 > Regularly switch to VS Code to examine the resources of your cluster. It will help you understand this lab.
 
-Also, in the terminal, change directories to the Docs repository directory named 'resources/lab13':
+Also, in the terminal, change directories to the Docs repository directory named 'resources/lab11':
 ```
-user@machine:/mnt/c/Sources/ContainerWorkshop-Docs/resources/lab13/$ 
+user@machine:/mnt/c/Sources/ContainerWorkshop-Docs/resources/lab11/$ 
 ```
 
 ## Important

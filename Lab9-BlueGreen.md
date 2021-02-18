@@ -11,13 +11,14 @@ Goals for this lab:
 Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'
 
 ## Getting started
-![](images/kubernetes01.png)
+![](images/kubernetes02.png)
+
 Launch VS Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster.
 Click on the 'Install dependencies' button if needed.
 
-Also, in the terminal, change directories to the Docs repository directory named 'resources/lab11'
+Also, in the terminal, change directories to the Docs repository directory named 'resources/lab09'
 ```
-C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab11>
+C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab09>
 ```
 
 ## <a name='deploy-contour'></a>Deploying the Contour ingress controller

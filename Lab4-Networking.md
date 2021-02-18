@@ -15,7 +15,7 @@ Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
 
 ## Getting started
 
-In the terminal, change directories to the Docs repository directory named 'resources/lab10'
+In the terminal, change directories to the Docs repository directory named 'resources/lab04'
 ```
 C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab04>
 ```
@@ -380,7 +380,7 @@ You can also give a container instance an alias, so you can refer to it by a net
 
 If you want to complete this part, just apply the file named '01-docker-compose-netwrk-alias.yml'
 ```
-docker-compose -f docker-compose-netwrk.yml up -d
+docker-compose -f 01-docker-compose-netwrk.yml up -d
 ```
 
 Run busybox again and verify that the database server can be resolved by its alias:

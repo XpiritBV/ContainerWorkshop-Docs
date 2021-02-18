@@ -108,7 +108,7 @@ Enhance the override file by adding the dependencies of the web application on t
 
 ```yaml
     depends_on:
-      - "leaderboard.webapi"
+      - "leaderboardwebapi"
 ```
 
 Next, you are going to create a similar compose override for a production situation. In essence the `docker-compose.override.yml` is the development environment override file by convention.

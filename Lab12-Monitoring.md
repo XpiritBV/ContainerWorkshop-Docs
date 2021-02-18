@@ -5,8 +5,11 @@ During this lab you will use Azure Application Insights and instrument the web a
 Goals for this lab:
 - [Create an Application Insights resource](#appinsights)
 - [Configure the web application and Web API to gather telemetry and monitoring data](#configure)
-- [Review structured logging and health endpoints](#review)
+- [Add health endpointss](#health)
+- [Check readiness and liveliness in Kubernetes cluster](#readiness)
+- [Add structured logging](#logging)
 - [Introduce, find and fix a bug](#bug)
+- [Monitoring with Istio](#istio)
 
 ## <a name='appinsights'></a>Create an Application Insights resource
 
@@ -31,7 +34,7 @@ Redeploy the solution. If you made changes to files, you will have to commit the
 
 Open a browser and navigate to the web application. Refresh the page a number of times. Next, visit the AppInsights resource in the Azure portal again and go to the Application Map. View the statistics there. Also view the Live Metrics and make another set of requests. Observe the behavior of the application under these normal circumstances. You might want to look at the Kubernetes dashboard as well to get a complete impression of how the application behaves.
 
-## <a name='review'></a>Add health endpoints
+## <a name='health'></a>Add health endpoints
 
 Being able to monitor the health of your application is important, both from an observability perspective, but also for the container orchestrator. You can easily add health endpoints to your solution.
 
@@ -48,18 +51,111 @@ private void ConfigureHealth(IServiceCollection services)
 }
 ```
 
-This method registers the required services in ASP.NET Core. 
+This method registers the required services for health monitoring in ASP.NET Core. 
 
 Next, go to the `Configure` method in `Startup` and find to the call to `app.UseEndpoints`. Add a new mapping for the health endpoint, that will be reachable from the relative route `/ping`. 
- Inspect the implementation and notice how a health check is added. There is a second health check behind a feature flag. That is there for experimenting in the next lab. Right now, the feature flag is not active and the second health check is not really added.
 
-You can try the health endpoint by navigating to the correct URL.
-
-```url
-https://localhost:44369/ping (local hosted)
+```c#
+app.UseEndpoints(endpoints =>
+{
+   endpoints.MapHealthChecks("/ping", new HealthCheckOptions() { Predicate = _ => false });
 ```
 
-## <a name='review'></a>Add structured logging
+You can try the health endpoint by navigating to the correct URL [when running your Docker composition locally: [https://localhost:44369/ping](https://localhost:44369/ping)
+
+## <a name='readiness'></a>Readiness and liveliness
+
+One step beyond a simple health endpoint for availability is using health endpoint that report readiness and liveliness. A service can indicate that it is ready to receive incoming requests and also whether it is still lively enough to continue operating. This information is used by the container orchestrator to start routing traffic to a container or pod, and to terminate and recycle a malfunctioning container that is no longer lively. 
+
+Add two new endpoints to the Leaderboard Web API inside the `Configure` method like before.
+```C#
+endpoints.MapHealthChecks("/health/ready",
+   new HealthCheckOptions()
+   {
+      Predicate = reg => reg.Tags.Contains("ready"),
+      ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+   })
+   .RequireHost($"*:{Configuration["ManagementPort"]}");
+
+endpoints.MapHealthChecks("/health/lively",
+   new HealthCheckOptions()
+   {
+      Predicate = _ => true,
+      ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+   })
+.RequireHost($"*:{Configuration["ManagementPort"]}");
+```
+The code shows that the two new endpoints will only be available for traffic coming from the management port. Also, the `lively` endpoint will run all health checks, whereas the `ready` endpoint will only run those tagged as `ready`.
+
+To indicate the management port at `8080`, add an environment variable for `ASPNETCORE_MANAGEMENTPORT` to both your `docker-compose.override.yml` file and the deployment manifest. Also, make sure the Kestrel web server for the Web API is also hosting on that same port.
+```yaml
+# docker-compose.override.yml
+- ASPNETCORE_URLS=https://+:443;http://+:80;http://+:8080
+- ASPNETCORE_MANAGEMENTPORT=8080
+```
+```yaml
+env:
+  # existing definitions
+- name: ASPNETCORE_MANAGEMENTPORT
+   value: "8080"
+- name: ASPNETCORE_URLS
+   value: http://+:80;http://+:8080
+ports:
+- containerPort: 80
+- containerPort: 8080
+- containerPort: 443
+```
+Finally, you can add a Docker container in your Docker Compose file that offers a health checks user interface:
+```yaml
+  healthcheckui:
+    image: xabarilcoding/healthchecksui:latest
+    environment:
+      - HealthChecksUI:HealthChecks:0:Name=Readiness checks
+      - HealthChecksUI:HealthChecks:0:Uri=http://leaderboardwebapi:8080/health/ready
+      - HealthChecksUI:HealthChecks:1:Name=Liveliness checks
+      - HealthChecksUI:HealthChecks:1:Uri=http://leaderboardwebapi:8080/health/lively
+    ports:
+      - 5000:80
+    networks:
+      - backend
+```
+Start your composition and navigate to the [http://localhost:5000/healthchecks-ui](http://localhost:5000/healthchecks-ui). You should see a website similar to this:
+
+![](/images/HealthChecksUI.png)
+This will help you get quick insights into your health endpoints for development purposes.
+
+Notice how we have not exposed the management ports to outside of the composition or cluster. It can only be reached from within the local cluster network and can therefore be considered safe. It does not show sensitive information, but should not be exposed nevertheless.
+
+Your Kubernetes cluster can use the two health endpoints for readiness and liveliness to know when to use a new pod or when to recycle it. In your manifest change the deployment definition for your Web API to use both ready and lively endpoints:
+```yaml
+containers:
+- name: leaderboardwebapi
+   terminationMessagePath: "/tmp/leaderboardwebapi-log"
+   image: <your-registry>.azurecr.io/leaderboardwebapi:latest
+   imagePullPolicy: Always
+   readinessProbe:
+      httpGet:
+      path: /health/ready
+      port: 8080
+      initialDelaySeconds: 90
+      periodSeconds: 10
+      timeoutSeconds: 20
+      failureThreshold: 5
+   livenessProbe:
+      httpGet:
+      path: /health/lively
+      port: 8080
+      initialDelaySeconds: 90
+      periodSeconds: 10
+      timeoutSeconds: 20
+      failureThreshold: 3
+```
+
+Redeploy your solution with the changed manifest file. Watch how the cluster will wait until the container of the web API indicates ready before it is marked as healthy.
+![](images/readiness.png)
+![](images/readinessDetail.png)
+
+## <a name='logging'></a>Add structured logging
 For the structured (or semantic) logging, you will implement a minimal set of code. Find the constructor of the `LeaderboardController` and add an additional argument:
 
 ```c#
@@ -100,7 +196,12 @@ Finally, open the `Program.cs` file and go to the `CreateHostBuilder` method. Ex
 })
 ```
 
-Go to the Azure Portal and open the blade for the AppInsights resource you created. Refresh the home page of the Look at Live Metrics and Log Analytics to see the effects of the logging and telemetry.
+Go to the Azure Portal and open the blade for the AppInsights resource you created. Look at the following:
+- **Application Map** 
+- **Live Metrics:** There should be two clients for each web API connected)
+- **Log Analytics:** Run a `traces` query for the structured logging.
+
+to see the effects of the logging and telemetry information reaching Application Insights.
 
 ## <a name='bug'></a>Introduce, find and fix a bug
 
@@ -153,12 +254,12 @@ Fix the bug (by removing the code you added previously) by following a proper De
 - Perform a build and release to your Kubernetes cluster
 - Verify everything works and close the work item
 
-## Monitoring Kubernetes Pods with Istio
+## <a name='istio'></a>Monitoring Kubernetes pods with Istio
 In this chapter we will use Istio addons to visualize your Kubernetes environment.
 
 ### Getting started
 1. Install Istio by following the steps outlined in chapter 'Deploying Istio' of [Lab 10 - Working with Istio on Kubernetes](Lab10-Istio.md).
-2. Deploy an Istio enabled **buggy** workload (a .NET API that returns a color string) as described in chapter 'Deploying a workload' of [Lab 11 Retry and Circuit breaker with Istio](Lab11-IstioRetry-CircuitBreaker). Stop after deploying Fortio and return here.
+2. Deploy an Istio enabled **buggy** workload. This is a .NET API that returns a color string) as described in chapter 'Deploying a workload' of [Lab 11 Retry and Circuit breaker with Istio](Lab11-IstioRetry-CircuitBreaker). Stop after deploying Fortio and return here.
 3. Generate some traffic to the workload, by running `fortio`:
    ```
    kubectl exec -it fortio-deploy-6dc9b4d7d9-p68rg -- fortio load -c 100 -qps 10  http://blue/api/color
@@ -175,7 +276,7 @@ First, deploy Prometheus to Istio:
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.8/samples/addons/prometheus.yaml
 ```
 
-Create a port forwarding from your machine to the cluster using `istioctl dashboard` and passing the name `prometheus`. This command will block the terminal, until you press `Ctrl+c`:
+Create a port forwarding from your machine to the cluster using `istioctl dashboard` and passing the name `prometheus`. This command will block the terminal, until you press `Ctrl+C`:
 
 ```
 istioctl dashboard prometheus
@@ -185,13 +286,9 @@ In your browser, navigate to http://localhost:9090
 
 ![](images/prometheus01.png)
 
-Click on the 'Graph' tab.
+Click on the 'Graph' tab and execute the query 'istio_requests_total'. Depending on how much load you generated with Fortio, you should see some statistics about the total amount of requests processed by Istio. Try to find out why you can see two lines, while we are running just a single Pod. (It's not the sidecar...)
 
-Execute the query 'istio_requests_total'. Depending on how much load you generated with Fortio, you should see some statistics about the total amount of requests processed by Istio.
-
-Try to find out why you can see two lines, while we are running just a single Pod. (It's not the sidecar...)
-
-Run the `fortio` tool a couple of times in a different terminal, to generate some more data.
+Run the `fortio` tool a couple of times in a different terminal, to generate some more data. 
 
 Let's zoom in on the failed responses returned by the Service named 'blue', by filtering out the successful calls. Run the following query:
 
@@ -202,7 +299,8 @@ You should see one line that indicates the total amount of failed requests. It s
 
 ![](images/prometheus02.png)
 
-Press `Ctrl+c` to stop the `istioctl` port forward.
+Press `Ctrl+C` to stop the `istioctl` port forward.
+
 ### Grafana
 
 Grafana is an open source monitoring solution that can be used to configure dashboards for Istio. You can use Grafana to monitor the health of Istio and of applications within the service mesh. Grafana will query the data that was gathered by Prometheus.
@@ -269,8 +367,7 @@ Go back and open the dashboard named 'Istio Performance Dashboard'. It will show
 
 Look around in the Istio dashboards for a few minutes. See if you can find more useful charts.
 
-Break the port forward by pressing `Ctrl+c`.
-
+Break the port forward by pressing `Ctrl+C`.
 
 ## Wrapup
 
