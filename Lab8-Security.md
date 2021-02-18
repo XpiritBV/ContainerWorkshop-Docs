@@ -95,6 +95,7 @@ This should give you a list of values for the following :
 Name | Value (example)
 --- | ---
 Key Vault name | https://your-keyvault.vault.azure.net/
+Tenant ID | ad184f13-1651-4b33-98bc-b636b35ee7e4
 Application ID | 1f31d60b-2f81-42c6-9df6-eb636bd3e9d3
 Client Secret | vFwBC9rEtBfO7BNVgeYmSLcpxhTGQfqKG4/ZAoCKhjh=
 
@@ -117,10 +118,11 @@ Add references to the packages `Azure.Extensions.AspNetCore.Configuration.Secret
 
 ```c#
 Host.CreateDefaultBuilder(args)
-    .ConfigureAppConfiguration((context, config) => {
-        //if (context.HostingEnvironment.IsProduction())
+    .ConfigureAppConfiguration((context, config) =>
+    {
+        var hostConfig = config.Build();
+        if (!String.IsNullOrEmpty(hostConfig["KeyVaultName"]))
         {
-            var hostConfig = config.Build();
             var secretClient = new SecretClient(
                 new Uri(hostConfig["KeyVaultName"]),
                 new ClientSecretCredential(
@@ -130,9 +132,7 @@ Host.CreateDefaultBuilder(args)
             );
             config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
         }
-      );
-      config.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
-  })
+    })
   // Existing code
 ```
 
@@ -376,7 +376,7 @@ miPrincipalId=aaaaaaaa-bae1-4f32-8f0e-d8cf29fba4fd
 miClientId=aaaaaaaa-192c-4f43-8e59-aaaaaaaa
 ```
 
-If you come back here later, but you don't remember the principalId, don't worry. You can get it by running `az identity show`:
+If you come back here later, but you don't remember the `principalId`, don't worry. You can get it by running `az identity show`:
 
 ```
 az identity show -g ContainerWorkshop -n PodRunnerIdentity
@@ -456,6 +456,7 @@ Also, an adjustment to the way the web API code connects to the Azure KeyVault m
 var secretClient = new SecretClient(
     new Uri(hostConfig["KeyVaultName"]),
     new DefaultAzureCredential()
+);
 ```
 
 Notice how there is only the configurable endpoint for the Azure KeyVault left. Build, tag and push the updated `LeaderboardWebAPI` image and deploy your new solution by applying the static manifest .
