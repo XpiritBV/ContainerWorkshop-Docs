@@ -56,7 +56,7 @@ Login to your AZDO account and switch to the `ContainerWorkshop` team project. G
 You will get a question stating "Where is your code?". 
 Pick `Azure Repos Git`, select the proper repository, and the master branch of that Git repository.
 
-<img src="images/AzureDevOpsTemplate.png" width="400" />
+<img src="images/AzureDevOpsTemplate.png" />
 
 From the available templates select the `Starter pipeline` template, so we can start adding tasks.
 
@@ -107,7 +107,7 @@ Leave the value of the 'Docker Compose File' as is. The docker-compose.yml file 
 
 At the 'Command', enter 'build', so the build agent will execute a `docker-compose build` command, to compile sources and generate container images for both 'GamingWebApp' and 'LeaderboardWebAPI' by using the 'Dockerfile' files in each folder.
 
-<img src="images/AzureDevOpsComposeTask01.png" height="400px" />
+<img src="images/AzureDevOpsComposeTask01.png" />
 
 Click on the 'Add' button.
 In the resulting yaml, add an additional attribute called `displayName` with value `Docker Compose Build`.
@@ -157,17 +157,17 @@ Update the display name, so your second task looks like this:
 
 Click on 'Save and run', to save your build pipeline definition file and queue the build to run on an agent. Click on the job named 'job1' to see details.
 
-<img src="images/AzureDevOpsSavePipeline.png" height="400px" />
+<img src="images/AzureDevOpsSavePipeline.png" />
 
 At this point, you might need to authorize the pipeline to use a Service Connection to interact with Azure.
 
-<img src="images/AzureDevOpsAuthPipeline.png" height="400px" />
+<img src="images/AzureDevOpsAuthPipeline.png" />
 
 Click on the 'Permit' button to continue.
 
 View the output of the build pipeline to monitor progress.
 
-<img src="images/AzureDevOpsRunPipeline.png" height="400px" />
+<img src="images/AzureDevOpsRunPipeline.png" />
 
 After a few minutes, you should see that your build has completed. At that point, you should have 2 brand new container images in your Container Registry.
 
@@ -241,7 +241,7 @@ In your browser, on the page that displays the build results, navigate back usin
 
 Select 'Edit pipeline'
 
-<img src="images/AzureDevOpsEditPipeline.png" height="400px" />
+<img src="images/AzureDevOpsEditPipeline.png" />
 
 In the toolbox, click on the 'Deploy to Kubernetes' task.
 
@@ -300,7 +300,7 @@ Next, click on the 'Run' button that appears after that, and 'Run' again to queu
 
 Click on the Job named 'Job' to monitor progress.
 
-<img src="images/AzureDevOpsGreenPipeline.png" height="400px" />
+<img src="images/AzureDevOpsGreenPipeline.png" />
 
 
 When the pipeline had completed, open your cluster on the Azure portal. Go to the Workloads tab and see if the Pods have deployed successfully.
