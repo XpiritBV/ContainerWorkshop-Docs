@@ -275,7 +275,7 @@ public interface ILeaderboardClient
 }
 ```
 
-For testing purposes and to exploit the bug, add the option for the index page to specific a querystring parameter called `limit`, allowing the browser to use  [http://localhost/?limit=0](http://localhost/?limit=0). 
+For testing purposes and to exploit the bug, add the option for the index page to specify a querystring parameter called `limit`, allowing the browser to use  [http://localhost/?limit=0](http://localhost/?limit=0). 
 
 Go to `Index.cshtml.cs` in your Gaming Web App and change the code for the try/catch block to be:
 ```c#
@@ -290,8 +290,7 @@ try
 catch
 ```
 
-Compile your changes locally. If it compiles, run the Docker composition first to see how the website is behaving. 
-Check that there is a bug by visiting the home page of the web application at [http://localhost/?limit=0](http://localhost/?limit=0). The `limit` value of `0` will be passed through the querystring to the proxy class, which will add it to the call to the web API, ending up in the `Get` method of the `LeaderboardController`.
+Compile your changes locally. If it compiles, run the Docker composition first to see how the website is behaving. Check that there is a bug by visiting the home page of the web application at [http://localhost/?limit=0](http://localhost/?limit=0). The `limit` value of `0` will be passed through the querystring to the proxy class, which will add it to the call to the web API, ending up in the `Get` method of the `LeaderboardController`.
 
 If all is correct, the page should display after a few seconds without any highscores.
 

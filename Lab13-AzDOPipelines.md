@@ -175,7 +175,7 @@ After a few minutes, you should see that your build has completed. At that point
 
 After doing lab 6, you know that we can deploy workloads to Kubernetes by using `kubectl apply` and passing in a filename.
 
-We have created such a file for you in the code repo. It's in the 'deployment' folder named 'gamingwebapp.k8s-static.yaml'.
+We have created such a file for you in the code repo. It's in the 'deployment' folder named 'gamingwebapp.k8s-monitoring.yaml'.
 
 Open the file and examine the contents. Please note that it contains a few placeholders, marked with two underscores `__` as prefix and postfix. For example, it contains the name of the container registry to use for images.
 
