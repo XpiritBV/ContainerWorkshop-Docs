@@ -343,6 +343,7 @@ Using the knowledge from the other Labs, you should be able to add these feature
 
 Additional improvements that you might make include:
 
+- Proper image tagging. We are using `latest` on every image we create. We should add semantic versioning.
 - Adding multiple build [stages](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/stages?view=azure-devops&tabs=yaml#specify-stages), to deploy updates to environments progressively.
 - Running a build, with tests that runs for pull requests, but does not deploy to Kubernetes by using [conditions](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/stages?view=azure-devops&tabs=yaml#conditions).
 - Adding [approval](https://docs.microsoft.com/en-us/azure/devops/pipelines/process/approvals?view=azure-devops&tabs=check-pass) steps to the pipeline to require human approval before deploying to a specific environment.
