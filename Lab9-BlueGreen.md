@@ -26,7 +26,7 @@ An ingress controller manages traffic into and out of the cluster. You can use i
 
 Kubernetes does not have a built-in [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) controller. We first need to deploy one. For this lab, we chose [Contour](https://github.com/heptio/contour). Other popular [options](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) are Nginx and Traefik.
 
-Open a terminal, move to the repository directory named 'resources/lab11'.
+Open a terminal, move to the repository directory named 'resources/lab09'.
 
 Type the following command to deploy the [Contour](https://github.com/heptio/contour) ingress controller:
 
