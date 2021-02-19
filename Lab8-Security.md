@@ -29,7 +29,7 @@ docker ps
 If SQL Server is not running, run this command:
 
 ```cmd
-docker run -d -p 5433:1433 --env ACCEPT_EULA=Y -e SA_PASSWORD="Pass@word" --env MSSQL_PID=Developer --name sqldocker microsoft/mssql-server-linux
+docker run -d -p 5433:1433 --env ACCEPT_EULA=Y -e SA_PASSWORD="Pass@word" --env MSSQL_PID=Developer --name sqldocker mcr.microsoft.com/mssql/server:2019-latest
 ```
 
 Inspect SQL Server, which contains the connection string in an environment variable. Use its container ID to inspect it.
@@ -49,8 +49,8 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 You can also look at the history of images and see the various commands that were used to build them. Try running:
 
 ```cmd
-docker history microsoft/mssql-server-linux
-docker history microsoft/mssql-server-linux --no-trunc
+docker history mcr.microsoft.com/mssql/server:2019-latest
+docker history mcr.microsoft.com/mssql/server:2019-latest --no-trunc
 ```
 
 Docker containers and their images are inspectable and it is non-trivial to work with secrets in a secure way. Let's find out how to do that.
