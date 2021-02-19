@@ -332,7 +332,7 @@ trigger:
 
 This pipeline is the absolute minimal setup that you can create. There's room for improvements.
 
-- The ability to target different environments (staging, production).
+- The ability to target different environments (staging, production) and blue/green deployments or focused canary releases.
 - Using Managed Identity to connect to Azure Key Vault to store the connection string.
 - Running multiple Pods of the same type, for high availability.
 - Using an external SQL Server database, e.g. in Azure.
