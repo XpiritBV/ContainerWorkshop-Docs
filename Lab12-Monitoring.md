@@ -250,10 +250,50 @@ public async Task<ActionResult<IEnumerable<HighScore>>> Get(int limit = 10)
    AnalyzeLimit(limit);
 ```
 
-Compile your changes locally. If it compiles, run the Docker composition first to see how the website is behaving. 
-Check that there is a bug by refreshing the home page of the web application at [http://localhost/?limit=0](http://localhost/?limit=0). 
+Next, we will add some code to make the web front end use the `limit` parameter and be more resilient. 
 
-If all is correct, the page should display without any highscores.
+Go to the `GamingWebApp` project and inspect the `ConfigureTypedClients` method. It will register a typed client that contains an `HttpClient` wrapped with Polly policies for Retry and Timeout. The policy will wait at most 1500 milliseconds and do 3 retries. You can use a such a client to make an HTTP call with these policies by injecting an object of the `ILeaderboardClient` type into the object that uses it. In our case this will be the `IndexModel` class:
+
+```c#
+private readonly ILeaderboardClient proxy;
+
+public IndexModel(ILeaderboardClient proxy, IOptionsSnapshot<LeaderboardApiOptions> options,
+   ILoggerFactory loggerFactory)
+{
+   this.logger = loggerFactory.CreateLogger<IndexModel>();
+   this.options = options;
+   this.proxy = proxy;
+}
+```
+
+Since our web API now exposes a limit parameter in the `GET` method to `/api/leaderboard`, the interface definition for the proxy changes. Change the signature of the proxy interface `ILeaderboard` in the `Proxy` folder to include the limit parameter:
+```c#
+public interface ILeaderboardClient
+{
+   [Get("/api/leaderboard")]
+   Task<IEnumerable<HighScore>> GetHighScores(int limit = 10);
+}
+```
+
+For testing purposes and to exploit the bug, add the option for the index page to specific a querystring parameter called `limit`, allowing the browser to use  [http://localhost/?limit=0](http://localhost/?limit=0). 
+
+Go to `Index.cshtml.cs` in your Gaming Web App and change the code for the try/catch block to be:
+```c#
+try
+{
+   // Using injected typed HTTP client instead of locally created proxy
+   int limit;
+   Scores = await proxy.GetHighScores(
+         Int32.TryParse(Request.Query["limit"], out limit) ? limit : 10
+   ).ConfigureAwait(false);
+}
+catch
+```
+
+Compile your changes locally. If it compiles, run the Docker composition first to see how the website is behaving. 
+Check that there is a bug by visiting the home page of the web application at [http://localhost/?limit=0](http://localhost/?limit=0). The `limit` value of `0` will be passed through the querystring to the proxy class, which will add it to the call to the web API, ending up in the `Get` method of the `LeaderboardController`.
+
+If all is correct, the page should display after a few seconds without any highscores.
 
 Next, perform a build and release into your cluster. After a successful deployment, check how the website is behaving for the same URL. 
 You might want to create some load on the cluster from PowerShell to see some bigger effect in Application Insights:
