@@ -234,9 +234,9 @@ spec:
 It describes a pod and specifies a pod name by using metadata. In the pod `spec` you can see that the container is based on `alpine` image. It also specifies which command to run inside the container after it has been created.
 
 ### Creating a pod from a template
-In your terminal, move to the repository directory named 'resources/lab10'.
+In your terminal, move to the repository directory named 'resources/lab06'.
 ```
-user@machine:/mnt/d/Projects/gh/ContainerWorkshop-Docs$ cd resources/lab10/
+user@machine:/mnt/d/Projects/gh/ContainerWorkshop-Docs$ cd resources/lab06/
 ```
 
 Use the command `kubectl apply` to deploy the template:
