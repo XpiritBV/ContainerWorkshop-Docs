@@ -13,7 +13,7 @@ Goals for this lab:
 
 ## <a name='appinsights'></a>Create an Application Insights resource
 
-Go to the Azure portal and create a new Application Insights resource in the existing resource group `ContainerWorkshop`. Once created go to the overview and take note of the AppInsights instrumentation key.
+Go to the Azure portal and create a new Application Insights resource in the existing resource group `ContainerWorkshop`. Give it a name such as `ContainerWorkshopAppInsights`. Once created go to the overview and take note of the Application Insights instrumentation key.
 
 Currently, you cannot [easily](https://docs.microsoft.com/en-us/cli/azure/ext/application-insights/monitor/app-insights?view=azure-cli-latest) create the AppInsights resource from the Azure CLI. It is possible to use Azure Resource Management (ARM templates) to automate the provisioning.
 
@@ -29,7 +29,28 @@ Open Visual Studio and the solution for the retro gaming application. We need to
 
 Go to the place where you think the instrumentation key should be located and specify it there.
 
+ Depending on the place you chose, use the following syntax:
+```json
+# appsettings.json (or secrets.json)
+  "ApplicationInsights": {
+    "InstrumentationKey": "aadb6c95-1234-fcab-bbd3-830bb9473d5a"
+  }
+```
+```yaml
+# docker-compose file
+ApplicationInsights__InstrumentationKey=aadb6c95-1234-fcab-bbd3-830bb9473d5a
+```
+```yaml
+# Kubernetes deployment manifest
+- name: ApplicationInsights__InstrumentationKey
+  value: aadb6c95-1234-fcab-bbd3-830bb9473d5a
+```
+```
+# KeyVault secret
+ApplicationInsights--InstrumentationKey
+```
 Repeat this for the Web API project.
+
 Redeploy the solution. If you made changes to files, you will have to commit the code and build and release with the pipelines. If you did not change the code, it might be enough to create only a new release.
 
 Open a browser and navigate to the web application. Refresh the page a number of times. Next, visit the AppInsights resource in the Azure portal again and go to the Application Map. View the statistics there. Also view the Live Metrics and make another set of requests. Observe the behavior of the application under these normal circumstances. You might want to look at the Kubernetes dashboard as well to get a complete impression of how the application behaves.
@@ -38,7 +59,7 @@ Open a browser and navigate to the web application. Refresh the page a number of
 
 Being able to monitor the health of your application is important, both from an observability perspective, but also for the container orchestrator. You can easily add health endpoints to your solution.
 
-First, open the `Startup.cs` file and look for the calls to `ConfigureTelemetry` and `ConfigureSecurity`.Add a new call with a similar signature `ConfigureHealth`. 
+First, add a reference to the NuGet package `Microsoft.Extensions.Diagnostics.HealthChecks`. Next, open the `Startup.cs` file and look for the calls to `ConfigureTelemetry` and `ConfigureSecurity`. Add a new call with a similar signature `ConfigureHealth`. 
 Implement the configuration of health as follows:
 ```c#
 private void ConfigureHealth(IServiceCollection services)
@@ -47,7 +68,7 @@ private void ConfigureHealth(IServiceCollection services)
 
    // Uncomment next two lines for self-host healthchecks UI
    //services.AddHealthChecksUI()
-   //    .AddSqliteStorage($"Data Source=sqlite.db"); ;
+   //    .AddSqliteStorage($"Data Source=sqlite.db");
 }
 ```
 
@@ -94,6 +115,7 @@ To indicate the management port at `8080`, add an environment variable for `ASPN
 - ASPNETCORE_MANAGEMENTPORT=8080
 ```
 ```yaml
+# deployment manifest
 env:
   # existing definitions
 - name: ASPNETCORE_MANAGEMENTPORT
@@ -135,16 +157,16 @@ containers:
    imagePullPolicy: Always
    readinessProbe:
       httpGet:
-      path: /health/ready
-      port: 8080
+        path: /health/ready
+        port: 8080
       initialDelaySeconds: 90
       periodSeconds: 10
       timeoutSeconds: 20
       failureThreshold: 5
    livenessProbe:
       httpGet:
-      path: /health/lively
-      port: 8080
+        path: /health/lively
+        port: 8080
       initialDelaySeconds: 90
       periodSeconds: 10
       timeoutSeconds: 20
@@ -176,7 +198,7 @@ this.logger = loggerFactory.CreateLogger<LeaderboardController>();
 In the controller `Get` action, call the `LogInformation` method to log at the Information level:
 
 ```c#
-logger.LogInformation("Retrieving score list with a limit of {SearchLimit}.", limit);
+logger.LogWarning("Retrieving score list with a limit of {SearchLimit}.", limit);
 ```
 
 Notice how the name of the log message format does not resemble the name of the argument. For semantic logging, it is not necessary to match by name. Instead, the matching is done positionally.
@@ -224,7 +246,7 @@ and calling it at the beginning of the `Get` method:
 ```c#
 public async Task<ActionResult<IEnumerable<HighScore>>> Get(int limit = 10)
 {
-   logger.LogError("Retrieving score list with a limit of {SearchLimit}.", limit);
+   logger.LogWarning("Retrieving score list with a limit of {SearchLimit}.", limit);
    AnalyzeLimit(limit);
 ```
 
