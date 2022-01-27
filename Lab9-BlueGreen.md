@@ -3,25 +3,30 @@
 During this lab, you will become familiar with Kubernetes networking concepts, like services and ingress.
 
 Goals for this lab:
+
 - Gain an understanding of basic networking concepts in Kubernetes.
 - Learn how to use Ingress to expose services based on routing keys.
 - Run multiple versions of a workload on Kubernetes concurrently, combined with traffic routing to perform [Blue/Green testing](https://martinfowler.com/bliki/BlueGreenDeployment.html).
 
 ## Prerequisites
+
 Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'
 
 ## Getting started
+
 ![](images/kubernetes02.png)
 
 Launch VS Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster.
 Click on the 'Install dependencies' button if needed.
 
 Also, in the terminal, change directories to the Docs repository directory named 'resources/lab09'
+
 ```
 C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab09>
 ```
 
 ## <a name='deploy-contour'></a>Deploying the Contour ingress controller
+
 An ingress controller manages traffic into and out of the cluster. You can use it to get network connectivity between pods and software outside of the cluster.
 
 Kubernetes does not have a built-in [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) controller. We first need to deploy one. For this lab, we chose [Contour](https://github.com/heptio/contour). Other popular [options](https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/) are Nginx and Traefik.
@@ -37,7 +42,8 @@ kubectl apply -f 00-contour.yaml
 This command will install custom resource definitions and pods to serve as ingress controller within the local cluster.
 
 ## <a name='deploy-workloads'></a>Deploying two versions of a container
-We will now deploy a small demo application. It is a .NET Core Web Api. There are two versions, 'blue' and 'green'. In real life, this would probably be something similar to v1 and v2. The demo application with version *'blue'* is configured to return string value `blue` when it is called. The *'green'* version, likewise returns string value `green`. This way, we can easily see which application version answers our call when we call the API's later.
+
+We will now deploy a small demo application. It is a .NET Core Web Api. There are two versions, 'blue' and 'green'. In real life, this would probably be something similar to v1 and v2. The demo application with version _'blue'_ is configured to return string value `blue` when it is called. The _'green'_ version, likewise returns string value `green`. This way, we can easily see which application version answers our call when we call the API's later.
 
 Deploy the two versions of the workload by running these commands:
 
@@ -51,7 +57,7 @@ kubectl apply -f 02-blue.yaml
 Each of these commands will first ensure that the namespace 'BlueGreen' exists, and then create a [deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#creating-a-deployment) and expose it by using a [service](https://kubernetes.io/docs/concepts/services-networking/service/).
 
 The first command creates the 'green' version of the workload, and the second will create the 'blue' version.
-After this step, you will have two active pods who can be called individually. 
+After this step, you will have two active pods who can be called individually.
 
 ### Check the resources
 
@@ -93,28 +99,36 @@ contour   ClusterIP   10.0.168.105   <none>        8001/TCP   11m   app=contour
 ```
 
 ### Finding node internal IP address for Docker Desktop
+
 If you're running Docker Desktop, write down the node IP address shown by running this command:
+
 ```
 kubectl get node/docker-desktop -o wide
 ```
 
 It will output something similar to this:
+
 ```
 NAME             STATUS   ROLES    AGE    VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE         KERNEL-VERSION                CONTAINER-RUNTIME
 docker-desktop   Ready    master   2d6h   v1.19.3   192.168.65.3   <none>        Docker Desktop   4.19.128-microsoft-standard   docker://20.10.2
 ```
 
 ### Finding node internal IP address for Azure Kubernetes Service
+
 If you're running on Azure, use this command to get the first node name:
+
 ```
 kubectl get nodes
 ```
+
 Use the node name to get information (your node name will be different):
+
 ```
 kubectl get node aks-nodepool1-36156572-vmss000000 -o wide
 ```
 
 It will output something similar to this:
+
 ```
 NAME                                STATUS   ROLES   AGE    VERSION    INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
 aks-nodepool1-36156572-vmss000000   Ready    agent   2d5h   v1.18.14   10.240.0.4    <none>        Ubuntu 18.04.5 LTS   5.4.0-1035-azure   docker://19.3.14
@@ -123,25 +137,26 @@ aks-nodepool1-36156572-vmss000000   Ready    agent   2d5h   v1.18.14   10.240.0.
 > Later in this lab, we will need the values of 'INTERNAL-IP'. So make a note of both.
 
 ## <a name='ingress'></a>Adding an HTTPProxy
+
 We now want to consume both services at a single endpoint, so we can perform Blue/Green testing. In this lab, ninety percent of traffic will be sent to the 'green' version, the remaining 10 percent will be sent to the 'blue' version.
 
 To do this, we'll create a Contour-specific 'HTTPProxy' resource.
 This resource acts as a [reverse proxy](https://en.wikipedia.org/wiki/Reverse_proxy) that routes incoming HTTP requests to one or more deployed services. Being able to target multiple services (e.g. blue & green) allows us to perform Blue/Green testing.
 
-```
+```yaml
 apiVersion: projectcontour.io/v1
 kind: HTTPProxy
-metadata: 
+metadata:
   name: ingress
   namespace: bluegreen
-spec: 
+spec:
   virtualhost:
     fqdn: demo.local
-  routes: 
+  routes:
     - conditions:
-      - prefix: / # matches everything
+        - prefix: / # matches everything
       permitInsecure: true
-      services: 
+      services:
         - name: blue
           port: 80
           weight: 10
@@ -149,6 +164,7 @@ spec:
           port: 80
           weight: 90
 ```
+
 The value in 'virtualhost' will be matched against the `Host` header of incoming HTTP requests. The value in `prefix` will be matched with the path of the URL. In this lab we will simply forward all HTTP requests for '/'. The values in `services` indicate the back-end services that will receive the forwarded calls.
 
 Create the ingress by running this command:
@@ -190,7 +206,7 @@ Inside the terminal, run this command to test the ingress, by making 100 web req
 Repeat the call, to see both words being returned.
 
 > Remember to replace the IP address with the value you noted down for 'INTERNAL-IP' (the host's IP address) earlier in this lab. You can display it again, by running this command:
-`kubectl get node/docker-desktop -o wide`
+> `kubectl get node/docker-desktop -o wide`
 
 Running the command, should display output similar to this:
 
@@ -199,11 +215,13 @@ Running the command, should display output similar to this:
  9 blue
 91 green
 ```
-> You should see that around 90 percent of the calls returned were answered by the *green* version, returning the word 'green' and that around 10 percent of the calls returned 'blue'.
+
+> You should see that around 90 percent of the calls returned were answered by the _green_ version, returning the word 'green' and that around 10 percent of the calls returned 'blue'.
 
 Switch back to your terminal and leave the test pod running.
 
 ### Blue/Green testing
+
 You can now perform Blue/Green testing, and (gradually) shift traffic towards the (newer) 'blue' version of the software.
 
 Type the following command to edit the existing Ingress:
@@ -211,15 +229,17 @@ Type the following command to edit the existing Ingress:
 ```
 kubectl edit HTTPProxy ingress
 ```
+
 Change the weights into:
-```
+
+```yaml
 - name: blue
   port: 80
   weight: 80
 - name: green
   port: 80
   weight: 20
-``` 
+```
 
 Save the file and run the `curl` loop again:
 
@@ -244,7 +264,7 @@ Uninstall Contour and delete the workloads:
 ```
 kubectl delete -f '00-contour.yaml'
 kubectl delete namespace bluegreen
-kubectl delete ns heptio-contour 
+kubectl delete ns heptio-contour
 ```
 
 ## Wrapup
