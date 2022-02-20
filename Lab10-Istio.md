@@ -37,7 +37,7 @@ You can choose to install Istio to the local mini-cluster that is installed with
 1. Download and install the tool `istioctl`. In WSL on Windows, or Mac or Linux run:
 
 ```
-cd resources/lab12
+cd resources/lab10
 
 curl -L https://istio.io/downloadIstio | sh -
 ```
@@ -95,12 +95,12 @@ kubectl delete namespace bluegreen
 
 2. Second, deploy both versions of the sample workload; by creating a namespace with two deployments and services. 
 
-> For more information about this application, read the introduction in [Lab 11](Lab11-BlueGreen.md#deploy-workloads).
+> For more information about this application, read the introduction in [Lab 9](Lab9-BlueGreen.md#deploy-workloads).
 
 > If you're running in the Cloud Shell, you can apply files by passing the raw Github URL, like this: `kubectl apply -f https://raw.githubusercontent.com/XpiritBV/ContainerWorkshop-Docs/master/resources/lab11/01-green.yaml`
 Version 1:
 ```
-kubectl apply -f ../lab11/01-green.yaml
+kubectl apply -f ../lab09/01-green.yaml
 
 namespace/bluegreen created
 deployment.apps/green created
@@ -110,7 +110,7 @@ service/green created
 and also for version 2:
 
 ```
-kubectl apply -f ../lab11/02-blue.yaml
+kubectl apply -f ../lab09/02-blue.yaml
 
 namespace/bluegreen unchanged
 deployment.apps/blue created
