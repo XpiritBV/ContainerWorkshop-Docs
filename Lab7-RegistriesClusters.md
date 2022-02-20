@@ -24,7 +24,7 @@ Goals for this lab:
 Docker registries are to Docker container images what NuGet feeds are to NuGet packages. They allow access to existing images that have been published by the owner. They can be private or publicly accessible.
 
 First, you will create an Azure Container Registry which allows (multiple) private repositories inside your registry. Run the following command from the command-line to create it:
-Find a unique name for your container registry, e.g. `containerworkshopregistry` plus your last name. It is best to use lower-casing.
+Find a unique name for your container registry, e.g. `containerworkshopregistry` _plus your last name_. It is best to use lower-casing.
 
 ```cmd
 az group create --name ContainerWorkshop --location WestEurope
@@ -60,7 +60,7 @@ The current images are not suitable to be pushed to the registry, since their na
 
 Tag the current images again to include the registry name. This will not create a new image, but it does appear as a separate entry in your local images list.
 
-```
+```cmd
 docker tag gamingwebapp:latest <full-registry-name>/gamingwebapp:latest
 ```
 > Note: use lower case strings only
@@ -91,12 +91,14 @@ Replace the name with your unique registry's name and `<username>` with the one 
 
 When you have successfully logged in, push both images to the their respective repositories in the registry:
 
-```
+```cmd
 docker push <registry.azurecr.io>/gamingwebapp:latest
 ```
-Again remember to replace the registry name, with yours.
+
+Again, remember to replace the registry name with yours.
 The output of the push will resemble something like this:
-```
+
+```cmd
 The push refers to repository [containerregistry.azurecr.io/gamingwebapp]
 d3dd2499dbb1: Pushed
 0506db78f43c: Pushed
@@ -107,12 +109,14 @@ latest: digest: sha256:05d2b2ceea30bbaa1fd0f37ac88d1185e66f055a29b85bf6438ce4658
 ```
 
 Verify that there is now a new repository in your registry by running:
-```
+
+```cmd
 az acr repository list --name <registry>
 ```
 
 Remove your local images for the web application release build from the Docker CLI by calling:
-```
+
+```cmd
 docker rmi <full-registry-name>/gamingwebapp:latest
 docker rmi gamingwebapp:latest
 docker rmi gamingwebapp:dev
@@ -123,15 +127,18 @@ Verify that the `gamingwebapp` images are no longer on your machine.
 When using DockerHub, visit your registry at https://hub.docker.com/r/<registry>/gamingwebapp/ to check whether the image is actually in the repository.
 
 When using ACR, use this command:
+
 ```cmd
 az acr repository list --name <registry>
 az acr repository show-tags --name <registry> --repository gamingwebapp
 ```
 
 Then, try to pull the image from the registry with:
-```
+
+```cmd
 docker pull <full-registry-name>/gamingwebapp:latest
 ```
+
 This process can be automated by a build and release pipeline. You will learn how to do that in a later lab.
 
 **Repeat the procedure for the Leaderboard Web API.**
@@ -146,30 +153,40 @@ The easiest way is to use Visual Studio Code and the Kubernetes extension. Navig
 ![](images/VSCodeKubernetesExtension.png)
 
 You can also deploy a Kubernetes hosted dashboard using this command:
-```
+
+```cmd
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
 ```
+
 You can reach the dashboard by running a proxy:
-```
+
+```cmd
 kubectl proxy
 ```
+
 The dashboard can be found at this endpoint:
-```
+
+```cmd
 http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
 ```
+
 You will reach a login screen where you need to provide a token (or kubeconfig file).
 ![](images/KubernetesDashboardLogin.png)
 The token can be found in two steps. First run this command:
-```
+
+```cmd
 kubectl -n kube-system get secret
 ```
+
 This will list all registered system-specific secrets in Kubernetes. Find the name for the `default-token` in the list. It is similar to `default-token-v9rxc`, but the last part will differ for your installation. 
 
-```
+```cmd
 kubectl -n kube-system describe secret default-token-v9rxc
 ```
+
 The command gives output similar to:
-```
+
+```cmd
 Name:         default-token-v9rxc
 Namespace:    kube-system
 Labels:       <none>
@@ -184,6 +201,7 @@ token:      eyJhbGciOiJSUzI1NiIsImtpZCI6InI0U29nakdwNmR1T3RLVzBRTVBUZUxGSWhtYl9Z
 ca.crt:     1066 bytes
 namespace:  11 bytes
 ```
+
 Copy and paste the line for `token` into the login field that reads `Enter token` and click `Sign in`. You should see the dashboard appear.
 
 ![](images/KubernetesDashboard.png)
@@ -193,7 +211,8 @@ Copy and paste the line for `token` into the login field that reads `Enter token
 > If you get any errors in the Kubernetes dashboard, revisit [Module 1](Lab1-GettingStarted.md) and fix the dashboard by changing the RBAC configuration.
 
 You can also set your cluster as the active context and interact with it using kubectl commands. First, retrieve a list of the current available clusters and contexts with `kubectl` commands and then set your cluster as active. All `kubectl` will be executed against that context from now.
-```
+
+```cmd
 kubectl cluster-info
 kubectl config get-clusters
 kubectl config get-contexts
@@ -240,7 +259,8 @@ kubectl create secret docker-registry pullkey --docker-server <your-registry-nam
 Later, secrets will be covered in more detail. Execute the next command, again replacing the necessary items.
 
 Save your work and go to the command prompt. Run the command:
-```
+
+```cmd
 kubectl config use-context docker-desktop
 kubectl apply -f .\gamingwebapp.k8s-static.yaml
 ```
@@ -250,10 +270,11 @@ and watch the results from the dashboard (assuming the proxy is still running). 
 
 Visit the gaming web app by going to `http://localhost`. You should see the page named 'All time highscore hall of fame'. 
 
-> If you get  collisions on port 80, it is probably already in use on your development machine. You will need to shut down your local W3SVC service by running `net stop w3svc`, or change the `port` mapping in your deployment manifest.
+> If you get collisions on port 80, it is probably already in use on your development machine. You will need to shut down your local W3SVC service by running `net stop w3svc`, or change the `port` mapping in your deployment manifest.
 
 If all is working well, try to deploy the solution to your AKS cluster as well. Switch the context to AKS and deploy the manifest:
-```
+
+```cmd
 kubectl config use-context ContainerWorkshopCluster-admin
 kubectl apply -f .\gamingwebapp.k8s-static.yaml
 ```
@@ -283,11 +304,11 @@ If there are any errors, troubleshoot your setup and fix these.
 
 If you have time left, you can remove the SQL Server container altogether and switch to Azure SQL Database.
 The steps you need to do are:
-- Provision an Azure SQL Server database called `Leaderboard`, and an Azure SQL Server if necessary.
+- Provision an Azure SQL Server Database called `Leaderboard`, and an Azure SQL Server if necessary.
 
 ![](images/AzureSQLDatabase.png)
 
-  You might have change the server name to be unique.
+  You might have change the server name so that it is unique.
 
 - Add a firewall rule to the Azure SQL Server to allow traffic coming in from the cluster. You can find the IP address of the cluster in the external load balancer NAT rules. As an alternative, you can give Azure resources access to the database server. Pay attention to the highlighted area in the firewall settings of your Azure SQL server resource.
 
@@ -297,6 +318,7 @@ The steps you need to do are:
 > **Tip**: Visual Studio has a Server Explorer that also allows easy connections to local and Azure hosted databases.
 
 Execute the following script to create the new `Leaderboard` database:
+
 ```sql
 CREATE DATABASE [Leaderboard]
 GO
@@ -305,6 +327,7 @@ GO
 Open the provided `02-createdatabase.sql` file in the lab resources. This SQL script adds two tables in your SQL Server `Leaderboard` database. Run it to create the tables and some initial test data. 
 
 Next, run this following script on the database:
+
 ```sql
 USE [master]
 GO
@@ -336,7 +359,7 @@ In this chapter we will use a Managed Identity to connect Kubernetes to an Azure
 ### Introduction
 
 If you want to store container images in a private repository and allow Kubernetes to use it, without managing credentials, you can use Azure Container Registry combined with [Azure Managed Identity](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview).
-To do this, we will configure the cluster to integate with a container registry.
+To do this, we will configure the cluster to integrate with a container registry.
 
 ### Creating a Container Registry (if needed)
 If you do not have one yet, create an Azure Container Registry. Run the following command from the command-line to create it:
@@ -349,13 +372,15 @@ az acr create --name $registryName --resource-group ContainerWorkshop --sku Basi
 ```
 
 Get the resource ID `id` value from the output. It should be similar to this:
+
 ```  
 "id": "/subscriptions/<subscriptionid>/resourceGroups/ContainerWorkshop/providers/Microsoft.ContainerRegistry/registries/<registryName>"
 ```
 
 ### Connecting AKS to the registry
 Run the `az aks update` command to connect an existing AKS cluster to an existing Azure Container Registry, passing in the resource Id of the registry:
-```
+
+```cmd
 registryResourceId=/subscriptions/<subscriptionid>/resourceGroups/ContainerWorkshop/providers/Microsoft.ContainerRegistry/registries/$registryName
 
 az aks update --name ContainerWorkshopCluster --resource-group ContainerWorkshop --attach-acr $registryResourceId
@@ -365,20 +390,23 @@ This operation takes a few seconds to complete.
 
 ### Test the connection
 To test the connection, we will import the nginx image into our private registry. 
-```
-az acr import  -n $registryName --source docker.io/library/nginx:latest --image nginx:v1
+
+```cmd
+az acr import -n $registryName --source docker.io/library/nginx:latest --image nginx:v1
 ```
 
 We will now create a Deployment that uses the nginx image from the private registry. We must first update the template to specify the registry name.
 Open the file `00-nginx-from-acr.yaml` and replace the `image` value with your registry name. (e.g. `containerworkshopcontainerregistry.azurecr.io/nginx:v1`)
 
 Now create the deployment using `kubectl apply`:
-```
+
+```cmd
 kubectl apply -f 00-nginx-from-acr.yaml
 ```
 
 Assert that your Pod runs well by using `kubectl get pod `:
-```
+
+```cmd
 kubectl get pods
 
 NAME                               READY   STATUS    RESTARTS   AGE
@@ -391,11 +419,13 @@ If the status equals 'Running', everything works correctly.
 ## Cleanup
 
 Remove the nginx pod:
-```
+
+```cmd
 kubectl delete -f 00-nginx-from-acr.yaml
 ```
 
 Remove the Container Registry integration:
+
 ```cmd
 az aks update --name ContainerWorkshopCluster --resource-group ContainerWorkshop --detach-acr $registryResourceId
 ```

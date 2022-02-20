@@ -16,7 +16,7 @@ Goals for this lab:
 > - Completed previous labs.
 > - Configured 'Docker Desktop' to run Linux containers.
 
-Navigate to 'user@machine:/mnt/c/Sources/ContainerWorkshop-Docs/resources/lab08'
+Navigate to `<your sources folder>/ContainerWorkshop-Docs/resources/lab08`
 
 ## Secrets and Docker
 
@@ -36,13 +36,13 @@ docker run -d -p 5433:1433 --env ACCEPT_EULA=Y -e SA_PASSWORD="Pass@word" --env 
 
 Inspect SQL Server, which contains the connection string in an environment variable. Use its container ID to inspect it.
 
-```
+```cmd
 docker inspect -f "{{.Config.Env}} " <container-id>
 ```
 
 This displays the `Env` section that contains all variables for the current environment.
 
-```bat
+```cmd
 SA_PASSWORD=Pass@word
 MSSQL_PID=Developer
 ACCEPT_EULA=Y
@@ -85,7 +85,7 @@ This Azure AD application registration represents a service principal that you a
 
 <img src="images/AADApplicationID.png" width="600" />
 
-Allow the Web API service principal to access the Key Vault. For that you need a Client ID and Secret. The Client ID is the application ID you stored a moment ago. The secret is a key you have to create under the application registration. Go to the `Certificates and Secrets` section and create a new Client Secret. Give it `KeyVaultSecret` as a name and set its expiration date to a year and save it. Make sure you copy and store the value that is generated. It should resemble the following format:
+Allow the Web API service principal to access the Key Vault. For that, you need a Client ID and Secret. The Client ID is the application ID you stored a moment ago. The secret is a key you have to create under the application registration. Go to the `Certificates and Secrets` section and create a new Client Secret. Name it `KeyVaultSecret` and set its expiration date to a year and save it. Make sure you copy and store the value that is generated _before you leave the page_. It should resemble the following format:
 
 ```cmd
 vFwBC9rEtBfO7BNVgeYmSLcpxhTGQfqKG4/ZAoCKhjh=
@@ -157,7 +157,7 @@ You must have noticed how there is still a set of secrets present in the solutio
 First, let's store the Key Vault access information in a safe place during development on your machine. Right-click the Web API project and choose `Manage User Secrets` from the context menu. It will open a JSON file called `secrets.json` that is not added to the project. Instead it exists on the file system in a special location `%AppData%\Roaming\Microsoft\UserSecrets\<UserSecretsId>\secrets.json`. Find the location of this file and verify that the `UserSecretsId` corresponds to the new entry in the `.csproj` file of the Web API project.
 
 Cut the values for the Key Vault access from the `appsettings.json` file and add these to the `secrets.json` file. Save the file and go to the `Program` class.
-Add a breakpoint in the `ConfigureAppConfiguration` method and inspect the configuration providers. With the presence of a `secrets.json` file there should be an additional provider of type `JspnConfigurationProvider` using the `secrets.json` file.
+Add a breakpoint in the `ConfigureAppConfiguration` method and inspect the configuration providers. With the presence of a `secrets.json` file there should be an additional provider of type `JsonConfigurationProvider` using the `secrets.json` file.
 
 Check if the user secrets are used when running the Web API outside of a container again. When it does, try running it in the complete composition. You should find that it does. Think about why this works when running from a container.
 
@@ -176,10 +176,10 @@ Open the file `appsettings.secrets.json` from the solution items and edit the de
 kubectl create secret generic secret-appsettings --from-file=./appsettings.secrets.json
 ```
 
-This creates a secret containing that file in the default namespace. Open the dashboard of your local cluster or the Azure portal to your AKS cluster and navigate to the `Secrets` section under `Configuration`, `Secrets`.
+This creates a secret, containing that file in the `default` namespace. Open the dashboard of your local cluster or the Azure portal to your AKS cluster and navigate to the `Secrets` section under `Configuration`, `Secrets`.
 You should see the new secret there.
 
-In the deployment manifest add the following directly under the `spec` section of the `template` in the `dep-leaderboardwebapi` deployment definition:
+In the deployment manifest, add the following directly under the `spec` section of the `template` in the `dep-leaderboardwebapi` deployment definition:
 
 ```yaml
 spec:
@@ -200,14 +200,14 @@ volumeMounts:
 
 The `mountPath` indicates where the volume will appear in our container. Since the container is running with a working directory of `/app` you can read the config file starting from the `secrets` subfolder. Add the following code to `Program` class of the `LeaderboardWebAPI` project, right before the configuration is built:
 
-```C#
+```c#
 .ConfigureAppConfiguration((context, config) => {
     config.AddJsonFile("secrets/appsettings.secrets.json", optional: true);
     var hostConfig = config.Build();
     // ...
 ```
 
-Rebuild your container images locally by pressing Ctrl+Shift+B. Tag and push the new images and redeploy the manifest to your local and Azure AKS cluster with:
+Rebuild your container images locally by pressing `Ctrl+Shift+B`. Tag and push the new images and redeploy the manifest to your local and Azure AKS cluster with:
 
 ```cmd
 kubectl apply -f .\gamingwebapp.k8s-static.yaml
@@ -216,7 +216,7 @@ kubectl apply -f .\gamingwebapp.k8s-static.yaml
 Remember to set the correct context before you apply the manifest.
 Verify that the `appsettings.secrets.json` file was read correctly in the cluster and that everything works correctly.
 
-Note that the secrets here are only base64 encoded and not protected. It is more secure to use [Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) in Azure to run your nodes in the cluster under a known-identity that has access to the Azure Key Vault. Using this strategy you do not need to maintain any secrets to get access to your Key Vault anymore.
+Note that the secrets here are only base64 encoded and thus not protected. It is more secure to use [Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) in Azure to run your nodes in the cluster under a known-identity that has access to the Azure Key Vault. Using this strategy, you do not need to maintain any secrets to get access to your Key Vault anymore.
 
 ## <a name='kubernetessecrets'></a>(Optional) Using Kubernetes Secrets from Azure Key Vault
 
@@ -237,7 +237,7 @@ To do this, we will deploy a Secrets Store Driver (Built by Microsoft) to Kubern
 
 We will first need to get some information from your Managed Identity-enabled Kubernetes cluster.
 
-```
+```cmd
 az aks show --name ContainerWorkshopCluster --resource-group ContainerWorkshop | grep -C 1 kubeletidentity
 
 "identityProfile": {
@@ -261,7 +261,7 @@ subscriptionId=00000000-0000-0000-0000-00000001
 
 And repeat for `tenantId`:
 
-```
+```cmd
 az account show | grep tenantId
 
 tenantId=00000000-0000-0000-0000-00000002
@@ -269,7 +269,7 @@ tenantId=00000000-0000-0000-0000-00000002
 
 You should now have 3 environment variables, check them using `echo`:
 
-```
+```cmd
 echo "Cluster Id: $clusterClientId"
 echo "Subscription Id: $subscriptionId"
 echo "Tenant Id: $tenantId"
@@ -281,13 +281,13 @@ In this chapter, we will use a tool called Helm, to deploy a Secrets Store Drive
 
 Check you Helm tool version, which should be version 3 or higher:
 
-```
+```bash
 helm version
 ```
 
 If Helm is not installed, or you have an older version, install it:
 
-```
+```bash
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
 chmod 700 get_helm.sh
 ./get_helm.sh
@@ -296,7 +296,7 @@ rm -f get_helm.sh
 
 Install the Secrets Store Driver using `helm`:
 
-```
+```bash
 helm repo add csi-secrets-store-provider-azure https://raw.githubusercontent.com/Azure/secrets-store-csi-driver-provider-azure/master/charts
 
 helm repo update
@@ -308,7 +308,7 @@ The Secrets Store Driver will be able to talk to Azure Key Vault, using the pod'
 
 Check the deployment of the driver by listing the Pods using `kubectl get pods`:
 
-```
+```cmd
 kubectl get pods
 
 NAME                                                              READY   STATUS    RESTARTS   AGE
@@ -316,7 +316,7 @@ csi-secrets-store-provider-azure-1612818292-4v797                 1/1     Runnin
 csi-secrets-store-provider-azure-1612818292-secrets-store-ff5kz   3/3     Running   0          9s
 ```
 
-If the Status equals 'Running', we are good to go to the next step.
+If the Status equals `Running`, we are good to go to the next step.
 
 ---
 
@@ -326,7 +326,7 @@ If the Status equals 'Running', we are good to go to the next step.
 
 If Helm doesn't work, try this:
 
-```
+```cmd
 kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/deploy/rbac-secretproviderclass.yaml
 kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/deploy/csidriver.yaml
 kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/secrets-store-csi-driver/master/deploy/secrets-store.csi.x-k8s.io_secretproviderclasses.yaml
@@ -348,19 +348,19 @@ Store the name in an environment variable, make sure to change the value:
 vaultName=containerworkshopvault
 ```
 
-```
+```cmd
 az keyvault create --name $vaultName --resource-group "ContainerWorkshop" --location "westeurope"
 ```
 
 Put the SQL password string into the Vault with the Azure CLI using the `az keyvault` command. Notice how the separator for the hierarchy in an appsetting uses `--` in the KeyVault's secret name:
 
-```
+```cmd
 az keyvault secret set --vault-name $vaultName --name "ConnectionStrings--LeaderboardContext" --value "Server=sql.retrogaming.internal;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False"
 ```
 
 To create, list, or read a user-assigned managed identity, your AKS cluster needs to be assigned the Managed Identity Operator role:
 
-```
+```cmd
 az role assignment create --role "Managed Identity Operator" --assignee $clusterClientId --scope /subscriptions/$subscriptionId/resourcegroups/ContainerWorkshop
 
 az role assignment create --role "Virtual Machine Contributor" --assignee $clusterClientId --scope /subscriptions/$subscriptionId/resourcegroups/ContainerWorkshop
@@ -370,7 +370,7 @@ az role assignment create --role "Virtual Machine Contributor" --assignee $clust
 
 Create a new user assigned Managed Identity to use in your Pods:
 
-```
+```cmd
 az identity create -g ContainerWorkshop -n PodRunnerIdentity
 
 {
@@ -404,7 +404,7 @@ az identity show -g ContainerWorkshop -n PodRunnerIdentity
 
 You should now have 6 environment variables, check them using `echo`:
 
-```
+```cmd
 echo "Cluster Id: $clusterClientId"
 echo "Subscription Id: $subscriptionId"
 echo "Tenant Id: $tenantId"
@@ -419,21 +419,21 @@ In this paragraph, we will grant the Managed Identity read-access to Azure resou
 
 Assign the 'Reader' role, so it can see the Azure Key Vault in the resource group named 'ContainerWorkshop':
 
-```
+```cmd
 az role assignment create --role "Reader" --assignee $miPrincipalId --scope /subscriptions/$subscriptionId/resourceGroups/ContainerWorkshop/providers/Microsoft.KeyVault/vaults/$vaultName
 ```
 
 Create [Azure Key Vault access policies](https://docs.microsoft.com/en-us/azure/key-vault/general/secure-your-key-vault#data-plane-and-azure-rbac-preview), so the Managed Identity is allowed read-only access to Key Vault secrets:
 
-```
+```cmd
 az keyvault set-policy -n $vaultName --secret-permissions get --spn $miClientId
 ```
 
 ### Deploy Pod Identity
 
-Deploy an AureIdentity resource to use the Managed Identity we created earlier as the Identity that runs your Pods.
+Deploy an AzureIdentity resource to use the Managed Identity we created earlier as the Identity that runs your Pods.
 
-```
+```cmd
 az aks pod-identity add --resource-group ContainerWorkshop --cluster-name ContainerWorkshopCluster --name azureidentity --identity-resource-id "/subscriptions/$subscriptionId/resourcegroups/ContainerWorkshop/providers/Microsoft.ManagedIdentity/userAssignedIdentities/PodRunnerIdentity" --namespace default
 ```
 
@@ -449,13 +449,13 @@ Open the file named `00-secret.yaml` and put in values for `keyvaultName`, `subs
 
 After this, create the resource using `kubectl apply`:
 
-```
+```cmd
 kubectl apply -f 00-secret.yaml
 ```
 
-We can now deploy a pod and configure it to run using the 'PodRunnerIdentity' as its pod identity. The identity can be used to get access to the Key Vault. To assign an identity to a pod, we will add a `metadata` item named `label` to it, named `aadpodidbinding` with a value `azureidentity`. The value is the `--name` we passed to the `az aks pod-identity add` command earlier.
+We can now deploy a pod and configure it to run using the `PodRunnerIdentity` as its pod identity. The identity can be used to get access to the Key Vault. To assign an identity to a pod, we will add a `metadata` item named `label` to it, named `aadpodidbinding` with a value `azureidentity`. The value is the `--name` we passed to the `az aks pod-identity add` command earlier.
 
-Make two changes to the gamingwebapp.k8s-static.yaml file:
+Make two changes to the `gamingwebapp.k8s-static.yaml` file:
 
 - Change the volume type to use `csi` instead of `secret`:
 
@@ -488,13 +488,13 @@ var secretClient = new SecretClient(
 );
 ```
 
-Notice how there is only the configurable endpoint for the Azure KeyVault left. Build, tag and push the updated `LeaderboardWebAPI` image and deploy your new solution by applying the static manifest .
+Notice how there is only the configurable endpoint for the Azure KeyVault left. Build, tag and push the updated `LeaderboardWebAPI` image and deploy your new solution by applying the static manifest.
 
 ### Checking the result
 
 Assert that the `leaderboardwebapi` pod is still running after deployment. Next, list all available secrets by running `ls` on the volume. Make sure to replace `<leaderboardwebapi-podname>` with the name of the pod instance. Use `kubectl get pods` to find it.
 
-```
+```cmd
 kubectl exec -it <leaderboardwebapi-podname> -- ls /app/secrets/
 
 connectionstrings--leaderboardcontext
@@ -502,7 +502,7 @@ connectionstrings--leaderboardcontext
 
 Finally, list the content of the secret using `cat` on a file in the volume, after having replaced the current pod name in the command again:
 
-```
+```cmd
 kubectl exec -it <leaderboardwebapi-podname> -- cat /app/secrets/connectionstrings--leaderboardcontext
 ```
 
@@ -510,7 +510,7 @@ The connection string from the Azure KeyVault should be displayed.
 
 For final testing, visit the homepage of the web application at the public IP address and check whether the high scores are still listed.
 
-If not, verify that the pod for the leaderboard Web API is still running. View the logs and create a port forward to access the API directly and troubleshoot it till you get it fixed.
+If not, verify that the pod for the leaderboard Web API is still running. View the logs and create a port forward to access the API directly and troubleshoot it till you get it working.
 
 You now have a pod running as a managed identity that is used to get access to the Azure KeyVault, where it can access a single read-only secret. No passwords are stored anywhere.
 
@@ -520,19 +520,19 @@ You can choose to remove the resources of the last part on managed identities, o
 
 In case you want to remove all, start by removing the AzureIdentity:
 
-```
+```cmd
 az aks pod-identity delete --resource-group ContainerWorkshop --cluster-name ContainerWorkshopCluster --name azureidentity --namespace default
 ```
 
 Next, remove the Managed Identity:
 
-```
+```cmd
 az identity delete -g ContainerWorkshop -n PodRunnerIdentity
 ```
 
 List the installed Helm packages to find the one that installed the secrets store provider and driver:
 
-```
+```cmd
 helm list
 
 NAME                                            NAMESPACE       REVISION       UPDATED                                                                                                                                                                                                 STATUS   CHART                                   APP VERSION
@@ -541,12 +541,12 @@ csi-secrets-store-provider-azure-1612818292     default         1              2
 
 Remove the secrets store provider and driver by removing the Helm chart:
 
-```
+```cmd
 helm uninstall csi-secrets-store-provider-azure-1612818292
 ```
 
 ## Wrapup
 
-In this lab you have stored the secrets of your application in the Azure Key Vault. You also moved the remaining secrets, containing the details to get access to the vault, in user secrets for development scenarios. In production these secrets are stored as Kubernetes secrets, or as a managed identity for Azure AKS scenarios.
+In this lab you have stored the secrets of your application in the Azure Key Vault. You also moved the remaining secrets, containing the details to get access to the vault, in user secrets for development scenarios. In production, these secrets are stored as Kubernetes secrets, or as a managed identity for Azure AKS scenarios.
 
 Continue with [Lab 9 - Blue/Green deployments on Kubernetes with Contour](Lab9-BlueGreen.md).
