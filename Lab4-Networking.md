@@ -97,7 +97,7 @@ Read each of the JSON fragments. Pay special attention to the `Config` object in
 
 ### Types of networks
 - **bridge**: The default network driver. Mostly used when standalone containers need to communicate with each other. It allows communication between containers on the same host inside the same bridge network, but isolates them from other containers. Custom bridge networks allow containers to find each other by using DNS. The container name can be used to find its IP address.
-- **host**: Used for standalone containers. This network remove isolation between the container and host, and use the host's network directly. A container can access services running on the host, by calling them on `localhost` and using a port number.
+- **host**: Used for standalone containers. This network removes isolation between the container and host, and uses the host's network directly. A container can access services running on the host, by calling them on `localhost` and using a port number.
 - **none**: Using this option, disables networking for a container.
 
 > ##### Different configurations
@@ -179,13 +179,15 @@ docker run -d --name c4 --ip 10.0.0.4 --net workshop_specific --network-alias c4
 ```
 
 Create a shell process within the "c3" container, and attach your terminal by using `docker exec -it`:
-```
+
+```cmd
 docker exec -it c3 sh
 ```
 
 
 From within the terminal of container "c3", you should be able to ping container itself `c3` using the `ping` command:
-```
+
+```cmd
 ping c3.containerworkshop.local
 
 PING c3.containerworkshop.local (10.0.0.3): 56 data bytes
@@ -193,8 +195,10 @@ PING c3.containerworkshop.local (10.0.0.3): 56 data bytes
 64 bytes from 10.0.0.3: seq=1 ttl=64 time=0.039 ms
 ^C
 ```
-Also, because you added container "c4" to the same network as containe "c3", you should also be able to ping it:
-```
+
+Also, because you added container "c4" to the same network as container "c3", you should also be able to ping it:
+
+```cmd
 ping c4.containerworkshop.local
 
 PING c4.containerworkshop.local (10.0.0.4): 56 data bytes
@@ -205,9 +209,10 @@ PING c4.containerworkshop.local (10.0.0.4): 56 data bytes
 
 Also, inspect the network again to see the running containers in it:
 
-```
+```cmd
 docker network inspect workshop_specific
 ```
+
 This command should show both containers "c3" and "c4" running:
 
 ```json
@@ -233,7 +238,8 @@ This command should show both containers "c3" and "c4" running:
 [Cleanup](#clean) all running containers.
 
 Remove the manually created networks:
-```
+
+```cmd
 docker network rm workshop_network
 docker network rm workshop_specific
 ```
@@ -244,27 +250,29 @@ You have now learned that it is possible to have multiple containers interact wi
 Before we create a composition, we will first design a network topology and use the Docker Compose YAML files to specify the networks and aliases for the containers.
 
 The project you are working with has 3 tiers:
+
 1. **Web Frontend** - uses the Web API
 1. **Web API**  - uses the database
 1. **SQL Database Server** - stores information
 
-Create a visual diagram for the three containers and assign them to the **proper** networks. The boundaries of these networks should be such that the web application can reach the web API, but not the SQL Server database. On the other hand, the Web API should be able to reach both the SQL Server database and the web application, but not from the same network. This network topology acts as a security boundry.
+Create a visual diagram for the three containers and assign them to the **proper** networks. The boundaries of these networks should be such that the web application can reach the web API, but not the SQL Server database. On the other hand, the Web API should be able to reach both the SQL Server database and the web application, but not from the same network. This network topology acts as a security boundary.
 
 > ##### A choice of network type
-> What type of network drive should the two networks use? Remember that your are currently in a local, single-host situation. How would that change when running in a cluster? Also consider the impact of running multiple instances of your container.
+> What type of network driver should the two networks use? Remember that your are currently in a local, single-host situation. How would that change when running in a cluster? Also consider the impact of running multiple instances of your container.
 
 ### Find the compose files 
-In your terminal, navigate to the `resources\lab04` folder. (e.g. C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab04)
+In your terminal, navigate to the `resources\lab04` folder. (e.g. `C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab04`)
 
-Run docker-compose to build the desired containers and network using a definition file named '00-docker-compose-netwrk.yml':
-  ```
+Run docker-compose to build the desired containers and network using a definition file named `00-docker-compose-netwrk.yml`:
+
+  ```cmd
   docker-compose -f 00-docker-compose-netwrk.yml up -d
 
   Creating network "lab04_frontend" with driver "bridge"
   Creating network "lab04_backend" with driver "bridge"
-  Creating lab04_backend_1  ... done
-  Creating lab04_db_1       ... done
-  Creating lab04_frontend_1 ... done
+  Creating lab04-backend-1  ... done
+  Creating lab04-db-1       ... done
+  Creating lab04-frontend-1 ... done
   ```
   
   After completion, you should have three running containers and two custom Docker networks.
@@ -273,20 +281,23 @@ Run docker-compose to build the desired containers and network using a definitio
   docker ps
 
   CONTAINER ID   IMAGE                                        COMMAND                  CREATED              STATUS              PORTS                                            NAMES
-  bb0fb3d99df6   nginx                                        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                                           lab04_backend_1
-  77cf533cd37a   mcr.microsoft.com/mssql/server:2019-latest   "/opt/mssql/bin/perm…"   About a minute ago   Up About a minute   0.0.0.0:5433->1433/tcp                           lab04_db_1
-  2628e46f4874   nginx                                        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                                           lab04_frontend_1
+  bb0fb3d99df6   nginx                                        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                                           lab04-backend-1
+  77cf533cd37a   mcr.microsoft.com/mssql/server:2019-latest   "/opt/mssql/bin/perm…"   About a minute ago   Up About a minute   0.0.0.0:5433->1433/tcp                           lab04-db-1
+  2628e46f4874   nginx                                        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                                           lab04-frontend-1
   ```
+
   You can also see that all resources have a prefix `lab04` that equals the name of the folder that holds the compose file.
 
 ### Check that everything works
 
-Hints, use tools like `docker exec -it <<container>> bash` and `docker network inspect lab04_backend` to verify connectivtiy works as expected.
+Hints, use tools like `docker exec -it <<container>> bash` and `docker network inspect lab04_backend` to verify connectivity works as expected.
 
 Inside the backend container terminal, run the command `curl -v ` and check how many ethernet adapters are listed. Verify that it corresponds with your design.
+
+```bash
+curl -v lab04-frontend-1
 ```
-curl -v lab04_frontend_1
-```
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -314,44 +325,50 @@ Commercial support is available at
 </body>
 </html>
 ```
+
 ### I can't even run `ping` ?!
 You'll likely find that there's very little tooling available within the containers to work with. This is a good thing, as it reduces the attack surface of your container.
+
 If you need to investigate a container composition, you can temporarily run a new container (like busybox) inside the backend network:
 
-```
+```cmd
 docker run -it --name bb --network lab04_backend busybox sh
 ```
 
 From the terminal check for connectivity to the frontend:
-```
-ping lab04_frontend_1
-ping: bad address 'lab04_frontend_1'
+
+```bash
+ping lab04-frontend-1
+ping: bad address 'lab04-frontend-1'
 ```
 
 Check connectivity to localhost:
-```
-ping lab04_backend_1
 
-PING lab04_backend_1 (172.22.0.3): 56 data bytes
+```bash
+ping lab04-backend-1
+
+PING lab04-backend-1 (172.22.0.3): 56 data bytes
 64 bytes from 172.22.0.3: seq=0 ttl=64 time=0.065 ms
 64 bytes from 172.22.0.3: seq=1 ttl=64 time=0.238 ms
 ^C
 ```
 
 And finally, check network connectivity to the database server:
-```
-ping lab04_db_1
-PING lab04_db_1 (172.22.0.2): 56 data bytes
+
+```bash
+ping lab04-db-1
+PING lab04-db-1 (172.22.0.2): 56 data bytes
 64 bytes from 172.22.0.2: seq=0 ttl=64 time=0.041 ms
 64 bytes from 172.22.0.2: seq=1 ttl=64 time=0.074 ms
 ^C
 ```
 
 You can even see if SQL Server is running, by using `telnet`:
-```
-telnet lab04_db_1 1433
 
-Connected to lab04_db_1
+```bash
+telnet lab04-db-1 1433
+
+Connected to lab04-db-1
 ^C
 Console escape. Commands are:
 
@@ -360,6 +377,7 @@ Console escape. Commands are:
  z      suspend telnet
  e      exit telnet
  ```
+
 Hit `Ctrl+C` and `e` to quit telnet.
 Type `exit` to exit the `busybox` container.
 Cleanup the `busybox` container. (`docker rm -f bb`)
@@ -376,15 +394,18 @@ You can also give a container instance an alias, so you can refer to it by a net
         aliases:
           - "sql.containerworkshop.local"
 ```
+
 >Please note that the network 'backend' no longer has a `-` in front of it.
 
-If you want to complete this part, just apply the file named '01-docker-compose-netwrk-alias.yml'
-```
+If you want to complete this part, just apply the file named `01-docker-compose-netwrk-alias.yml`
+
+```cmd
 docker-compose -f 01-docker-compose-netwrk.yml up -d
 ```
 
 Run busybox again and verify that the database server can be resolved by its alias:
-```
+
+```bash
 telnet sql.containerworkshop.local 1433
 
 Connected to sql.containerworkshop.local
@@ -398,7 +419,7 @@ Console escape. Commands are:
  ```
 
 ### Add networks to workshop solution
-Finally, you can try to add the same networking structure to the `docker-compose.override.yml` file. 
+Finally, you can try adding the same networking structure to the `docker-compose.override.yml` file. 
 Use this checklist to see if it is complete:
 - Add a `frontend` bridge network
 - Add a `backend` bridge network

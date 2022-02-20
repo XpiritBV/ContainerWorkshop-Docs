@@ -10,24 +10,27 @@ Goals for this lab:
 - Use a service to define networking.
 
 ## Prerequisites
-Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'
+Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6). Double check that you have completed chapter 'Create a Kubernetes cluster'
 
 ## Getting started
 ![](images/kubernetes01.png)
-Launch Visual Studio Code, open the Kubernetes extension, make sure the cluster named 'docker-desktop' or 'ContainerWorkshopCluster-admin' is the current cluster, or right click on it to select it as the current cluster.
-Click on the 'Install dependencies' button if needed.
+Launch Visual Studio Code, open the Kubernetes extension, make sure the cluster named `docker-desktop` or `ContainerWorkshopCluster-admin` is the current cluster, or right click on it to select it as the current cluster.
+
+Click on the `Install dependencies` button if it appears in the lower right corner.
 
 Also, in the terminal, change directories to the Docs repository directory named 'resources/lab06'
-```
+
+```cmd
 C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab06>
 ```
 
 ## <a name='inspect-cluster'></a>Inspecting the cluster
+
 To interact with the Kubernetes cluster, you will need to use the **kubectl** tool. This allows you to issue commands and queries to the selected Kubernetes cluster. 
 
 For example, type the `kubectl cluster-info` command to inspect the cluster:
 
-```
+```cmd
 kubectl cluster-info
 
 Kubernetes master is running at https://containerw-containerworksho-guid-guid.hcp.westeurope.azmk8s.io:443
@@ -40,7 +43,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 This command will show you where the master node is running. To see the cluster version, use the `kubectl version` command to return the client and server version numbers:
 
-```
+```cmd
 kubectl version
 
 Client Version: version.Info{Major:"1", Minor:"19", GitVersion:"v1.19.3", GitCommit:"1e11e4a2108024935ecfcb2912226cedeafd99df", GitTreeState:"clean", BuildDate:"2020-10-14T12:50:19Z", GoVersion:"go1.15.2", Compiler:"gc", Platform:"windows/amd64"}
@@ -60,16 +63,16 @@ Context "ContainerWorkshopCluster-admin" modified.
 ## <a name='nodes'></a>Information about the nodes
 A cluster has one or more nodes that are responsible for running the actual pods. A node is the worker machine in Kubernetes and can be a virtual machine or a physical machine. To see which nodes are available, we can use the `describe` command of `kubectl`.
 
-```
+```cmd
 kubectl describe nodes
 ```
 
 Each node is listed with not only the technical details but also the actual pods running on the specific node. To get the details about a particular node, you can use the same `describe` command:
 
-```
+```cmd
 kubectl describe node {node-name}
 ```
->Note replace {node-name} with the name of one cluster node. E.g. `aks-nodepool1-36156572-vmss000000` or `docker-desktop`.
+>Note: replace `{node-name}` with the name of one cluster node. E.g. `aks-nodepool1-36156572-vmss000000` or `docker-desktop`.
 
 The _conditions_ in the output indicate if the node can accept pods. You might see an output like below:
 
@@ -92,7 +95,7 @@ A pod is a group of one or more containers running on 1 node. It can have its ow
 
 Start a new deployment using `kubectl create deployment` by creating a pod running an nginx container:
 
-```
+```cmd
 kubectl create deployment hello-nginx --image=nginx
 
 deployment.apps/hello-nginx created
@@ -100,7 +103,7 @@ deployment.apps/hello-nginx created
 
 Verify that the deployment is working, by using the describe functionality again, this time by querying the deployment by using `kubectl describe deployment` and passing the deployment name:
 
-```
+```cmd
 kubectl describe deployment hello-nginx
 
 Name:                   hello-nginx
@@ -138,13 +141,13 @@ Events:
 
 You will get all the details about the running pod. For a quick overview of all deployments, use the command:
 
-```
+```cmd
 kubectl get deployments
 ```
 
 Which will output something like this:
 
-```
+```cmd
 NAME            READY   UP-TO-DATE   AVAILABLE   AGE
 hello-nginx   0/1     1            0           87s
 ```
@@ -152,7 +155,7 @@ hello-nginx   0/1     1            0           87s
 ### Dealing with pods
 Now let's see if we can get some information about the pod that was created for us by the Deployment, by using `kubectl get pods`:
 
-```
+```cmd
 kubectl get pods
 
 NAME                          READY   STATUS    RESTARTS   AGE
@@ -167,7 +170,7 @@ As you can see, the deployment created a pod for us and it's running happily.
 Get more details about the pod. 
 Copy the pod name and pass it to the `kubectl describe pod` command:
 
-```
+```cmd
 kubectl describe pod hello-nginx-8688958b4-skdvg
 ```
 
@@ -183,7 +186,7 @@ Another interesting element of the pod is that it has an IP address. See if you 
 
 Let's see why deployments are very useful tools in Kubernetes by simulating an application crash inside the nginx container.
 
-```
+```cmd
 kubectl delete pod hello-nginx-8688958b4-skdvg
 
 pod "hello-nginx-8688958b4-skdvg" deleted
@@ -191,20 +194,20 @@ pod "hello-nginx-8688958b4-skdvg" deleted
 
 Quickly check the list of running pods again:
 
-```
+```cmd
 kubectl get pods
 
 NAME                          READY   STATUS    RESTARTS   AGE
 hello-nginx-8688958b4-4xt5v   1/1     Running   0          39s
 ```
 
-You should see that a brand new pod was created. The deployment noticed that the first pod went away, and responded by creating a new pod. A deployment adds resillience to your applications running on Kubernetes!
+You should see that a brand new pod was created. The deployment noticed that the first pod went away, and responded by creating a new pod. A deployment adds resilience to your applications running on Kubernetes!
 
 ### Cleanup
 
 Remove the deployment, by issuing the `kubectl delete` command and pass the deployment name:
 
-```
+```cmd
 kubectl delete deployment hello-nginx
 
 deployment.apps "hello-nginx" deleted
@@ -214,7 +217,7 @@ deployment.apps "hello-nginx" deleted
 
 Earlier, we created a container running in a pod, by creating a deployment using the `kubectl` CLI. Instead of creating pods imperatively, we can also use a pod template to create them declaratively. This way we can define the desired state (which image, resources, networking, etc.) and Kubernetes will ensure that the required changes are made.
 
-> If you worked at [Lab 4 - Networking](Lab4-Networking.md) before, you'll see similarities between using the docker CLI (imperative) and the docker-compose CLI (declarative).
+> If you worked on [Lab 4 - Networking](Lab4-Networking.md) before, you'll see similarities between using the docker CLI (imperative) and the docker-compose CLI (declarative).
 
 Examine the YAML definition below:
 
@@ -231,24 +234,27 @@ spec:
     image: alpine
     command: ['sh', '-c', 'echo Hello Kubernetes!']
 ```
+
 It describes a pod and specifies a pod name by using metadata. In the pod `spec` you can see that the container is based on `alpine` image. It also specifies which command to run inside the container after it has been created.
 
 ### Creating a pod from a template
-In your terminal, move to the repository directory named 'resources/lab06'.
-```
+In your terminal, move to the repository directory named `resources/lab06`.
+
+```bash
 user@machine:/mnt/d/Projects/gh/ContainerWorkshop-Docs$ cd resources/lab06/
 ```
 
 Use the command `kubectl apply` to deploy the template:
 
-```
+```cmd
 kubectl apply -f 00-nginx-pod.yaml
 
 pod/myapp-pod created
 ```
 
 Verify that the pod is running by using `kubectl get pods`:
-```
+
+```cmd
 kubectl get pods       
 
 NAME        READY   STATUS    RESTARTS   AGE
@@ -257,14 +263,15 @@ myapp-pod   1/1     Running   0          14s
 
 We have now directly created a pod, without using a deployment. Kill the pod to simulate an application crash again:
 
-```
+```cmd
 kubectl delete pod myapp-pod
 
 pod "myapp-pod" deleted
 ```
 
 Now check running pods again, to see if it was automatically restarted by Kubernetes:
-```
+
+```cmd
 kubectl get pods   
 
 No resources found in default namespace.
@@ -301,23 +308,24 @@ spec:
         ports:
         - containerPort: 80
 ```
+
 This deployment will create a pod with a single container based on the nginx image. It will also expose port 80 of the container on the pod's IP address.
 
 Let's roll out nginx again, but this time we're using a deployment resource:
 
-```
+```cmd
 kubectl apply -f 01-nginx-deployment.yaml
 ```
 
 It might take some time to become available, so query the state of the deployment using the `get` command until it is available:
 
-```
+```cmd
 kubectl get deployment nginx-deployment
 ```
 
 The number of replicas is now set to 1. When the container crashes for some reason, Kubernetes will make sure there is at least one container running. Running a single instance might not always be enough. When can scale the number of pods by issuing a `scale` command:
 
-```
+```cmd
 kubectl scale deployment.v1.apps/nginx-deployment --replicas=3
 
 deployment.apps/nginx-deployment scaled
@@ -325,19 +333,20 @@ deployment.apps/nginx-deployment scaled
 
 Query the state by checking the deployment:
 
-```
+```cmd
 kubectl get deployment nginx-deployment
 ```
 
 And you should now see three pods are running:
 
-```
+```cmd
 NAME               READY   UP-TO-DATE   AVAILABLE   AGE
 nginx-deployment   3/3     3            3           4m
 ```
 
 Confirm this by listing the running pods:
-```
+
+```cmd
 kubectl get pods
 
 NAME                               READY   STATUS    RESTARTS   AGE
@@ -345,17 +354,19 @@ nginx-deployment-d46f5678b-6gd9h   1/1     Running   0          2m1s
 nginx-deployment-d46f5678b-hlvj5   1/1     Running   0          8m27s
 nginx-deployment-d46f5678b-k95wr   1/1     Running   0          2m1s
 ```
+
 This list is sorted alphabetically, and pod names are generated, so your list will look different.
 Two of three pods were created by scaling out, so they have a younger age.
 
 ## <a name='services'></a>Use services
 As we saw earlier, in Kubernetes each pod will get a unique IP address. In theory you can use this to communicate with other pods. However, when a pod dies and gets recreated by the deployment resource, its IP address will be different. 
 
-So, when a front-end pod needs to talk to a back-end pod, we need a reliable way to communicate. Services are the solution to this. A service is an IP address inside the cluster, that never changes. It can be attached to pods by using selection criteria with a `selector`. A sService will live forever as it doesn't have any moving parts. The pods connected to a Service may come and go. This way, you have a fixed endpoint within the Kubernetes cluster, that acts as a load balancer into a dynamic collection of pods.
+So, when a front-end pod needs to talk to a back-end pod, we need a reliable way to communicate. Services are the solution to this. A Service is an IP address inside the cluster that never changes. It can be attached to pods by using selection criteria with a `selector`. A Service will live forever as it doesn't have any moving parts. The pods connected to a Service may come and go. This way, you have a fixed endpoint within the Kubernetes cluster, that acts as a load balancer into a dynamic collection of pods.
 
-As an example, let's see if we can add a service to the nginx deployment. We will add a service in front of the running pods. The service will target pods matching a given app (based on the pod's `metadata` - `label.app` attribute value 'nginx'. 
+As an example, let's see if we can add a Service to the nginx deployment. We will add a Service in front of the running pods. The Service will target pods matching a given app (based on the pod's `metadata` - `label.app` attribute value `'nginx'`. 
 
 This is the relevant part of the deployment YAML:
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -366,6 +377,7 @@ spec:
       labels:
         app: nginx
 ```
+
 This YAML will cause a metadata attribute `app: nginx` to be added to all created pods. We will create a Service with a `selector` to find all pods with that label:
 
 In the YAML below, you can see how that works:
@@ -383,17 +395,19 @@ spec:
       port: 8080
       targetPort: 80
 ```
+
 The service will forward traffic from Service port 8080 to port 80 of the pod.
 
 ### Creating a Service
 Apply the service template:
-```
+
+```cmd
 kubectl apply -f 02-nginx-service.yaml
 ```
 
 and inspect the outcome:
 
-```
+```cmd
 kubectl get service nginx-service
 
 NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
@@ -402,13 +416,13 @@ nginx-service   ClusterIP   10.0.119.208   <none>        8080/TCP   5s
 
 To validate that we can resolve the name using the internal DNS to a service, we will run a lookup from within the cluster.
 
-```
+```cmd
 kubectl run wget --image=busybox -i --tty --restart=Never
 ```
 
-In the terminal that opens, run `nslookup` and pass the name of the service 'nginx-service', it will return the IP address of the service:
+In the terminal that opens, run `nslookup` and pass the name of the Service 'nginx-service', it will return the IP address of the Service:
 
-```
+```cmd
 nslookup nginx-service
 
 Server:         10.0.0.10
@@ -422,7 +436,7 @@ Address: 10.0.119.208
 
 In the same terminal window, execute a `wget` command to fetch the nginx index HTML page:
 
-```
+```cmd
 wget -S 10.0.119.208:8080 -O -
 
 Connecting to 10.0.119.208:8080 (10.0.119.208:8080)
@@ -447,24 +461,27 @@ You can see that the response of the `wget` call was created by an nginx pod. We
 
 ## <a name='clean'></a>Cleaning up
 If your terminal is still active, exit it by running:
-```
+
+```cmd
 exit
 ```
+
 Delete the 'wget' pod:
-```
+
+```cmd
 kubectl delete pod wget
 ```
 
 Delete the nginx service and deployment
 
-```
+```cmd
 kubectl delete deployment nginx-deployment
 kubectl delete service nginx-service
 ```
 
 An alternative way to delete the deployment and service is by undoing the `kubectl apply` by using `kubectl delete`:
 
-```
+```cmd
 kubectl delete -f 01-nginx-deployment.yaml
 kubectl delete -f 02-nginx-service.yaml
 ```
