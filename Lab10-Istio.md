@@ -512,6 +512,4 @@ kubectl delete namespace bluegreen
 
 In this lab you experimented with network traffic shaping using Istio, from the command line. You have learned how to gradually shift traffic to a newer API version and how to perform focused canary releases.
 
-Continue with [Lab 11 - Retry and Circuit breaker with Istio](Lab11-IstioRetry-CircuitBreaker).
-
-
+Continue with [Lab 11 - Retry and Circuit breaker with Istio](Lab11-IstioRetry-CircuitBreaker.md).
