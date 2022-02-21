@@ -112,7 +112,7 @@ depends_on:
   - "leaderboardwebapi"
 ```
 
-Next, you are going to create a similar compose override for a production situation. In essence, the `docker-compose.override.yml` is the development environment override file by convention.
+In essence, the `docker-compose.override.yml` is the development environment override file by convention.
 
 ## <a name="change"></a>Working with environments in .NET
 
