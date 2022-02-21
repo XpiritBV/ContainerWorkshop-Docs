@@ -384,7 +384,7 @@ Cleanup the `busybox` container. (`docker rm -f bb`)
 
 ### Container alias (DNS)
 
-You can also give a container instance an alias, so you can refer to it by a network alias instead of its container service name. Use the fragment below to give the SQL Server instance created in the [previous module](Lab3-DockerizingNET.md#running-sql-server-in-a-docker-container) a network alias `sql.containerworkshop.local` on your `db` service.
+You can also give a container instance an alias, so you can refer to it by a network alias instead of its container service name. Use the fragment below to give the SQL Server instance created in the [Docker 101 lab](Lab2-Docker101.md#sql) a network alias `sql.containerworkshop.local` on your `db` service.
 
 ```yaml
   db:

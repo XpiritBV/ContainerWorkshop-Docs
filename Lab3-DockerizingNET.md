@@ -7,7 +7,7 @@ Goals for this lab:
 - [Add Docker support to .NET Core application](#add)
 - [Run and debug applications from containers](#debug)
 - [Build container images](#build)
-- [Running SQL Server in a Docker container](#sql)
+- [Running SQL Server in a Docker container composition](#sql)
 
 ## Prerequisites
 Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
@@ -26,7 +26,7 @@ Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to na
 - `GamingWebApp`, an ASP.NET MVC Core frontend 
 - `LeaderboardWebAPI`, an ASP.NET Core Web API
 
-For now, the SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as described in [Lab 2 - Running Microsoft SQL Server on Linux](Lab2-Docker101.md###sql).
+For now, the SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as described in [Lab 2 - Running Microsoft SQL Server on Linux](Lab2-Docker101.md#sql).
 
 > ##### Important
 > Update the connectionstring in the appsettings.json file to use the local ip address instead of localhost or 127.0.0.1. We will need this later. 
