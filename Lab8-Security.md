@@ -108,7 +108,7 @@ with your specific values.
 
 The configuration system of .NET makes it relatively easy to access Key Vault values as part of your configuration.
 
-Open the `LeaderboardWebAPI` project and add three key/value pairs to the `appsettings.json` file, replacing the values with your own.
+Open the `LeaderboardWebAPI` project and add four key/value pairs to the `appsettings.json` file, replacing the values with your own.
 
 ```json
 "KeyVaultName": "https://your-keyvault.vault.azure.net/",
@@ -161,7 +161,7 @@ Add a breakpoint in the `ConfigureAppConfiguration` method and inspect the confi
 
 Check if the user secrets are used when running the Web API outside of a container again. When it does, try running it in the complete composition. You should find that it does. Think about why this works when running from a container.
 
-The answer is that the Visual Studio tooling for Docker helps in mounting the user secrets file inside a composition. If you are interested in finding how, check out the file `docker-compose.vs.debug.g.yml` insode the folder `obj\Docker` under the solution root for your source code.
+The answer is that the Visual Studio tooling for Docker helps in mounting the user secrets file inside a composition. If you are interested in finding how, check out the file `docker-compose.vs.debug.g.yml` inside the folder `obj\Docker` under the solution root for your source code.
 
 Using user secrets is well suited for development scenarios and single host machine. When running in a cluster for production scenarios it is not recommended. Instead you can store 'Secrets' on your cluster host machines.
 
@@ -413,7 +413,7 @@ echo "Managed Id Principal Id: $miPrincipalId"
 echo "Managed Id Client Id: $miClientId"
 ```
 
-#### Assing RBAC roles
+#### Adding RBAC roles
 
 In this paragraph, we will grant the Managed Identity read-access to Azure resources and Azure Key Vault data. To do this, we will use [Azure Role Based Access Control](https://docs.microsoft.com/en-us/azure/role-based-access-control/overview).
 
