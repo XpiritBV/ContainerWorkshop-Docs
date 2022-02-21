@@ -242,7 +242,9 @@ private void AnalyzeLimit(int limit)
    while (limit != 0);
 }
 ```
+
 and calling it at the beginning of the `Get` method:
+
 ```c#
 public async Task<ActionResult<IEnumerable<HighScore>>> Get(int limit = 10)
 {
@@ -267,6 +269,7 @@ public IndexModel(ILeaderboardClient proxy, IOptionsSnapshot<LeaderboardApiOptio
 ```
 
 Since our web API now exposes a limit parameter in the `GET` method to `/api/leaderboard`, the interface definition for the proxy changes. Change the signature of the proxy interface `ILeaderboard` in the `Proxy` folder to include the limit parameter:
+
 ```c#
 public interface ILeaderboardClient
 {
@@ -278,6 +281,7 @@ public interface ILeaderboardClient
 For testing purposes and to exploit the bug, add the option for the index page to specify a querystring parameter called `limit`, allowing the browser to use  [http://localhost/?limit=0](http://localhost/?limit=0). 
 
 Go to `Index.cshtml.cs` in your Gaming Web App and change the code for the try/catch block to be:
+
 ```c#
 try
 {
@@ -333,13 +337,13 @@ Prometheus will gather telemetry from the platform and store it in a database. W
 
 First, deploy Prometheus to Istio:
 
-```
+```cmd
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.8/samples/addons/prometheus.yaml
 ```
 
 Create a port forwarding from your machine to the cluster using `istioctl dashboard` and passing the name `prometheus`. This command will block the terminal, until you press `Ctrl+C`:
 
-```
+```cmd
 istioctl dashboard prometheus
 ```
 
@@ -353,7 +357,7 @@ Run the `fortio` tool a couple of times in a different terminal, to generate som
 
 Let's zoom in on the failed responses returned by the Service named 'blue', by filtering out the successful calls. Run the following query:
 
-```
+```cmd
 istio_requests_total{destination_service=~"blue.*", response_code="503"}
 ```
 You should see one line that indicates the total amount of failed requests. It should look similar to the image below, try to zoom in a little if needed, by changing the time scale to 15m:
@@ -367,18 +371,20 @@ Press `Ctrl+C` to stop the `istioctl` port forward.
 Grafana is an open source monitoring solution that can be used to configure dashboards for Istio. You can use Grafana to monitor the health of Istio and of applications within the service mesh. Grafana will query the data that was gathered by Prometheus.
 
 Generate some more test data:
-```
+
+```cmd
 kubectl exec -it fortio-deploy-6dc9b4d7d9-p68rg -- fortio load -c 100 -qps 10  http://blue/api/color
 ```
 
 Add the Grafana (visualization tooling) addon to Istio:
 
-```
+```cmd
 kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.8/samples/addons/grafana.yaml
 ```
 
 Just like Prometheus, Grafana comes with a built-in Portal. Create a port forward to Grafana by using the `istioctl dashboard` command again, but passing `grafana` as the name:
-```
+
+```cmd
 istioctl dashboard grafana
 ```
 
@@ -387,18 +393,19 @@ In your browser, navigate to the Grafana portal. We will open the 'Data sources'
 ```
 http://localhost:3000/datasources
 ```
+
 ![](images/grafana01.png)
 
 Let's see if we can query the request totals again:
 Navigate to the 'Explore' tab:
 
-```
+```cmd
 http://localhost:3000/explore
 ```
 
 Enter the following query:
 
-```
+```cmd
 istio_requests_total{destination_service=~"blue.*", response_code="503"}
 ```
 
@@ -409,9 +416,11 @@ The added benefit of Grafana is that you can combine data from multiple data sou
 (Grafana charts also look a lot nicer.)
 
 In your browser, navigate to:
-```
+
+```cmd
 http://localhost:3000/dashboards
 ```
+
 It should show you a 'folder' named Istio.
 
 With your mouse, hover over the folder and click on 'Go to folder'
