@@ -70,7 +70,7 @@ Instead of using *curl*, we will use the tool *Fortio* to call the Service, as i
 
 Deploy Fortio:
 ```
-kubectl apply -f ../lab12/istio-1.8.2/samples/httpbin/sample-client/fortio-deploy.yaml
+kubectl apply -f ../lab10/istio-1.13.0/samples/httpbin/sample-client/fortio-deploy.yaml
 
 service/fortio created
 deployment.apps/fortio-deploy created
@@ -191,7 +191,7 @@ You have deployed two Pods; one named 'green' and one named 'buggy'. The Pods ar
 Deploy the Fortio Pod again:
 
 ```
-kubectl apply -f ../lab12/istio-1.8.2/samples/httpbin/sample-client/fortio-deploy.yaml
+kubectl apply -f ../lab10/istio-1.13.0/samples/httpbin/sample-client/fortio-deploy.yaml
 ```
 
 Make a note of the fortio Pod name, it should resemble this: `fortio-deploy-576dbdfbc4-284kk`

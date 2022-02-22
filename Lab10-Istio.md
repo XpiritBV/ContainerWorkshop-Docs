@@ -41,7 +41,7 @@ cd resources/lab10
 
 curl -L https://istio.io/downloadIstio | sh -
 ```
-This will make sure that the tool is installed in a folder named 'istio-1.9.0' and available for the next steps.
+This will make sure that the tool is installed in a folder named 'istio-1.13.0' (your version might be different) and available for the next steps.
 
 > Note that your version may be different.
 
