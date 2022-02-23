@@ -6,10 +6,9 @@ Goals for this lab:
 
 - [Push images to a container registry](#push)
 - [Connecting to your cluster](#connect)
-- [Create and enhance cluster composition for Docker Swarm](#create)
 - [Deploy images to cluster](#deploy)
-- [Run and manage composition in cluster](#run)
 - [(Optional) Switch to Azure SQL Database](#sql)
+- [Using Azure Managed Identity with ACR and AKS](#mi)
 
 > ##### Important
 > Make sure you have:
@@ -143,7 +142,7 @@ This process can be automated by a build and release pipeline. You will learn ho
 
 **Repeat the procedure for the Leaderboard Web API.**
 
-## Connecting to your cluster
+## <a name="connect"></a>Connecting to your cluster
 
 At this point you will need to have access to a Docker cluster. You can use your local cluster running in Docker Desktop and Azure Kubernetes Service. If you haven't done so already, create an Azure Kubernetes Service cluster in Azure. [Lab 1](Lab1-GettingStarted.md) describes how you can create one.
 
@@ -230,7 +229,7 @@ Inside this resource group you will find the underlying resources of your AKS cl
 
 > What resources are part of a AKS cluster? What is the purpose of each of these?
 
-## Deploy your Docker composition to a cluster
+## <a name="deploy"></a> Deploy your Docker composition to a cluster
 
 Kubernetes does not use Docker Compose files for its deployments. Instead, it uses deployment manifests. The resources files under Lab 6  has a file called `01-gamingwebapp.k8s-static.yaml`. Create a folder `deployment` in the root of your code repository and copy the file into it. Right-click your Visual Studio solution and add the YAML file as an existing file. The manifest file should appear in `Solution items` in the Solution Explorer. Open the file and examine the contents.
 
@@ -353,7 +352,7 @@ GO
 
 Try to deploy the manifest again using Azure SQL Database now instead of the containerized version.
 
-## Using Azure Managed Identity with ACR and AKS
+## <a name="mi"></a>Using Azure Managed Identity with ACR and AKS
 In this chapter we will use a Managed Identity to connect Kubernetes to an Azure Container Registry.
 
 ### Introduction
