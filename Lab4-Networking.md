@@ -116,6 +116,11 @@ and remove them if needed:
 docker rm -f <containerid>
 ```
 
+> Tip: if you want to stop and remove all running containers in one go, you can also use:
+>```cmd
+>docker rm -f $(docker ps -a -q)
+>```
+
 ## <a name="create"></a>Manually create a docker network
 
 Let's create a new container network and run a couple of containers in them:
