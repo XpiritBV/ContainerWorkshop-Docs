@@ -405,7 +405,7 @@ You can also give a container instance an alias, so you can refer to it by a net
 If you want to complete this part, just apply the file named `01-docker-compose-netwrk-alias.yml`
 
 ```cmd
-docker-compose -f 01-docker-compose-netwrk.yml up -d
+docker-compose -f 01-docker-compose-netwrk-alias.yml up -d
 ```
 
 Run busybox again and verify that the database server can be resolved by its alias:
