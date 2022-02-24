@@ -97,7 +97,7 @@ kubectl delete namespace bluegreen
 
 > For more information about this application, read the introduction in [Lab 9](Lab9-BlueGreen.md#deploy-workloads).
 
-> If you're running in the Cloud Shell, you can apply files by passing the raw Github URL, like this: `kubectl apply -f https://raw.githubusercontent.com/XpiritBV/ContainerWorkshop-Docs/master/resources/lab11/01-green.yaml`
+> If you're running in the Cloud Shell, you can apply files by passing the raw Github URL, like this: `kubectl apply -f https://raw.githubusercontent.com/XpiritBV/ContainerWorkshop-Docs/master/resources/lab09/01-green.yaml`
 Version 1:
 ```
 kubectl apply -f ../lab09/01-green.yaml
