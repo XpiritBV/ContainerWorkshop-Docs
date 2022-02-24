@@ -29,7 +29,7 @@ Open Visual Studio and the solution for the retro gaming application. We need to
 
 Go to the place where you think the instrumentation key should be located and specify it there.
 
- Depending on the place you chose, use the following syntax:
+Depending on the place you chose, use the following syntax:
 ```json
 # appsettings.json (or secrets.json)
   "ApplicationInsights": {
@@ -280,7 +280,7 @@ public interface ILeaderboardClient
 
 For testing purposes and to exploit the bug, add the option for the index page to specify a querystring parameter called `limit`, allowing the browser to use  [http://localhost/?limit=0](http://localhost/?limit=0). 
 
-Go to `Index.cshtml.cs` in your Gaming Web App and change the code for the try/catch block to be:
+Go to `Index.cshtml.cs` in your Gaming Web App and change the code for the `try/catch` block to be:
 
 ```c#
 try
