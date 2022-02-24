@@ -87,7 +87,7 @@ istiod-7d8f784f96-cvf6g                 1/1     Running   0          106m
 ## <a name='deploy-workload'></a> Deploying a workload
 
 Now it is time to see ingress in action.
-1. First, make sure that we start with a clean slate by deleting the existing namespace 'bluegreen', which may have been left over from Lab 11:
+1. First, make sure that we start with a clean slate by deleting the existing namespace 'bluegreen', which may have been left over from Lab 9:
 
 ```
 kubectl delete namespace bluegreen
