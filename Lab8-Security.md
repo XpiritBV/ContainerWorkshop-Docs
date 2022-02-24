@@ -441,7 +441,7 @@ This operation can take some time to complete.
 
 ### Deploying a workload
 
-Create a `SecretProviderClass` resource type in your Kubernetes cluster that will fetch a single secret from the Key Vault. To do this, you will need to customize a template from the labs resources folder `resources/lab07` first.
+Create a `SecretProviderClass` resource type in your Kubernetes cluster that will fetch a single secret from the Key Vault. To do this, you will need to customize a template from the labs resources folder `resources/lab08` first.
 
 Open the file named `00-secret.yaml` and put in values for `keyvaultName`, `subscriptionId` and `tenantId`. The values should still be available as environment variables. Alternatively, you can find the values using `az account show`.
 
