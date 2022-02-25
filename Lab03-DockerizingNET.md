@@ -10,10 +10,10 @@ Goals for this lab:
 - [Running SQL Server in a Docker container composition](#sql)
 
 ## Prerequisites
-Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
+Make sure you have completed [Lab 1 - Getting Started](Lab01-GettingStarted.md).
 
 ## <a name="run"></a>Run the application
-We will start with running the existing ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to clone it now if you do not have the sources. 
+We will start with running the existing ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab01-GettingStarted.md) to clone it now if you do not have the sources. 
 
 Switch to the `start` branch by using this command:
 
@@ -26,7 +26,7 @@ Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to na
 - `GamingWebApp`, an ASP.NET MVC Core frontend 
 - `LeaderboardWebAPI`, an ASP.NET Core Web API
 
-For now, the SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as described in [Lab 2 - Running Microsoft SQL Server on Linux](Lab2-Docker101.md#sql).
+For now, the SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as described in [Lab 2 - Running Microsoft SQL Server on Linux](Lab02-Docker101.md#sql).
 
 > ##### Important
 > Update the connectionstring in the appsettings.json file to use the local ip address instead of localhost or 127.0.0.1. We will need this later. 
@@ -154,7 +154,7 @@ You will need to change the connection string for the Web API to reflect the new
 ```
 
 > ##### Strange connection string or not? 
-> There are at least two remarkable things in this connection string. Can you spot them and explain why? Don't worry if not, as we will look at this in the [Networking](Lab4-Networking.md) lab.
+> There are at least two remarkable things in this connection string. Can you spot them and explain why? Don't worry if not, as we will look at this in the [Networking](Lab04-Networking.md) lab.
  
 With this change, you should be able to run your applications in containers. Make sure you have stopped any containers related to the application. Give it a try and fix any issues that occur. 
 
@@ -209,4 +209,4 @@ Your container image does not contain any of the binaries that make your ASP.NET
 ## Wrapup
 In this lab you have added Docker support to run both of your projects from Docker containers as well as the SQL Server instance. You enhanced the Docker Compose file that describes the composition of your complete application. In the next lab you will improve the networking part of the composition.
 
-Continue with [Lab 4 - Networking](Lab4-Networking.md).
+Continue with [Lab 4 - Networking](Lab04-Networking.md).

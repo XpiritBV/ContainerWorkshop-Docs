@@ -7,7 +7,7 @@ Goals for this lab:
 - Understand how the built-in capability to retry HTTP calls can be helpful when calling Services.
 
 ## Prerequisites
-Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'
+Make sure you have completed [Lab 1 - Getting Started](Lab01-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'
 Also, make sure you have installed Istio as described in [Lab 10 - Working with Istio on Kubernetes](Lab10-Istio.md#deploy-istio) chapter 'Deploying Istio'. 
 
 >Make sure to complete the entire chapter.

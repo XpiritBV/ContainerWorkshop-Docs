@@ -8,7 +8,7 @@ Goals for this lab:
 - [Working with container images](#working)
 
 ## Prerequisites
-Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
+Make sure you have completed [Lab 1 - Getting Started](Lab01-GettingStarted.md).
 
 ## <a name="inspect"></a>Inspect your Docker environment
 Let's check whether your Docker Desktop tooling is correctly set up. Also, you might need to get familiar with the Docker tooling.
@@ -30,7 +30,7 @@ After starting the Docker tooling, the tray icon should be present.
   wsl
   ```
   This opens your default WSL distro. If you don't have one yet, please visit the [Microsoft Store](https://www.microsoft.com/en-us/p/ubuntu/9nblggh4msv6) and install Ubuntu.
-  > Make sure to enable WSL integration inside Docker Desktop settings, as described in [Lab 1 - Getting Started](Lab1-GettingStarted.md).
+  > Make sure to enable WSL integration inside Docker Desktop settings, as described in [Lab 1 - Getting Started](Lab01-GettingStarted.md).
 
 ## <a name="manage"></a>Managing container instances
 Let's see whether you can start some container instances. The categorical sample is "Hello World". Start a container that should run if everything is configured correctly. From a command prompt, run the following command:
@@ -239,4 +239,4 @@ You have just learned some of the basic commands in the Docker CLI to manage bot
 
 Keep the container with the SQL Server developer instance running, as we will need it in the next lab.
 
-Continue with [Lab 3 - Dockerizing .NET](Lab3-DockerizingNET.md).
+Continue with [Lab 3 - Dockerizing .NET](Lab03-DockerizingNET.md).

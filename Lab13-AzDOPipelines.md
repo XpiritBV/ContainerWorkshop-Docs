@@ -6,7 +6,7 @@ Goals for this lab:
 - Deploy images to cluster
 
 ## <a name="run"></a>Get existing application
-We will start with or continue running the completed ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to clone it now if you do not have the sources. Switch to the `master` branch by using this command :
+We will start with or continue running the completed ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab01-GettingStarted.md) to clone it now if you do not have the sources. Switch to the `master` branch by using this command :
 
 ```
 git checkout master
@@ -17,9 +17,9 @@ git checkout master
 
 
 ## Prerequisites
-You will need an Azure Kubernetes Service (AKS) cluster. Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'. 
+You will need an Azure Kubernetes Service (AKS) cluster. Make sure you have completed [Lab 1 - Getting Started](Lab01-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'. 
 
-You will also need an Azure Container Registry. Please visit [Lab 7 - Container registries and clusters](Lab7-RegistriesClusters.md) and review the chapter named 'Pushing images to a registry' to see how to create a new container registry.
+You will also need an Azure Container Registry. Please visit [Lab 7 - Container registries and clusters](Lab07-RegistriesClusters.md) and review the chapter named 'Pushing images to a registry' to see how to create a new container registry.
 
 The final step before you can get started with building pipelines, is to get access to an Azure DevOps (AZDO) account and a team project. You can use an existing AZDO account, or create a new one at [dev.azure.com ](https://dev.azure.com). 
 
@@ -205,7 +205,7 @@ As we might not have configured a Managed Identity with this cluster yet, we wil
 
 #### Connecting AKS to ACR
 
-> If you have completed [Lab 7](Lab7-RegistriesClusters.md) and left the connection between your cluster and the container registry in place, you can skip this chapter.
+> If you have completed [Lab 7](Lab07-RegistriesClusters.md) and left the connection between your cluster and the container registry in place, you can skip this chapter.
 
 To get the resource Id for your container registry, run `az acr show`:
 

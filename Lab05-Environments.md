@@ -14,7 +14,7 @@ Goals for this lab:
 
 ## Prerequisites
 
-Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
+Make sure you have completed [Lab 1 - Getting Started](Lab01-GettingStarted.md).
 
 ## <a name="work"></a>Working with compositions and Docker Compose
 
@@ -163,4 +163,4 @@ While you are looking at this, follow the code to the proxy implementation and g
 
 In this lab, you have examined the way environments can be used to distinguish various hosting situations for your Docker composition. It is important to know which settings must be changeable for different environments, as the Docker images that you build cannot be changed internally.
 
-Continue with [Lab 6 - Kubernetes](Lab6-Kubernetes.md).
+Continue with [Lab 6 - Kubernetes](Lab06-Kubernetes.md).

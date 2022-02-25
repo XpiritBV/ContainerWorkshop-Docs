@@ -10,7 +10,7 @@ Goals for this lab:
 > Make sure to configure Docker Desktop to run Linux containers.
 
 ## Prerequisites
-Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md).
+Make sure you have completed [Lab 1 - Getting Started](Lab01-GettingStarted.md).
 
 
 ## Getting started
@@ -389,7 +389,7 @@ Cleanup the `busybox` container. (`docker rm -f bb`)
 
 ### Container alias (DNS)
 
-You can also give a container instance an alias, so you can refer to it by a network alias instead of its container service name. Use the fragment below to give the SQL Server instance created in the [Docker 101 lab](Lab2-Docker101.md#sql) a network alias `sql.containerworkshop.local` on your `db` service.
+You can also give a container instance an alias, so you can refer to it by a network alias instead of its container service name. Use the fragment below to give the SQL Server instance created in the [Docker 101 lab](Lab02-Docker101.md#sql) a network alias `sql.containerworkshop.local` on your `db` service.
 
 ```yaml
   db:
@@ -439,4 +439,4 @@ Verify that everything still works by running your Visual Studio solution. Fix a
 
 In this lab you experimented with networks in Docker from the command line and later with definitions in Docker Compose compositions. You applied network segmentation to separate container instances from each other, to improve network security.
 
-Continue with [Lab 5 - Environments](Lab5-Environments.md).
+Continue with [Lab 5 - Environments](Lab05-Environments.md).

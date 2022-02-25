@@ -10,7 +10,7 @@ Goals for this lab:
 - Use a service to define networking.
 
 ## Prerequisites
-Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6). Double check that you have completed chapter 'Create a Kubernetes cluster'
+Make sure you have completed [Lab 1 - Getting Started](Lab01-GettingStarted.md#6). Double check that you have completed chapter 'Create a Kubernetes cluster'
 
 ## Getting started
 ![](images/kubernetes01.png)
@@ -180,7 +180,7 @@ The last part, that describes `Events` is very important; if your container fail
 ### Pod networking
 Another interesting element of the pod is that it has an IP address. See if you can find it in the output from `kubectl describe pod`. It should be similar to this: `IP: 10.244.0.16`.
 
-> What this means, is that we can connect pods to a network, similar to what we did with `docker-compose` in [Lab 4 - Networking](Lab4-Networking.md) earlier.
+> What this means, is that we can connect pods to a network, similar to what we did with `docker-compose` in [Lab 4 - Networking](Lab04-Networking.md) earlier.
 
 ### Pod lifecycle
 
@@ -217,7 +217,7 @@ deployment.apps "hello-nginx" deleted
 
 Earlier, we created a container running in a pod, by creating a deployment using the `kubectl` CLI. Instead of creating pods imperatively, we can also use a pod template to create them declaratively. This way we can define the desired state (which image, resources, networking, etc.) and Kubernetes will ensure that the required changes are made.
 
-> If you worked on [Lab 4 - Networking](Lab4-Networking.md) before, you'll see similarities between using the docker CLI (imperative) and the docker-compose CLI (declarative).
+> If you worked on [Lab 4 - Networking](Lab04-Networking.md) before, you'll see similarities between using the docker CLI (imperative) and the docker-compose CLI (declarative).
 
 Examine the YAML definition below:
 
@@ -490,5 +490,5 @@ kubectl delete -f 02-nginx-service.yaml
 
 In this lab you experimented with Kubernetes from the command line. You have learned how to manage pods using Deployments and how to add network connectivity to pods.
 
-Continue with [Lab 7 - Registries and clusters](Lab7-RegistriesClusters.md).
+Continue with [Lab 7 - Registries and clusters](Lab07-RegistriesClusters.md).
 

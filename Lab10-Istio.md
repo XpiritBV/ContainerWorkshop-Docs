@@ -9,7 +9,7 @@ Tip: Having multiple ingress controllers on a Kubernetes cluster may cause issue
 You can deploy the mini-cluster by right clicking on the icon in the tool bar. 
 
 ## Prerequisites
-Make sure you have completed [Lab 1 - Getting Started](Lab1-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'
+Make sure you have completed [Lab 1 - Getting Started](Lab01-GettingStarted.md#6). Doublecheck that you have completed chapter 'Create a Kubernetes cluster'
 
 ## Getting started
 ![](images/kubernetes02.png)
@@ -95,7 +95,7 @@ kubectl delete namespace bluegreen
 
 2. Second, deploy both versions of the sample workload; by creating a namespace with two deployments and services. 
 
-> For more information about this application, read the introduction in [Lab 9](Lab9-BlueGreen.md#deploy-workloads).
+> For more information about this application, read the introduction in [Lab 9](Lab09-BlueGreen.md#deploy-workloads).
 
 > If you're running in the Cloud Shell, you can apply files by passing the raw Github URL, like this: `kubectl apply -f https://raw.githubusercontent.com/XpiritBV/ContainerWorkshop-Docs/master/resources/lab09/01-green.yaml`
 Version 1:

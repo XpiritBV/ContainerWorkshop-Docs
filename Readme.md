@@ -14,21 +14,21 @@ To get the best experience with the hands-on-labs it is recommended that you pre
 
 ### Preparing for workshop
 
-Even though you can certainly participate in this workshop with an unprepared laptop, it will save a lot of time to install your development machine ahead of time. In [Lab 1 - Getting started](Lab1-GettingStarted.md) you will find a list of the recommended tools to install on your laptop or development Virtual Machine.
+Even though you can certainly participate in this workshop with an unprepared laptop, it will save a lot of time to install your development machine ahead of time. In [Lab 1 - Getting started](Lab01-GettingStarted.md) you will find a list of the recommended tools to install on your laptop or development Virtual Machine.
 
 Additionally, for hosting a container cluster in Microsoft Azure you will need an Azure subscription. You can create a trial account if you do not have a subscription available.
 
 ## Labs in this workshop
 
-- [Lab 1 - Getting started](Lab1-GettingStarted.md)
-- [Lab 2 - Docker101](Lab2-Docker101.md)
-- [Lab 3 - Dockerizing .NET Core](Lab3-DockerizingNET.md)
-- [Lab 4 - Networking](Lab4-Networking.md)
-- [Lab 5 - Environments](/Lab5-Environments.md)
-- [Lab 6 - Kubernetes](Lab6-Kubernetes.md)
-- [Lab 7 - Registries and clusters](Lab7-RegistriesClusters.md)
-- [Lab 8 - Security](Lab8-Security.md)
-- [Lab 9 - Blue/Green deployments on Kubernetes with Contour](Lab9-BlueGreen.md)
+- [Lab 1 - Getting started](Lab01-GettingStarted.md)
+- [Lab 2 - Docker101](Lab02-Docker101.md)
+- [Lab 3 - Dockerizing .NET Core](Lab03-DockerizingNET.md)
+- [Lab 4 - Networking](Lab04-Networking.md)
+- [Lab 5 - Environments](/Lab05-Environments.md)
+- [Lab 6 - Kubernetes](Lab06-Kubernetes.md)
+- [Lab 7 - Registries and clusters](Lab07-RegistriesClusters.md)
+- [Lab 8 - Security](Lab08-Security.md)
+- [Lab 9 - Blue/Green deployments on Kubernetes with Contour](Lab09-BlueGreen.md)
 - [Lab 10 - Working with Istio on Kubernetes](Lab10-Istio.md)
 - [Lab 11 - Retry and Circuit breaker with Istio](Lab11-IstioRetry-CircuitBreaker.md)
 - [Lab 12 - Monitoring](Lab12-Monitoring.md)

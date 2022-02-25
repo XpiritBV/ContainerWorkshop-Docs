@@ -167,7 +167,7 @@ Using user secrets is well suited for development scenarios and single host mach
 
 ## <a name='kubernetessecrets'></a>(Optional) Using Kubernetes Secrets
 
-> This uses a Kubernetes cluster. If you don't have one yet, go to [Lab 1 - Getting Started](Lab1-GettingStarted.md) to see how to create one.
+> This uses a Kubernetes cluster. If you don't have one yet, go to [Lab 1 - Getting Started](Lab01-GettingStarted.md) to see how to create one.
 > You can store the secrets in a secure way in your cluster. The way this is done depends on the type of orchestrator you have. Kubernetes has its own implementation for secrets. In this step you are going to create four secrets for the Azure Key Vault connection details, so all secrets are "securely" stored in a combination of the cluster and the Azure Key Vault: one set of cluster-based connection details to the Key Vault, and all other secrets in the vault.
 
 Open the file `appsettings.secrets.json` from the solution items and edit the details to reflect the contents of four configuration settings for the KeyVault. Open a terminal window, navigate to the `deployment` folder in your solution folder. Use the Docker CLI to connect to your cluster and create a secret named `secret-appsettings`:
@@ -549,4 +549,4 @@ helm uninstall csi-secrets-store-provider-azure-1612818292
 
 In this lab you have stored the secrets of your application in the Azure Key Vault. You also moved the remaining secrets, containing the details to get access to the vault, in user secrets for development scenarios. In production, these secrets are stored as Kubernetes secrets, or as a managed identity for Azure AKS scenarios.
 
-Continue with [Lab 9 - Blue/Green deployments on Kubernetes with Contour](Lab9-BlueGreen.md).
+Continue with [Lab 9 - Blue/Green deployments on Kubernetes with Contour](Lab09-BlueGreen.md).

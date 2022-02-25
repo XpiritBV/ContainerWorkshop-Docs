@@ -144,7 +144,7 @@ This process can be automated by a build and release pipeline. You will learn ho
 
 ## <a name="connect"></a>Connecting to your cluster
 
-At this point you will need to have access to a Docker cluster. You can use your local cluster running in Docker Desktop and Azure Kubernetes Service. If you haven't done so already, create an Azure Kubernetes Service cluster in Azure. [Lab 1](Lab1-GettingStarted.md) describes how you can create one.
+At this point you will need to have access to a Docker cluster. You can use your local cluster running in Docker Desktop and Azure Kubernetes Service. If you haven't done so already, create an Azure Kubernetes Service cluster in Azure. [Lab 1](Lab01-GettingStarted.md) describes how you can create one.
 
 First, connect to your local cluster in Docker Desktop. There are several ways to connect to it:
 
@@ -207,7 +207,7 @@ Copy and paste the line for `token` into the login field that reads `Enter token
 
 > ****Important****
 >
-> If you get any errors in the Kubernetes dashboard, revisit [Module 1](Lab1-GettingStarted.md) and fix the dashboard by changing the RBAC configuration.
+> If you get any errors in the Kubernetes dashboard, revisit [Module 1](Lab01-GettingStarted.md) and fix the dashboard by changing the RBAC configuration.
 
 You can also set your cluster as the active context and interact with it using kubectl commands. First, retrieve a list of the current available clusters and contexts with `kubectl` commands and then set your cluster as active. All `kubectl` will be executed against that context from now.
 
@@ -433,4 +433,4 @@ az aks update --name ContainerWorkshopCluster --resource-group ContainerWorkshop
 
 In this lab you have created a composition that is able to deploy a stack of services to a cluster. Necessary changes to the environment variables were made and perhaps you even got to use an Azure SQL Database.
 
-Continue with [Lab 8 - Security](Lab8-Security.md).
+Continue with [Lab 8 - Security](Lab08-Security.md).

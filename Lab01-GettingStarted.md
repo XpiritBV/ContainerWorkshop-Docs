@@ -319,4 +319,4 @@ docker pull fortio/fortio
 
 You have prepared your laptop and container environment to be ready for the next labs. Any issues you may have, can probably be resolved during the labs. Ask your fellow attendees or the proctor to help you, if you cannot solve the issues.
 
-Continue with [Lab 2 - Docker101](Lab2-Docker101.md).
+Continue with [Lab 2 - Docker101](Lab02-Docker101.md).
