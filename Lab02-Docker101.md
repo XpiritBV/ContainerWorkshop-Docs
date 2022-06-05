@@ -20,7 +20,7 @@ You should see the Docker tooling running. On Windows, you can check this by loo
 If you cannot find the Docker icon in the tray, you might need to start the Docker tooling:
 
 ```cmd
-C:\Program Files\Docker\Docker\Docker for Windows.exe
+C:\Program Files\Docker\Docker\Docker Desktop.exe
 ```
 
 After starting the Docker tooling, the tray icon should be present.

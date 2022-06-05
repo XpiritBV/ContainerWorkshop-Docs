@@ -148,13 +148,14 @@ At this point you will need to have access to a Docker cluster. You can use your
 
 First, connect to your local cluster in Docker Desktop. There are several ways to connect to it:
 
-The easiest way is to use Visual Studio Code and the Kubernetes extension. Navigate to the Kubernetes pane on the left and find your local cluster listed as `docker-desktop`. Right-click it and use `Set as current cluster` if you have more than one cluster and yours is not selected yet. The `>` glyph in front of the cluster node indicates the current cluster.  
-![](images/VSCodeKubernetesExtension.png)
+The easiest way is to use Visual Studio Code and the Kubernetes extension. Navigate to the Kubernetes pane on the left and find your local cluster listed as `docker-desktop`. Right-click it and use `Set as current cluster` if you have more than one cluster and yours is not selected yet. The `>` glyph in front of the cluster node indicates the current cluster.
+
+<img src='images/VSCodeKubernetesExtension.png' width=300 />
 
 You can also deploy a Kubernetes hosted dashboard using this command:
 
 ```cmd
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0/aio/deploy/recommended.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
 ```
 
 You can reach the dashboard by running a proxy:
@@ -171,37 +172,28 @@ http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kube
 
 You will reach a login screen where you need to provide a token (or kubeconfig file).
 ![](images/KubernetesDashboardLogin.png)
-The token can be found in two steps. First run this command:
+
+First, we will need to create a new service account and give it the proper role-binding to access the dashboard.
+Use the two files `dashboard-user.yaml` and `dashboard-rolebinding.yaml` from the `resources` folder and apply these.
 
 ```cmd
-kubectl -n kube-system get secret
+kubectl apply -f .\dashboard-user.yaml
+kubectl apply -f .\dashboard-rolebinding.yaml
 ```
 
-This will list all registered system-specific secrets in Kubernetes. Find the name for the `default-token` in the list. It is similar to `default-token-v9rxc`, but the last part will differ for your installation. 
+From Kubernetes 1.24 onward tokens are no longer created automatically for service accounts. You can now create a token by running this command:
 
 ```cmd
-kubectl -n kube-system describe secret default-token-v9rxc
+kubectl create token admin-user -n kubernetes-dashboard
 ```
 
 The command gives output similar to:
 
 ```cmd
-Name:         default-token-v9rxc
-Namespace:    kube-system
-Labels:       <none>
-Annotations:  kubernetes.io/service-account.name: default
-              kubernetes.io/service-account.uid: 08a100bd-df9a-4f3f-b11a-106fe92d2871
-
-Type:  kubernetes.io/service-account-token
-
-Data
-====
-token:      eyJhbGciOiJSUzI1NiIsImtpZCI6InI0U29nakdwNmR1T3RLVzBRTVBUZUxGSWhtYl9ZRExsNXpBYmNvdjl0MWcifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXY5cnhjIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiIwOGExMDBiZC1kZjlhLTRmM2YtYjExYS0xMDZmZTkyZDI4NzEiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.lNaY8rnoZv0BTNoI-F7fj-CtxtWF_fulymFL1k2y0BpgvPRfojsKy7HBzBi9qnUwipLK46AksCOzgg0Z3DbpF9BN_4VIBQmfJ4_yH1v8TYqC7LSriyIYEST_hJIRCQbJ919CXxSxW-Teo8mJ3mZo9PheBiARLas3P-e2e_xu14_Q5DnvjCcmgxTpPBEBhi5G-4O7fDybVljZxgeBQM65ODCd5pTjPp_SPrFykw2qWCHnEl28q5wUvtGYlXle9aAN1arZq1O2_h98LAYUUryYzGNEp4Ma7CIdytf1nwwpSaAmRUAC4RYWL41DDp3oeD9-hiQsZ-hLYWxZlQ8A
-ca.crt:     1066 bytes
-namespace:  11 bytes
+eyJhbGciOiJSUzI1NiIsImtpZCI6InI0U29nakdwNmR1T3RLVzBRTVBUZUxGSWhtYl9ZRExsNXpBYmNvdjl0MWcifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXY5cnhjIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiIwOGExMDBiZC1kZjlhLTRmM2YtYjExYS0xMDZmZTkyZDI4NzEiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.lNaY8rnoZv0BTNoI-F7fj-CtxtWF_fulymFL1k2y0BpgvPRfojsKy7HBzBi9qnUwipLK46AksCOzgg0Z3DbpF9BN_4VIBQmfJ4_yH1v8TYqC7LSriyIYEST_hJIRCQbJ919CXxSxW-Teo8mJ3mZo9PheBiARLas3P-e2e_xu14_Q5DnvjCcmgxTpPBEBhi5G-4O7fDybVljZxgeBQM65ODCd5pTjPp_SPrFykw2qWCHnEl28q5wUvtGYlXle9aAN1arZq1O2_h98LAYUUryYzGNEp4Ma7CIdytf1nwwpSaAmRUAC4
 ```
 
-Copy and paste the line for `token` into the login field that reads `Enter token` and click `Sign in`. You should see the dashboard appear.
+Copy and paste the token value into the login field that reads `Enter token` and click `Sign in`. You should see the dashboard appear.
 
 ![](images/KubernetesDashboard.png)
 
@@ -231,10 +223,10 @@ Inside this resource group you will find the underlying resources of your AKS cl
 
 ## <a name="deploy"></a> Deploy your Docker composition to a cluster
 
-Kubernetes does not use Docker Compose files for its deployments. Instead, it uses deployment manifests. The resources files under Lab 6  has a file called `01-gamingwebapp.k8s-static.yaml`. Create a folder `deployment` in the root of your code repository and copy the file into it. Right-click your Visual Studio solution and add the YAML file as an existing file. The manifest file should appear in `Solution items` in the Solution Explorer. Open the file and examine the contents.
+Kubernetes does not use Docker Compose files for its deployments. Instead, it uses deployment manifests. The resources folder under Lab 7 has a file called `01-gamingwebapp.k8s-static.yaml`. Create a folder `deployment` in the root of your code repository and copy the file into it. Right-click your Visual Studio solution and add the YAML file as an existing file. The manifest file should appear in `Solution items` in the Solution Explorer. Open the file and examine the contents.
 
 You need to make a few changes to the manifest for it to be useable. In particular, make sure you change the following marker
-`__containerregistry__`
+`__containerregistry__`.
 	
 Execute the command `az acr show -n <registry> --query loginServer` to get the fully qualified name of the registry and replace the marker with its value.
 
@@ -292,7 +284,7 @@ Open a browser and navigate to the IP address listed under EXTERNAL-IP
 If there are any errors, troubleshoot your setup and fix these.
 
 > ##### Using containerized SQL Server in production
-> It is not recommended to use SQL Server in a production scenario in this way. You will loose data, unless you take special measures, such as mounting volumes.
+> It is not recommended to use SQL Server in a production scenario in this way. You will lose data, unless you take special measures, such as mounting volumes.
 > However, for now you will keep the SQL Service instance in a Docker container.
 >
 > Make sure that you change the environment name to **Development** to provision the database `Leaderboard` and seed it using Entity Framework's `DbInitialize()`.
@@ -305,7 +297,7 @@ If you have time left, you can remove the SQL Server container altogether and sw
 The steps you need to do are:
 - Provision an Azure SQL Server Database called `Leaderboard`, and an Azure SQL Server if necessary.
 
-![](images/AzureSQLDatabase.png)
+<img src="images/AzureSQLDatabase.png" alt="drawing" width="300" />
 
   You might have change the server name so that it is unique.
 
@@ -365,7 +357,7 @@ If you do not have one yet, create an Azure Container Registry. Run the followin
 Use a unique name for your container registry, e.g. `ContainerWorkshopContainerRegistry` plus your last name or initials.
 
 ```cmd
-registryName=ContainerWorkshopContainerRegistry
+$registryName=ContainerWorkshopContainerRegistry
 az group create --name ContainerWorkshop --location WestEurope
 az acr create --name $registryName --resource-group ContainerWorkshop --sku Basic --admin-enabled true --location WestEurope
 ```
@@ -388,7 +380,7 @@ az aks update --name ContainerWorkshopCluster --resource-group ContainerWorkshop
 This operation takes a few seconds to complete.
 
 ### Test the connection
-To test the connection, we will import the nginx image into our private registry. 
+To test the connection, we will import the nginx image into our private registry.
 
 ```cmd
 az acr import -n $registryName --source docker.io/library/nginx:latest --image nginx:v1

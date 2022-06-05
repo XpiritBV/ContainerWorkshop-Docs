@@ -73,9 +73,9 @@ Visit the [Azure Portal](https://portal.azure.com) and go to your new Key Vault 
 
 > Note: Ideally you would place the KeyVault in a separate resource group, as its lifetime is likely to exceed that of the container cluster group.
 
-Take note of the DNS name of the Key Vault in the `Properties` section.
+Take note of the Vault URI of the Key Vault in the `Properties` section.
 
-<img src="images/KeyVaultDNSName.png" width="400" />
+<img src="images/KeyVaultDNSName.png" width="300" />
 
 Next, allow the Web API access to the Key Vault. Register the web API as an Azure Active Directory application. Go to the Azure Active Directory for your Azure subscription and choose `App Registrations`. Create a new application registration called `Leaderboard Web API` of type `Web app / API` and use the local URL `http://localhost:44369` as the Sign-on URL value.
 

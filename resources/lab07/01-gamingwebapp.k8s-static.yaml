@@ -116,6 +116,8 @@ spec:
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: Development
+        - name: ASPNETCORE_MANAGEMENTPORT
+          value: "8080"
         - name: ASPNETCORE_URLS
           value: http://0.0.0.0:80
         - name: ConnectionStrings__LeaderboardContext
@@ -156,4 +158,4 @@ spec:
         ports:
         - containerPort: 1433
       nodeSelector:
-        beta.kubernetes.io/os: linux
+        kubernetes.io/os: linux
