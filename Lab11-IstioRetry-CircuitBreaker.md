@@ -28,7 +28,7 @@ user@machine:/mnt/c/Sources/ContainerWorkshop-Docs/resources/lab11/$
 
 The local Istio tooling uses a Linux based executable. Make sure to run this lab on:
 - WSL on Windows (like Ubuntu)
-- Azure Cloud Shell (in the Terminal) on Windows 
+- Azure Cloud Shell (in the Terminal) on Windows
 - Any Linux distro that supports the `az` CLI
 - Mac also works fine
 
@@ -36,14 +36,14 @@ The local Istio tooling uses a Linux based executable. Make sure to run this lab
 
 In the previous lab, we deployed Istio to Kubernetes by using `istioctl`. It can do more! It is now time to deploy a workload to the cluster. We will use the tool `istioctl` to modify a regular deployment to become 'Istio-enabled'.
 The template file will create a Namespace 'blue', which will not be labeled for automatic sidecar injection.
-The Deployment needs to be modified to include an additional container, the 'istio-proxy'.
+The deployment needs to be modified to include an additional container, the 'istio-proxy'.
 
 Examine the file '01-CircuitBreaker.yaml', if you have completed Lab 10 and 12, it should look very familiar. Except maybe for the DestinationRule `trafficPolicy`, but we will come back to that.
-The file creates a Deployment for a Pod with a container based on the 'blue' image. It exposes the Pod using a Service resource. Finally, it creates an Istio DeploymentRule as a proxy around the Service.
+The file creates a deployment for a pod with a container based on the 'blue' image. It exposes the pod using a `Service` resource. Finally, it creates an Istio DeploymentRule as a proxy around the service.
 
 ### Modify an existing Kubernetes template file
 
-To enable Istio sidecar injection for the Deployment, we can modify the regular Kubernetes template by using `isioctl`:
+To enable Istio sidecar injection for the deployment, we can modify the regular Kubernetes template by using `isioctl`:
 
 ```
 istioctl kube-inject --filename 01-CircuitBreaker.yaml  --output 01-CircuitBreaker-mod.yaml
@@ -70,14 +70,14 @@ Instead of using *curl*, we will use the tool *Fortio* to call the Service, as i
 
 Deploy Fortio:
 ```
-kubectl apply -f ../lab10/istio-1.13.0/samples/httpbin/sample-client/fortio-deploy.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.14/samples/httpbin/sample-client/fortio-deploy.yaml
 
 service/fortio created
 deployment.apps/fortio-deploy created
 ```
 > Note that your version of Istio may be different. Change the path accordingly.
 
-Next, get the Pod name;
+Next, get the pod name;
 ```
 kubectl get pod -n blue
 
@@ -85,9 +85,9 @@ NAME                            READY   STATUS    RESTARTS   AGE
 blue-554f964ff8-lm8w7           2/2     Running   0          8m29s
 fortio-deploy-576dbdfbc4-f6nfh   1/1     Running   0          85s
 ```
-> Note that in your environment, the name of the fortio Pod will be different.
+> Note that in your environment, the name of the fortio pod will be different.
 
-Use the Fortio web load testing Pod to call the 'blue' Service once by using its name, and verify the output:
+Use the Fortio web load testing pod to call the 'blue' Service once by using its name, and verify the output:
 
 ```
 kubectl exec -it fortio-deploy-576dbdfbc4-f6nfh -- fortio load -curl http://blue/api/color
@@ -104,14 +104,14 @@ transfer-encoding: chunked
 blue
 0
 ```
-You can see that a single call to the Service works fine.
+You can see that a single call to the service works fine.
 
 ## <a name='cb'></a>Circuit breaker
 
 The 'Circuit breaker' is a design pattern that helps creating resilient applications. It allows you to write applications that limit the impact of failures, by letting callers to a back-end service know that it is unavailable. By storing information about issues and quickly failing the call, the calling application is saved the wait time and overhead that would otherwise be required to find out. It allows the back-end service to recover without continuously being overloaded by waiting callers.
 
 Remember that the DestinationRule specifies that the Service can only process 1 call at a time.
-To trip the Circuit breaker, use the following command to call the service concurrently and verify the output:
+To trip the circuit breaker, use the following command to call the service concurrently and verify the output:
 
 ```
 kubectl exec -it fortio-deploy-576dbdfbc4-f6nfh -- fortio load http://blue/api/color
@@ -184,17 +184,17 @@ Select the new 'buggygreen' namespace as the default for this session:
 kubectl config set-context --current --namespace=buggygreen
 ```
 
-You have deployed two Pods; one named 'green' and one named 'buggy'. The Pods are exposed by one Service. One of the Pods (guess which one) has an issue; 25% of all web requests made to the API will fail.
+You have deployed two pods; one named 'green' and one named 'buggy'. The pods are exposed by one Service. One of the pods (guess which one) has an issue; 25% of all web requests made to the API will fail.
 
 ### Deploy the Fortio test tool
 
-Deploy the Fortio Pod again:
+Deploy the Fortio pod again:
 
 ```
-kubectl apply -f ../lab10/istio-1.13.0/samples/httpbin/sample-client/fortio-deploy.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.14/samples/httpbin/sample-client/fortio-deploy.yaml
 ```
 
-Make a note of the fortio Pod name, it should resemble this: `fortio-deploy-576dbdfbc4-284kk`
+Make a note of the fortio pod name, it should resemble this: `fortio-deploy-576dbdfbc4-284kk`
 
 ```
 kubectl get pod
@@ -251,8 +251,8 @@ Response Body/Total Sizes : count 20 avg 199.7 +/- 26.47 min 187 max 263 sum 399
 All done 20 calls (plus 0 warmup) 12.667 ms avg, 271.7 qps
 
 ```
-In the output generated by Fortio, you should see that around 15% of the calls to the Service 'buggygreen' are failing. This is because the 'buggy' Pod is configured to return a Server Error (HTTP Status code 503) for 25% of all incoming requests. Istio is evenly balancing the load across the 'blue' and 'buggy' Pods. Therefore, around half of 25% (= 12.5%) of all calls to the Service will fail.
-In real life, this can be compared with the deployment of a bug inside a new software version which causes intermittent failures. 
+In the output generated by Fortio, you should see that around 15% of the calls to the Service 'buggygreen' are failing. This is because the 'buggy' pod is configured to return a Server Error (HTTP Status code 503) for 25% of all incoming requests. Istio is evenly balancing the load across the 'blue' and 'buggy' pods. Therefore, around half of 25% (= 12.5%) of all calls to the Service will fail.
+In real life, this can be compared with the deployment of a bug inside a new software version which causes intermittent failures.
 
 If you cannot fix the software itself, Istio can help you mitigate such issues, by automatically retrying HTTP calls upon failures for you.
 Let's see how that works.
@@ -320,7 +320,7 @@ All done 20 calls (plus 0 warmup) 24.707 ms avg, 125.8 qps
 
 As you can see, all service calls (eventually) resulted in a response with 'Code 200', which is 'OK'.
 
-To get a feeling about how many times the 'buggy' API was really called, we can examine the log output of the proxy container by using `kubectl logs` and provide both the Pod name and the proxy container name:
+To get a feeling about how many times the 'buggy' API was really called, we can examine the log output of the proxy container by using `kubectl logs` and provide both the pod name and the proxy container name:
 ```
 kubectl logs buggy-68f5b98cd4-58fwn istio-proxy
 
@@ -329,7 +329,7 @@ kubectl logs buggy-68f5b98cd4-58fwn istio-proxy
 a
 ```
 
-Run Fortio again a couple of times, to make sure the 'buggy' Pod gets called a few times, and examine the log output to see new responses in the log (since 2 minutes).
+Run Fortio again a couple of times, to make sure the 'buggy' pod gets called a few times, and examine the log output to see new responses in the log (since 2 minutes).
 ```
 kubectl exec -it fortio-deploy-576dbdfbc4-284kk -- fortio load -c 4 -qps 0 -n 200 http://buggygreen/api/color
 

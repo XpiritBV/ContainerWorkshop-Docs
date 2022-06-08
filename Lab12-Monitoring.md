@@ -333,12 +333,12 @@ In this chapter we will use Istio addons to visualize your Kubernetes environmen
 ### Prometheus
 Prometheus is an open source monitoring system and time series database. You can use Prometheus with Istio to record metrics that track the health of Istio and of applications within the service mesh. You can visualize metrics using tools like Grafana and Kiali.
 
-Prometheus will gather telemetry from the platform and store it in a database. We can query the data using a built-in web portal. 
+Prometheus will gather telemetry from the platform and store it in a database. We can query the data using a built-in web portal.
 
 First, deploy Prometheus to Istio:
 
 ```cmd
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.8/samples/addons/prometheus.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.14/samples/addons/prometheus.yaml
 ```
 
 Create a port forwarding from your machine to the cluster using `istioctl dashboard` and passing the name `prometheus`. This command will block the terminal, until you press `Ctrl+C`:
@@ -379,7 +379,7 @@ kubectl exec -it fortio-deploy-6dc9b4d7d9-p68rg -- fortio load -c 100 -qps 10  h
 Add the Grafana (visualization tooling) addon to Istio:
 
 ```cmd
-kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.8/samples/addons/grafana.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.14/samples/addons/grafana.yaml
 ```
 
 Just like Prometheus, Grafana comes with a built-in Portal. Create a port forward to Grafana by using the `istioctl dashboard` command again, but passing `grafana` as the name:
@@ -406,7 +406,7 @@ http://localhost:3000/explore
 Enter the following query:
 
 ```cmd
-istio_requests_total{destination_service=~"blue.*", response_code="503"}
+istio_requests_total{destination_service=~"blue.*", response_code="502"}
 ```
 
 It should show the same chart, as Prometheus:

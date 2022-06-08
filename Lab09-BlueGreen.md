@@ -134,7 +134,27 @@ NAME                                STATUS   ROLES   AGE    VERSION    INTERNAL-
 aks-nodepool1-36156572-vmss000000   Ready    agent   2d5h   v1.18.14   10.240.0.4    <none>        Ubuntu 18.04.5 LTS   5.4.0-1035-azure   docker://19.3.14
 ```
 
-> Later in this lab, we will need the values of 'INTERNAL-IP'. So make a note of both.
+## Checking external IP address of cluster
+
+The cluster is exposed via a loadbalancer that we can find by inspecting the services. 
+
+```cmd
+kubectl get services -A
+```
+
+The output show the envoy loadbalancer and its EXTERNAL-IP address:
+
+```
+NAMESPACE        NAME         TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+bluegreen        blue         ClusterIP      10.99.180.12     <none>        80/TCP                       12m
+bluegreen        green        ClusterIP      10.99.26.173     <none>        80/TCP                       12m
+default          kubernetes   ClusterIP      10.96.0.1        <none>        443/TCP                      12m
+kube-system      kube-dns     ClusterIP      10.96.0.10       <none>        53/UDP,53/TCP,9153/TCP       12m
+projectcontour   contour      ClusterIP      10.103.179.185   <none>        8001/TCP                     12m
+projectcontour   envoy        LoadBalancer   10.110.54.134    localhost     80:31919/TCP,443:30848/TCP   12m
+```
+
+As you can see, the loadbalancer is exposed via `localhost`.
 
 ## <a name='ingress'></a>Adding an HTTPProxy
 
@@ -190,24 +210,13 @@ ingress   demo.local                valid    Valid HTTPProxy
 
 ## <a name='results'></a>Checking the results.
 
-To test the new ingress route, we'll run a terminal in a temporary pod.
-Open up a **new terminal** and run:
+To test the new ingress route, start a terminal window running Linux, and run the following command to test the ingress:
 
 ```
-kubectl run -i --rm --tty curl --image=mcr.microsoft.com/dotnet/aspnet:3.1 --restart=Never bash
+(for i in {1..100}; do echo -e ""; curl -s http://localhost/api/color -H 'Host: demo.local';  done;) | sort | uniq -c
 ```
 
-Inside the terminal, run this command to test the ingress, by making 100 web requests, targeting the host 'demo.local', and displaying the returned unique word frequencies (which are blue & green):
-
-```
-(for i in {1..100}; do echo -e ""; curl -s http://192.168.65.3/api/color -H 'Host: demo.local';  done;) | sort | uniq -c
-```
-
-Repeat the call, to see both words being returned.
-
-> Remember to replace the IP address with the value you noted down for 'INTERNAL-IP' (the host's IP address) earlier in this lab. You can display it again, by running this command:
-> `kubectl get node/docker-desktop -o wide`
-
+This command makes 100 web requests, targeting the host 'demo.local', and displaying the returned unique word frequencies (which are blue & green):Repeat the call, to see both words being returned.
 Running the command, should display output similar to this:
 
 ```
@@ -244,7 +253,7 @@ Change the weights into:
 Save the file and run the `curl` loop again:
 
 ```
-(for i in {1..100}; do echo -e ""; curl -s http://192.168.65.3/api/color -H 'Host: demo.local';  done;) | sort | uniq -c
+(for i in {1..100}; do echo -e ""; curl -s http://localhost/api/color -H 'Host: demo.local';  done;) | sort | uniq -c
 ```
 
 This time, it should display a result like this:
