@@ -77,10 +77,7 @@ Inspect the contents of the `docker-compose.yml` and `docker-compose.override.ym
 - Run your application by running the `docker compose up` task.
 - Launch and attach a debugger, by pressing F5 and choosing container group `start` and container `gamingwebapp`. Select `Yes` when asked if you want to copy the .NET Core debugger into the container.
 
-
-> If you encounter the error 'The DOCKER_REGISTRY variable is not set. Defaulting to a blank string.', make sure you started Visual Studio as an administrator
-
-> Does the application still work?
+#### Does the application still work?
 
 Now that the projects are running from a Docker container, the application is not working anymore. You can try to find what is causing the issue, but do not spend too much time to try to fix it. We will do that next.
 
