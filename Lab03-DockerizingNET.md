@@ -114,7 +114,16 @@ In case you thought of changing the setting via environment variables, you can m
 gamingwebapp:
   environment:
     - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://+:80
     - LeaderboardApiOptions__BaseUrl=http://leaderboardwebapi
+    
+[..]
+
+leaderboardwebapi:
+  environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://+:80
+    - ConnectionStrings__LeaderboardContext=Server=tcp:sql.data,1433;Database=Leaderboard;User Id=sa;Password=Pass@word;Trusted_Connection=False;
 ```
 
 Make sure you changed the IP address of the connection string in the application settings for the Web API to be your local IP address (of your LAN) instead of `127.0.0.1` or `localhost`. This is a temporary fix.
