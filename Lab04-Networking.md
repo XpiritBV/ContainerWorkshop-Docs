@@ -17,7 +17,7 @@ Make sure you have completed [Lab 1 - Getting Started](Lab01-GettingStarted.md).
 
 In the terminal, change directories to the Docs repository directory named 'resources/lab04'
 ```
-C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab04>
+ContainerWorkshop/resources/lab04>
 ```
 
 ## <a name="experiment"></a>Experimenting with networking
@@ -100,8 +100,9 @@ Read each of the JSON fragments. Pay special attention to the `Config` object in
 - **host**: Used for standalone containers. This network removes isolation between the container and host, and uses the host's network directly. A container can access services running on the host, by calling them on `localhost` and using a port number.
 - **none**: Using this option, disables networking for a container.
 
-> ##### Different configurations
+#### Different configurations
 > Why are the config sections for networks `host` & `none` empty?
+
 > Which IP addresses will be assigned to the containers when they are inside a bridge network?
 
 Shut down any running compositions, by stopping your Visual Studio debugging session and any manually started containers of the demo application.
@@ -266,7 +267,7 @@ Create a visual diagram for the three containers and assign them to the **proper
 > What type of network driver should the two networks use? Remember that your are currently in a local, single-host situation. How would that change when running in a cluster? Also consider the impact of running multiple instances of your container.
 
 ### Find the compose files 
-In your terminal, navigate to the `resources\lab04` folder. (e.g. `C:\Sources\ContainerWorkshop\ContainerWorkshop-Docs\resources\lab04`)
+In your terminal, navigate to the `resources\lab04` folder. (e.g. `ContainerWorkshop/resources/lab04`)
 
 Run docker-compose to build the desired containers and network using a definition file named `00-docker-compose-netwrk.yml`:
 
@@ -287,7 +288,7 @@ Run docker-compose to build the desired containers and network using a definitio
 
   CONTAINER ID   IMAGE                                        COMMAND                  CREATED              STATUS              PORTS                                            NAMES
   bb0fb3d99df6   nginx                                        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                                           lab04-backend-1
-  77cf533cd37a   mcr.microsoft.com/mssql/server:2019-latest   "/opt/mssql/bin/perm…"   About a minute ago   Up About a minute   0.0.0.0:5433->1433/tcp                           lab04-db-1
+  77cf533cd37a   mcr.microsoft.com/mssql/server:2022-latest   "/opt/mssql/bin/perm…"   About a minute ago   Up About a minute   0.0.0.0:5433->1433/tcp                           lab04-db-1
   2628e46f4874   nginx                                        "/docker-entrypoint.…"   About a minute ago   Up About a minute   80/tcp                                           lab04-frontend-1
   ```
 
@@ -433,7 +434,6 @@ Use this checklist to see if it is complete:
 - Give the `sql.data` service an alias named `sql.retrogaming.internal`
 - Change the connection string setting for the `leaderboardwebapi` service to reflect the alias
 
-Verify that everything still works by running your Visual Studio solution. Fix any errors should they occur.
 
 ## Wrapup
 
