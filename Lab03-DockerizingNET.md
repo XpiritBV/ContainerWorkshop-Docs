@@ -53,7 +53,7 @@ Launch both the GamingWebApp and LeaderboardWebAPI and start the debugger.
 
 First, navigate to the web site located at http://localhost:5000/. There should be a single highscore listed. Notice what the operating system is that you are currently running on.
 
-Next, navigate to the Web API endpoint at http://localhost:5000/swagger. Experiment with the GET and POST operations that are offered from the Swagger user interface. Try to retrieve the list of high scores, and add a new high score for one of the registered player names.
+Next, navigate to the Web API endpoint at http://localhost:5002/swagger. Experiment with the GET and POST operations that are offered from the Swagger user interface. Try to retrieve the list of high scores, and add a new high score for one of the registered player names.
 
 Make sure you know how this application is implemented. Set breakpoints if necessary and navigate the flow of the application for the home page.
 
