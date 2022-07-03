@@ -24,13 +24,11 @@ C:\Program Files\Docker\Docker\Docker Desktop.exe
 ```
 
 After starting the Docker tooling, the tray icon should be present.
-- Open a terminal 
-- If on Windows, run:
-  ```
-  wsl
-  ```
-  This opens your default WSL distro. If you don't have one yet, please visit the [Microsoft Store](https://www.microsoft.com/en-us/p/ubuntu/9nblggh4msv6) and install Ubuntu.
-  > Make sure to enable WSL integration inside Docker Desktop settings, as described in [Lab 1 - Getting Started](Lab01-GettingStarted.md).
+- Open a Windows terminal, or a terminal in VS Code. 
+
+### WSL
+If you want, you can use a WSL distro. If you don't have one yet, please visit the [Microsoft Store](https://www.microsoft.com/en-us/p/ubuntu/9nblggh4msv6) and install Ubuntu.
+> Make sure to enable WSL integration inside Docker Desktop settings, as described in [Lab 1 - Getting Started](Lab01-GettingStarted.md).
 
 ## <a name="manage"></a>Managing container instances
 Let's see whether you can start some container instances. The categorical sample is "Hello World". Start a container that should run if everything is configured correctly. From a command prompt, run the following command:
@@ -66,7 +64,7 @@ docker volume create portainer_data
 ```
 Next, start a new container with:
 ```
-docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce
+docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce
 ```
 This command runs a containerized web server at port 9000. The web server port is connected to the host machine (your laptop). This means you can now access the web server.
 For example, try using the `curl` command to see if it works:
@@ -76,11 +74,11 @@ curl localhost:9000
 ```
 This should output raw HTML to your terminal.
 
-![](images/portainer-01.png)
+![](images/portainer-01.PNG)
 
-In your browser, navigate to http://localhost:9000 and create a login for your local machine. Choose to manage the Local Docker Environment. The management UI can come in useful to manage Docker, while you are learning about the Docker CLI. It should show (at least) 2 containers on your machine:
+In your browser, navigate to http://localhost:9000 and create a login for your local machine. Choose to manage the Local Docker Environment. The management UI can come in useful to manage Docker, while you are learning about the Docker CLI. It should show (at least) 2 containers on your machine.
 
-![](images/portainer-02.png)
+![](images/portainer-02.PNG)
 
 Feel free to spend some time in this environment for a minute or two. See if you can start the hello-world container again.
 
@@ -129,12 +127,12 @@ Next, start a container to run an instance of SQL Server on Linux.
 The image for SQL Server for Linux is located in the Docker Store, since it is an official image. Navigate to https://hub.docker.com and search for [SQL Server](https://hub.docker.com/_/microsoft-mssql-server) there. Pull the image when you found its name:
 
 ```
-docker pull mcr.microsoft.com/mssql/server:2019-latest
+docker pull mcr.microsoft.com/mssql/server:2022-latest
 ```
 
 Use the command:
 ```
-docker run -e ACCEPT_EULA=Y -e MSSQL_PID=Developer -e SA_PASSWORD="Pass@word" --name sqldocker -p 5433:1433 -d mcr.microsoft.com/mssql/server:2019-latest
+docker run -e ACCEPT_EULA=Y -e MSSQL_PID=Developer -e SA_PASSWORD="Pass@word" --name sqldocker -p 5433:1433 -d mcr.microsoft.com/mssql/server:2022-latest
 ```
 The SQL Server container is started detached, so it will not show any output other than the container ID (yours will be different):
 ```
@@ -166,9 +164,9 @@ Run `exit` to close the container terminal connection, and return to local envir
 exit
 ```
 
-### Using Visual Studio to connect to your database server
+### (Optional) Using Visual Studio to connect to your database server
 
-Start Visual Studio and examine the contents of the master database by adding a Data Connection in the Server Explorer. The database connection details are:
+If you have Visual Studio installed, start Visual Studio and examine the contents of the master database by adding a Data Connection in the Server Explorer. The database connection details are:
 - Server: 127.0.0.1,5433 (notice the **comma** instead of a colon)
 - Username: sa
 - Password: Pass@word
