@@ -15,13 +15,15 @@ Make sure you have completed [Lab 1 - Getting Started](Lab01-GettingStarted.md).
 ## <a name="run"></a>Run the application
 We will start with running the existing ASP.NET Core application from Visual Studio. Make sure you have cloned the Git repository, or return to [Lab 1 - Getting Started](Lab01-GettingStarted.md) to clone it now if you do not have the sources. 
 
-Switch to the `start` branch by using this command:
+> The completed solution can be found inside the `finished` folder. So if you need to check whether you missed something, feel free to use this as a reference. We will work in the `start` folder in this Lab.
+
+Open the `start` folder inside the repo:
 
 ```cmd
-git checkout start
+cd /workspaces/ContainerWorkshop/start
 ```
 
-Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to navigate the code and familiarize yourself with the various projects in the solution. You should be able to identify these:
+Take your time to navigate the code and familiarize yourself with the various projects in the solution. You should be able to identify these:
 
 - `GamingWebApp`, an ASP.NET MVC Core frontend 
 - `LeaderboardWebAPI`, an ASP.NET Core Web API
@@ -29,7 +31,10 @@ Open the solution `ContainerWorkshop.sln` in Visual Studio. Take your time to na
 For now, the SQL Server for Linux container instance is providing the developer backend for data storage. This will be changed later on. Make sure you run the SQL Server as described in [Lab 2 - Running Microsoft SQL Server on Linux](Lab02-Docker101.md#sql).
 
 > ##### Important
-> Update the connectionstring in the appsettings.json file to use the local ip address instead of localhost or 127.0.0.1. We will need this later. 
+> Update the connectionstring in the appsettings.json file in the `LeaderboardWebAPI` folder, to use the local ip address instead of localhost or 127.0.0.1. We will need this later. 
+
+> Find your ip address using this command in your terminal: `ip addr` (Linux/Mac) or `ipconfig` (Win)
+> On Linux/Mac, take the ip address of `eth0`.
 
 ```json
 {
@@ -38,35 +43,37 @@ For now, the SQL Server for Linux container instance is providing the developer 
   }
 ```
 
-Right-click both the GamingWebApp and LeaderboardWebAPI and start to debug a new instance.
+Launch both the GamingWebApp and LeaderboardWebAPI and start the debugger.
+- In VS Code, type CTRL+SHIFT+D to show 'Run and Debug'
+- In the dropdown, select 'Launch (start WebAPI)'
+- Click the 'play' button or type CRTL+SHIFT+B to launch the Web API
+- Wait until it has started
+- Next, in the dropdown, select 'Launch (start Frontend)'
+- Click the 'play' button or type CRTL+SHIFT+B to launch the Web Frontend
 
-First, navigate to the web site located at https://localhost:44326/. There should be a single highscore listed. Notice what the operating system is that you are currently running on.
+First, navigate to the web site located at http://localhost:5000/. There should be a single highscore listed. Notice what the operating system is that you are currently running on.
 
-Next, navigate to the Web API endpoint at https://localhost:44370/swagger. Experiment with the GET and POST operations that are offered from the Swagger user interface. Try to retrieve the list of high scores, and add a new high score for one of the registered player names.
+Next, navigate to the Web API endpoint at http://localhost:5000/swagger. Experiment with the GET and POST operations that are offered from the Swagger user interface. Try to retrieve the list of high scores, and add a new high score for one of the registered player names.
 
 Make sure you know how this application is implemented. Set breakpoints if necessary and navigate the flow of the application for the home page.
 
 ## <a name="add"></a>Add Docker support
 
-Visual Studio offers tooling for adding support to run your application in a Docker container. You will first add container support to the Web API project.
+### Docker support
+Copy the `Dockerfile` files into your project folders:
+1. Copy `ContainerWorkshop\resources\lab03\frontend\Dockerfile` to folder `ContainerWorkshop/start/src/GamingWebApp`
+2. Copy `ContainerWorkshop\resources\lab03\frontend\Dockerfile` to folder `ContainerWorkshop/start/src/GamingWebApp`
 
-To get started you can right-click the LeaderboardWebAPI project and select Add, Container Orchestrator Support from the context menu. Choose `Docker Compose` as the local orchestrator from the dropdown.
-
-<img src="images/AddContainerOrchestratorSupport.PNG" width="400" />
-
-In the next dialog, choose `Linux` as the target operating system.
-
-<img src="images/AddDockerSupportTargetOS.png" width="400" />
-
-Observe the changes that Visual Studio makes to your solution.  
-
-Most noticeably you will see that a new Docker Compose project has been added with the name `docker-compose`. It is now your start project for the solution. *(If it's not, make sure to configure it as the startup project.)*
+### Orchestrator support
+Copy the `docker-compose` files into your solution folder:
+1. Copy `ContainerWorkshop\resources\lab03\docker-compose.yml` and `docker-compose.override.yml` to folder 
+`ContainerWorkshop/start/src`.
 
 Inspect the contents of the `docker-compose.yml` and `docker-compose.override.yml` files if you haven't already. The compose file specifies which services (containers), volumes (data) and networks (connectivity) need to be created and run. The `override` file is used for local debugging purposes. Ensure that you understand the meaning of the various entries in the YAML files.
 
-Repeat adding Docker support for the Web application project. More changes will be made to the YAML files.
+### Running the application
 
-Run your application again. Which projects are effectively started? If some project is not running, start it by choosing `Debug` > `Start new instance` from the right-click context menu of the project.
+Run your application by running the `docker compose up` task. Which projects are effectively started? If some project is not running, start it by choosing `Debug` > `Start new instance` from the right-click context menu of the project.
 
 > If you encounter the error 'The DOCKER_REGISTRY variable is not set. Defaulting to a blank string.', make sure you started Visual Studio as an administrator
 
@@ -84,13 +91,11 @@ The `docker-compose.override.yml` file contains port mappings, defining the port
 ```
 leaderboardwebapi:
   ports:
-    - "4972:80"
-    - "44369:443"
+    - "5002:80"
 ...
 gamingwebapp:
   ports:
-    - "5618:80"
-    - "44325:443"
+    - "5000:80"
 ```
 
 The setting for `LeaderboardWebApi:BaseUrl` should now point to the new endpoint of the Web API with the internal address `http://leaderboardwebapi`.
