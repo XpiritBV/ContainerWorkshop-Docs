@@ -61,13 +61,13 @@ Make sure you know how this application is implemented. Set breakpoints if neces
 
 ### Docker support
 Copy the `Dockerfile` files into your project folders:
-1. Copy `ContainerWorkshop\resources\lab03\frontend\Dockerfile` to folder `ContainerWorkshop/start/src/GamingWebApp`
-2. Copy `ContainerWorkshop\resources\lab03\frontend\Dockerfile` to folder `ContainerWorkshop/start/src/GamingWebApp`
+1. Copy `ContainerWorkshop/resources/lab03/frontend/Dockerfile` to folder `ContainerWorkshop/start/src/GamingWebApp`
+2. Copy `ContainerWorkshop/resources/lab03/webapi/Dockerfile` to folder `ContainerWorkshop/start/src/LeaderboardWebAPI`
 
 ### Orchestrator support
 Copy the `docker-compose` files into your solution folder:
-1. Copy `ContainerWorkshop\resources\lab03\docker-compose.yml` and `docker-compose.override.yml` to folder 
-`ContainerWorkshop/start/src`.
+1. Copy `ContainerWorkshop/resources/lab03/docker-compose.yml` and `docker-compose.override.yml` to folder 
+`ContainerWorkshop/start/`.
 
 Inspect the contents of the `docker-compose.yml` and `docker-compose.override.yml` files if you haven't already. The compose file specifies which services (containers), volumes (data) and networks (connectivity) need to be created and run. The `override` file is used for local debugging purposes. Ensure that you understand the meaning of the various entries in the YAML files.
 
