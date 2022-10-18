@@ -51,23 +51,28 @@ Launch both the GamingWebApp and LeaderboardWebAPI and start the debugger.
 - Next, in the dropdown, select 'Launch (start Frontend)'
 - Click the 'play' button to start the Web Frontend
 
-First, navigate to the web site located at http://localhost:5000/. There should be a single highscore listed. Notice what the operating system is that you are currently running on.
+First, navigate to the web site 
+- If you are running this lab on your laptop it will be located at http://localhost:5000/. 
+- If you are running inside a CodeSpace, you can find it using the 'Ports' tab in the bottom of VS Code.
+  ![](images/CodeSpacesBrowseFrontend.png)
+There should be a single highscore listed. Notice what the operating system is that you are currently running on.
 
-Next, navigate to the Web API endpoint at http://localhost:5002/swagger. Experiment with the GET and POST operations that are offered from the Swagger user interface. Try to retrieve the list of high scores, and add a new high score for one of the registered player names.
+Next, navigate to the Web API endpoint at http://localhost:5002/swagger or the Ports tab in CodeSpaces. Experiment with the GET and POST operations that are offered from the Swagger user interface. Try to retrieve the list of high scores, and add a new high score for one of the registered player names.
 
 Make sure you know how this application is implemented. Set breakpoints if necessary and navigate the flow of the application for the home page.
 
 ## <a name="add"></a>Add Docker support
 
 ### Docker support
+Stop both running debuggers.
 Copy the `Dockerfile` files into your project folders:
 1. Copy `ContainerWorkshop\resources\lab03\frontend\Dockerfile` to folder `ContainerWorkshop/start/src/GamingWebApp`
-2. Copy `ContainerWorkshop\resources\lab03\frontend\Dockerfile` to folder `ContainerWorkshop/start/src/GamingWebApp`
+2. Copy `ContainerWorkshop\resources\lab03\webapi\Dockerfile` to folder `ContainerWorkshop/start/src/LeaderboardWebAPI`
 
 ### Orchestrator support
 Copy the `docker-compose` files into your solution folder:
 1. Copy `ContainerWorkshop\resources\lab03\docker-compose.yml` and `docker-compose.override.yml` to folder 
-`ContainerWorkshop/start/src`.
+`ContainerWorkshop/start/`.
 
 Inspect the contents of the `docker-compose.yml` and `docker-compose.override.yml` files if you haven't already. The compose file specifies which services (containers), volumes (data) and networks (connectivity) need to be created and run. The `override` file is used for local debugging purposes. Ensure that you understand the meaning of the various entries in the YAML files.
 
@@ -75,7 +80,10 @@ Inspect the contents of the `docker-compose.yml` and `docker-compose.override.ym
 
 - In VS Code, type CRTL+SHIFT+B to display the Build tasks. 
 - Run your application by running the `docker compose up` task.
-- Launch and attach a debugger, by pressing F5 and choosing container group `start` and container `gamingwebapp`. Select `Yes` when asked if you want to copy the .NET Core debugger into the container.
+- Launch and attach a debugger, by pressing F5 
+- Choosing container group `start` 
+- Choose container `gamingwebapp`. 
+- Select `Yes` when asked if you want to copy the .NET Core debugger into the container.
 
 #### Does the application still work?
 
