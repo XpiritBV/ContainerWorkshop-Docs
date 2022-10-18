@@ -152,55 +152,6 @@ The easiest way is to use Visual Studio Code and the Kubernetes extension. Navig
 
 <img src='images/VSCodeKubernetesExtension.png' width=300 />
 
-You can also deploy a Kubernetes hosted dashboard using this command:
-
-```cmd
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.5.0/aio/deploy/recommended.yaml
-```
-
-You can reach the dashboard by running a proxy:
-
-```cmd
-kubectl proxy
-```
-
-The dashboard can be found at this endpoint:
-
-```cmd
-http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
-```
-
-You will reach a login screen where you need to provide a token (or kubeconfig file).
-![](images/KubernetesDashboardLogin.png)
-
-First, we will need to create a new service account and give it the proper role-binding to access the dashboard.
-Use the two files `dashboard-user.yaml` and `dashboard-rolebinding.yaml` from the `resources` folder and apply these.
-
-```cmd
-kubectl apply -f .\dashboard-user.yaml
-kubectl apply -f .\dashboard-rolebinding.yaml
-```
-
-From Kubernetes 1.24 onward tokens are no longer created automatically for service accounts. You can now create a token by running this command:
-
-```cmd
-kubectl create token admin-user -n kubernetes-dashboard
-```
-
-The command gives output similar to:
-
-```cmd
-eyJhbGciOiJSUzI1NiIsImtpZCI6InI0U29nakdwNmR1T3RLVzBRTVBUZUxGSWhtYl9ZRExsNXpBYmNvdjl0MWcifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkZWZhdWx0LXRva2VuLXY5cnhjIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImRlZmF1bHQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC51aWQiOiIwOGExMDBiZC1kZjlhLTRmM2YtYjExYS0xMDZmZTkyZDI4NzEiLCJzdWIiOiJzeXN0ZW06c2VydmljZWFjY291bnQ6a3ViZS1zeXN0ZW06ZGVmYXVsdCJ9.lNaY8rnoZv0BTNoI-F7fj-CtxtWF_fulymFL1k2y0BpgvPRfojsKy7HBzBi9qnUwipLK46AksCOzgg0Z3DbpF9BN_4VIBQmfJ4_yH1v8TYqC7LSriyIYEST_hJIRCQbJ919CXxSxW-Teo8mJ3mZo9PheBiARLas3P-e2e_xu14_Q5DnvjCcmgxTpPBEBhi5G-4O7fDybVljZxgeBQM65ODCd5pTjPp_SPrFykw2qWCHnEl28q5wUvtGYlXle9aAN1arZq1O2_h98LAYUUryYzGNEp4Ma7CIdytf1nwwpSaAmRUAC4
-```
-
-Copy and paste the token value into the login field that reads `Enter token` and click `Sign in`. You should see the dashboard appear.
-
-![](images/KubernetesDashboard.png)
-
-> ****Important****
->
-> If you get any errors in the Kubernetes dashboard, revisit [Module 1](Lab01-GettingStarted.md) and fix the dashboard by changing the RBAC configuration.
-
 You can also set your cluster as the active context and interact with it using kubectl commands. First, retrieve a list of the current available clusters and contexts with `kubectl` commands and then set your cluster as active. All `kubectl` will be executed against that context from now.
 
 ```cmd
@@ -255,7 +206,7 @@ Save your work and go to the command prompt. Run the command:
 kubectl config use-context docker-desktop
 kubectl apply -f .\gamingwebapp.k8s-static.yaml
 ```
-and watch the results from the dashboard (assuming the proxy is still running). This deployment could take some time to complete as container images must be downloaded to your local cluster. 
+and watch the results from the extension. This deployment could take some time to complete as container images must be downloaded to your local cluster. 
 
 > Note that consecutive deployments of the same application, but with newer images, will go a lot faster.
 
