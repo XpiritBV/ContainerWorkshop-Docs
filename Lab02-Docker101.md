@@ -74,9 +74,15 @@ curl localhost:9000
 ```
 This should output raw HTML to your terminal.
 
+In your browser, navigate to http://localhost:9000 and create a login for your local machine. Choose to manage the Docker Standalone Environment. 
+
 ![](images/portainer-01.PNG)
 
-In your browser, navigate to http://localhost:9000 and create a login for your local machine. Choose to manage the Local Docker Environment. The management UI can come in useful to manage Docker, while you are learning about the Docker CLI. It should show (at least) 2 containers on your machine.
+Provide an environment name to get started.
+
+![](images/portainer-04.PNG)
+
+The management UI can come in useful to manage Docker, while you are learning about the Docker CLI. It should show (at least) 2 containers on your machine.
 
 ![](images/portainer-02.PNG)
 
@@ -111,6 +117,9 @@ docker run -it --name docker-nginx -p 8090:80 nginx
 ```
 
 The last command seems to block. That's okay. Navigate to http://localhost:8090. You will notice that the output of the nginx container is now filling the console. The prompt is missing. This is because your terminal is now attached to the container, by specifying `-it` with the `run` command. To detach your terminal from the container, use the key combination `Ctrl+P, Ctrl+Q` to detach from the container and return to the prompt. You can avoid your terminal being attached by specifying `-d`, as we did with Portainer earlier.
+
+>When running inside CodeSpaces, you can use the command `Docker Containers: Stop` and select `nginx` to stop the container. If you do this, make sure to start it detached, using the `-d` flag:
+`docker run -d--name docker-nginx -p 8090:80 nginx`
 
 Inspecting the running containers with `docker ps`, you should find that the nginx container is still running:
 
